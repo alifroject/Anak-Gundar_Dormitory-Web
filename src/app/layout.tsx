@@ -1,7 +1,7 @@
 // app/layout.tsx
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import Navbar from '@/components/layout/navbar-app';
+
 import Document, { Html, Head, Main, NextScript } from 'next/document';
 import { ReactNode } from 'react';
 // app/layout.tsx or pages/_app.tsx
@@ -22,7 +22,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         />
       </head>
       <body className="overflow-hidden h-screen">
-        <Navbar />
+       
         <div className="overflow-y-auto h-screen">
           <main className='pt-16 bg-white min-h-screen'>{children}</main>
         </div>
