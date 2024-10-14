@@ -1,7 +1,7 @@
 export default function career() {
     return(
         <>
-        <h1>Ini didalam career</h1>
+        <h1 className="h-screen text-black">Ini aturan</h1>
         </>
     )
 }

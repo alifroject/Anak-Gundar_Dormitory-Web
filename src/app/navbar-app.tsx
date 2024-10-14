@@ -9,7 +9,7 @@ import Image from 'next/image';
 
 interface NavbarProps { //button masuk si klik
     onLoginClick: () => void;
-  }
+}
 
 const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
@@ -51,12 +51,13 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                 <div className="flex items-center">
                     <Link href="/">
                         <Image
-                            src="/anakGundar.png"
+                            src="https://firebasestorage.googleapis.com/v0/b/fir-auth-bd49b.appspot.com/o/anakGundar.png?alt=media"
                             alt="Description of the image"
                             width={120}
                             height={100}
-                            className='ml-10'
+                            className="ml-10"
                         />
+
                     </Link>
                 </div>
 
@@ -125,8 +126,8 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
             <div className={`fixed top-0 left-0 h-full w-64 p-5 bg-white transition-transform transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} z-30`}>
                 <div className={`p-4  ${isSidebarOpen ? 'block' : 'hidden'}`}>
                     <Link href="/" onClick={closeSidebar}> {/* Panggil closeSidebar saat link di-klik */}
-                        <Image
-                            src="/anakGundar.png"
+                        <img
+                            src="https://firebasestorage.googleapis.com/v0/b/fir-auth-bd49b.appspot.com/o/anakGundar.png?alt=media"
                             alt="Description of the image"
                             width={100}
                             height={90}
@@ -182,7 +183,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                         </Link>
                     </li>
                     <li>
-                        <button className="text-blue-700 hover:bg-gray-100 hover:text-blue-400 border-2 border-blue-500 px-4 py-1 rounded w-full">
+                        <button onClick={onLoginClick} className="text-blue-700 hover:bg-gray-100 hover:text-blue-400 border-2 border-blue-500 px-4 py-1 rounded w-full">
                             Masuk
                         </button>
                     </li>

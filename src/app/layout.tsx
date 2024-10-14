@@ -1,18 +1,21 @@
-// app/layout.tsx
+"use client"
+
+import { usePathname } from 'next/navigation'; // Import usePathname
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-
-import Document, { Html, Head, Main, NextScript } from 'next/document';
 import { ReactNode } from 'react';
-// app/layout.tsx or pages/_app.tsx
-import './globals.css'; // Adjust the path as necessary
-
+import './globals.css'; // Sesuaikan path jika perlu
 
 interface RootLayoutProps {
   children: ReactNode;
 }
 
 export default function RootLayout({ children }: RootLayoutProps) {
+  const pathname = usePathname(); // Menggunakan usePathname untuk mendapatkan rute saat ini
+  
+  // Menentukan apakah kita berada di halaman registrasi
+  const isRegisterPage = pathname === '/register'; // Ubah '/register' sesuai rute Anda
+
   return (
     <html lang="en">
       <head>
@@ -21,12 +24,15 @@ export default function RootLayout({ children }: RootLayoutProps) {
           rel="stylesheet"
         />
       </head>
-      <body className="overflow-hidden h-screen">
-       
-        <div className="overflow-y-auto h-screen">
-          <main className='pt-16 bg-white min-h-screen'>{children}</main>
+      <body className="overflow-hidden min-h-screen">
+        {/* Hanya tampilkan navbar jika bukan di halaman registrasi */}
+        {!isRegisterPage && <Header />}
+
+        <div className="h-screen overflow-y-auto">
+          <main className={`pt-${!isRegisterPage ? '16' : '0'} bg-white w-full`}>{children}</main>
         </div>
 
+        {/* Footer tetap muncul di semua halaman */}
         <Footer />
       </body>
     </html>
