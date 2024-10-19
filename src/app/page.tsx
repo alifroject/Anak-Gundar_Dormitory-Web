@@ -7,10 +7,10 @@ import "swiper/css";
 import "swiper/css/pagination";
 import { Pagination } from "swiper/modules";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft, faChevronRight,faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
 import Navbar from '@/app/navbar-app';
-import Login from '@/components/layout/Login'; // Import komponen login
+import Login from '@/app/Login'; // Import komponen login
 import { Swiper as SwiperCore } from 'swiper';
 
 const images = [

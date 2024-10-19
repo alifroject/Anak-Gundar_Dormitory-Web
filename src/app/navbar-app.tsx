@@ -51,7 +51,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                 <div className="flex items-center">
                     <Link href="/">
                         <Image
-                            src="https://firebasestorage.googleapis.com/v0/b/fir-auth-bd49b.appspot.com/o/anakGundar.png?alt=media"
+                            src="https://firebasestorage.googleapis.com/v0/b/anak-gundar.appspot.com/o/anakGundar.png?alt=media"
                             alt="Description of the image"
                             width={120}
                             height={100}
@@ -127,7 +127,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                 <div className={`p-4  ${isSidebarOpen ? 'block' : 'hidden'}`}>
                     <Link href="/" onClick={closeSidebar}> {/* Panggil closeSidebar saat link di-klik */}
                         <img
-                            src="https://firebasestorage.googleapis.com/v0/b/fir-auth-bd49b.appspot.com/o/anakGundar.png?alt=media"
+                            src="https://firebasestorage.googleapis.com/v0/b/anak-gundar.appspot.com/o/anakGundar.png?alt=media"
                             alt="Description of the image"
                             width={100}
                             height={90}
