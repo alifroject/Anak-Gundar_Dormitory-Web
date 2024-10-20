@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
 import Navbar from '@/app/navbar-app';
+import PromoComponent from '@/app/region_section';
 import Login from '@/app/Login'; // Import komponen login
 import { Swiper as SwiperCore } from 'swiper';
 
@@ -35,7 +36,7 @@ const images = [
 const ActiveSlider = () => {
   const swiperRef = useRef<SwiperCore | null>(null);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  
+
 
   const handleLoginClick = () => {
     setIsLoginOpen(true); // Menampilkan popup login
@@ -61,7 +62,7 @@ const ActiveSlider = () => {
     <>
       <Navbar onLoginClick={handleLoginClick} />
       {isLoginOpen && <Login onClose={handleCloseLogin} />} {/* Menampilkan popup login */}
-      
+
       <div className="flex items-center justify-center flex-col h-[900px]">
         <h1 className="text-4xl text-black font-bold mb-4">Lagi cari kos deket Gundar?</h1>
         <p className="text-lg text-black font-bold mb-10">Coba pilih gundar region mana dibawah ini.</p>
@@ -121,6 +122,8 @@ const ActiveSlider = () => {
           </button>
         </div>
       </div>
+      <PromoComponent></PromoComponent>
+
     </>
   );
 };
