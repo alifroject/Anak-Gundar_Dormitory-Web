@@ -19,22 +19,17 @@ interface Kostan {
 
 // Fetch and display the specific kostan details using the document ID
 const KostanDetail = async ({ params }: { params: { id: string } }) => {
-    console.log('Rendering KostanDetail for ID:', params.id); // Log the rendering ID
-
     try {
         const docRef = doc(dbFire, 'home', params.id);
         const docSnap = await getDoc(docRef);
-        
-        console.log('Document snapshot:', docSnap); // Log snapshot for debugging
 
         if (!docSnap.exists()) {
-            console.log('Document does not exist:', params.id);
             return <div>Kostan tidak ditemukan</div>;
         }
 
         const kostan: Kostan = {
             id: docSnap.id,
-            ...(docSnap.data() as Omit<Kostan, 'id'>), // Ensure data matches the interface
+            ...(docSnap.data() as Omit<Kostan, 'id'>),
         };
 
         return (
@@ -56,13 +51,16 @@ const KostanDetail = async ({ params }: { params: { id: string } }) => {
 export async function generateStaticParams() {
     try {
         const snapshot = await getDocs(collection(dbFire, 'home'));
+
         if (snapshot.empty) {
             console.log('No documents found in the "home" collection');
             return [];
         }
 
-        const paramsArray = snapshot.docs.map(doc => ({ params: { id: doc.id } }));
-        console.log('Generated static params:', paramsArray); // Log the generated params
+        const paramsArray = snapshot.docs.map(doc => ({
+            params: { id: doc.id },
+        }));
+
         return paramsArray;
     } catch (error) {
         console.error('Error generating static params:', error);
@@ -70,5 +68,6 @@ export async function generateStaticParams() {
     }
 }
 
+export const revalidate = 60;
 
 export default KostanDetail;
