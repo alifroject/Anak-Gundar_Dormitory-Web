@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useState } from 'react';
-import { collection, getDocs, addDoc } from 'firebase/firestore';
+import { useState } from 'react';
+import { collection, addDoc } from 'firebase/firestore';
 import { dbFire } from '@/app/firebase/config';
 
 interface Fal {
@@ -115,14 +115,8 @@ export default function KostanPage() {
         const nameParts = name.split('.');
 
         setFormData((prevData) => {
-            const updatedData: KostanData = {
-                ...prevData, ...prevData, alamat: {
-                    ...prevData.alamat,
-                    [name]: value, // Memperbarui nilai berdasarkan nama input
-                }
-            };
+            const updatedData = { ...prevData };
 
-            // Handle checkbox input
             if (type === 'checkbox') {
                 const facilityKey = name as keyof Fal;
                 updatedData.fal = {
@@ -132,25 +126,30 @@ export default function KostanPage() {
             } else {
                 const firstLevel = nameParts[0] as keyof KostanData;
 
-                if (firstLevel in updatedData) {
-                    if (nameParts.length > 1) {
-                        const secondLevel = nameParts[1] as keyof KostanData[typeof firstLevel];
-
-                        if (typeof updatedData[firstLevel] === 'object' && updatedData[firstLevel] !== null) {
-                            updatedData[firstLevel] = {
-                                ...updatedData[firstLevel],
-                                [secondLevel]: type === 'number' ? Number(value) : value,
-                            } as KostanData[typeof firstLevel];
-                        }
-                    } else {
-                        updatedData[firstLevel] = type === 'number' ? Number(value) : value;
-                    }
+                // Check if it's part of 'alamat'
+                if (firstLevel === 'alamat' && nameParts.length > 1) {
+                    updatedData.alamat = {
+                        ...updatedData.alamat,
+                        [nameParts[1]]: value,  // Update specific alamat field
+                    };
+                }
+                // Check if it's part of 'peraturan'
+                else if (firstLevel === 'peraturan' && nameParts.length > 1) {
+                    updatedData.peraturan = {
+                        ...updatedData.peraturan,
+                        [nameParts[1]]: value,  // Update specific peraturan field
+                    };
+                }
+                // Handle top-level fields
+                else {
+                    updatedData[firstLevel] = type === 'number' ? Number(value) : value;
                 }
             }
 
             return updatedData;
         });
     };
+
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -226,6 +225,17 @@ export default function KostanPage() {
                         type="text"
                         name="nama"
                         value={formData.nama}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div>
+                    <label>Tipe: </label>
+                    <input
+                        className="border border-black p-2 mb-4 w-full"
+                        type="text"
+                        name="type"
+                        value={formData.type}
                         onChange={handleChange}
                         required
                     />
@@ -307,7 +317,7 @@ export default function KostanPage() {
                     <input
                         className="border border-black p-2 mb-2 w-full"
                         type="text"
-                        name="provinsi"
+                        name="alamat.provinsi"
                         placeholder="Provinsi"
                         value={formData.alamat.provinsi}
                         onChange={handleChange}
@@ -316,7 +326,7 @@ export default function KostanPage() {
                     <input
                         className="border border-black p-2 mb-2 w-full"
                         type="text"
-                        name="kota_kabupaten"
+                        name="alamat.kota_kabupaten"
                         placeholder="Kota/Kabupaten"
                         value={formData.alamat.kota_kabupaten}
                         onChange={handleChange}
@@ -325,7 +335,7 @@ export default function KostanPage() {
                     <input
                         className="border border-black p-2 mb-2 w-full"
                         type="text"
-                        name="kecamatan"
+                        name="alamat.kecamatan"
                         placeholder="Kecamatan"
                         value={formData.alamat.kecamatan}
                         onChange={handleChange}
@@ -334,7 +344,7 @@ export default function KostanPage() {
                     <input
                         className="border border-black p-2 mb-2 w-full"
                         type="text"
-                        name="Desa_Kelurahan"
+                        name="alamat.Desa_Kelurahan"
                         placeholder="Desa/Kelurahan"
                         value={formData.alamat.Desa_Kelurahan}
                         onChange={handleChange}
@@ -343,7 +353,7 @@ export default function KostanPage() {
                     <input
                         className="border border-black p-2 mb-2 w-full"
                         type="text"
-                        name="Jalan"
+                        name="alamat.Jalan"
                         placeholder="Jalan"
                         value={formData.alamat.Jalan}
                         onChange={handleChange}
@@ -352,7 +362,7 @@ export default function KostanPage() {
                     <input
                         className="border border-black p-2 mb-2 w-full"
                         type="text"
-                        name="Nomor_Rumah"
+                        name="alamat.Nomor_Rumah"
                         placeholder="Nomor Rumah"
                         value={formData.alamat.Nomor_Rumah}
                         onChange={handleChange}
@@ -361,13 +371,14 @@ export default function KostanPage() {
                     <input
                         className="border border-black p-2 mb-2 w-full"
                         type="text"
-                        name="Kode_Pos"
+                        name="alamat.Kode_Pos"
                         placeholder="Kode Pos"
                         value={formData.alamat.Kode_Pos}
                         onChange={handleChange}
                         required
                     />
                 </div>
+
                 <div>
                     <h2 className="font-bold text-black">Peraturan:</h2>
                     {Object.keys(formData.peraturan).map((key) => (

@@ -113,7 +113,8 @@ export default function PromoComponent() {
                                 .filter(kostan => kostan.region === region)
                                 .slice(0, 4)  // Limit to 4 items
                                 .map((kostan) => (
-                                    <Link key={kostan.id} href={`/home/${kostan.id}`} passHref>
+                                    <Link key={kostan.id} href={`/home/${kostan.id}?details=${encodeURIComponent(kostan.nama.replace(/\s+/g, '-'))}&alamat?Kota/Kabupeten=${encodeURIComponent(kostan.alamat.kota_kabupaten)}+kecamatan=${encodeURIComponent(kostan.alamat.kecamatan)}+${encodeURIComponent(kostan.alamat.Desa_Kelurahan)}+NO_Rumah=${encodeURIComponent(kostan.alamat.Nomor_Rumah)}`} passHref>
+
                                         <div className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer">
                                             <img src={kostan.image.image1} alt={kostan.nama} className="w-full h-48 object-cover" />
                                             <div className="p-4">
