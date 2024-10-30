@@ -1,0 +1,48 @@
+"use client"; // Pastikan ini ada di atas
+
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import AppLayout from './layout'; // Import the layout component
+
+const MainAppPage = () => {
+    const router = useRouter();
+
+    useEffect(() => {
+        console.log('Checking authentication token...');
+        
+        // Cek cookie untuk authToken
+        const authToken = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('authToken='))
+            ?.split('=')[1];
+
+        console.log('Auth Token:', authToken); // Log token untuk debugging
+
+        // Jika tidak ada token, redirect ke halaman utama tanpa menampilkan konten
+        if (!authToken) {
+            console.log('No auth token found, redirecting to home...');
+            router.replace('/'); // Redirect ke halaman utama
+            return; // Menghentikan eksekusi lebih lanjut
+        }
+    }, [router]);
+
+    // Jika tidak ada authToken, jangan render halaman
+    const authToken = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('authToken='))
+        ?.split('=')[1];
+
+    // Ini menghindari rendering saat tidak terautentikasi
+    if (!authToken) {
+        return null; // Jangan render konten jika tidak terautentikasi
+    }
+
+    return (
+        <AppLayout>
+            <h1 className="text-2xl text-black">Welcome to the Main App</h1>
+            {/* Tambahkan konten halaman Anda di sini */}
+        </AppLayout>
+    );
+};
+
+export default MainAppPage;

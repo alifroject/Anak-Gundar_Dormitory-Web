@@ -4,7 +4,19 @@
     "rewrites": [
       {
         "source": "/home/**",
-        "destination": "/home/index.html"
+        "destination": "/app/home/[id]/page.html"
+      },
+      {
+        "source": "/main-app/dashboard/**",
+        "destination": "/app/main-app/dashboard/index.html"
+      },
+      {
+        "source": "/main-app/chat/**",
+        "destination": "/app/main-app/chat/index.html"
+      },
+      {
+        "source": "/main-app/**",
+        "destination": "/app/main-app/page.html"
       },
       {
         "source": "**",

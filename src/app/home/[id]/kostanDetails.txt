@@ -1,0 +1,42 @@
+"use client";
+import { useState, useEffect } from 'react';
+
+interface Kostan {
+    id: string;
+    nama: string;
+    Price: number;
+    alamat: {
+        Jalan: string;
+        Desa_Kelurahan: string;
+    };
+    image?: {
+        image1?: string;
+    };
+}
+
+const KostanDetailClient = ({ initialData }: { initialData: Kostan | null }) => {
+    const [kostan] = useState<Kostan | null>(initialData);
+    const [loading] = useState(false);
+
+    useEffect(() => {
+        console.log("Kostan data:", kostan);
+    }, [kostan]);
+
+    if (loading) return <div>Loading...</div>;
+    if (!kostan) return <div>Kostan tidak ditemukan</div>;
+
+    return (
+        <div>
+            <h1>{kostan.nama}</h1>
+            <p>Harga: {kostan.Price}</p>
+            <p>Alamat: {kostan.alamat.Jalan}, {kostan.alamat.Desa_Kelurahan}</p>
+            {kostan.image?.image1 ? (
+                <img src={kostan.image.image1} alt={kostan.nama} />
+            ) : (
+                <div>Image not available</div>
+            )}
+        </div>
+    );
+};
+
+export default KostanDetailClient;

@@ -1,38 +1,34 @@
-// App.tsx
-
+// src/app/main-app/page.tsx
 "use client";
-import React, { useState } from 'react';
-import Sidebar from '@/app/main-app/sidebar';
-import Layout from '@/app/main-app/layout';
-import Chat from '@/app/main-app/chat/page'
 
-const App = () => {
-    const [isOpen, setIsOpen] = useState(false);
+import React, { useEffect, useState } from 'react';
+import AppLayout from './layout'; // Import the layout component
+import Cookies from 'js-cookie';
+import { useRouter } from 'next/navigation'; // Import useRouter from next/navigation
 
-    const toggleSidebar = () => {
-        setIsOpen(!isOpen);
-    };
+const MainAppPage = () => {
+    const router = useRouter();
+    const [isLoading, setIsLoading] = useState(true); // State to manage loading
+
+    useEffect(() => {
+        const token = Cookies.get('authToken');
+        if (!token) {
+            router.push('/'); // Redirect to login if no token
+        } else {
+            setIsLoading(false); // Set loading to false if authenticated
+        }
+    }, [router]);
+
+    if (isLoading) {
+        return null; // Optionally return a loading spinner or nothing
+    }
 
     return (
-        <>
-            <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
-            <div className={`flex-1 transition-all duration-300 ${isOpen ? 'ml-64' : 'ml-0'}`}>
-                <button
-                    onClick={toggleSidebar}
-                    className="p-2 bg-gray-800 text-white absolute z-10"
-                >
-                    {isOpen ? (
-                        <i className="fas fa-chevron-left"></i>
-                    ) : (
-                        <i className="fas fa-chevron-right"></i>
-                    )}
-                </button>
-
-            </div >
-            <Layout>
-                <Chat/>
-            </Layout></>
+        <AppLayout>
+            <h1 className="text-2xl text-black">Welcome to the Main App</h1>
+            {/* Add your page content here */}
+        </AppLayout>
     );
 };
 
-export default App;
+export default MainAppPage;

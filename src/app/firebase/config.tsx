@@ -3,6 +3,7 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getDatabase } from 'firebase/database';
 import { getFirestore } from 'firebase/firestore'; // Firestore, bukan Realtime Database
+import { getStorage } from "firebase/storage";
 
 
 
@@ -27,3 +28,4 @@ const auth = getAuth(app)
 export {app, auth}
 export const db = getDatabase(app);
 export const dbFire = getFirestore(app);
+export const storage = getStorage(app);

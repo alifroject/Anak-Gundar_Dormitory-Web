@@ -1,0 +1,181 @@
+"use client";
+import { useState, useEffect } from 'react';
+
+interface Kostan {
+    id: string;
+    nama: string;
+    Price: number;
+    alamat: {
+        Jalan: string;
+        Desa_Kelurahan: string;
+    };
+    images?: {
+        image1?: string;
+    };
+}
+
+const KostanDetailClient = ({ initialData }: { initialData: Kostan | null }) => {
+    const [kostan] = useState<Kostan | null>(initialData);
+    const [loading] = useState(false);
+
+    useEffect(() => {
+        console.log("Kostan data:", kostan);
+    }, [kostan]);
+
+    if (loading) return <div>Loading...</div>;
+    if (!kostan) return <div>Kostan tidak ditemukan</div>;
+
+    return (
+        <div className="container mx-auto p-4">
+            <main className="bg-white p-6 rounded-lg shadow-md">
+                <div className="flex">
+                    <div className="w-2/3">
+                        <img src="https://placehold.co/600x400" alt="Room Image" className="rounded-lg mb-4" />
+                        <div className="grid grid-cols-3 gap-4">
+                            <img src="https://placehold.co/200x150" alt="Room Image 1" className="rounded-lg" />
+                            <img src="https://placehold.co/200x150" alt="Room Image 2" className="rounded-lg" />
+                            <img src="https://placehold.co/200x150" alt="Room Image 3" className="rounded-lg" />
+                        </div>
+                    </div>
+                    <div className="w-1/3 pl-4">
+                        <h1 className="text-2xl font-bold mb-2">Kost Singgahsini Dago Asri D14 Tipe B Coblong Bandung FCR723K9</h1>
+                        <div className="flex items-center mb-4">
+                            <span className="text-green-600 text-xl font-bold">Rp2.411.000</span>
+                            <span className="text-gray-600 ml-2">/ bulan</span>
+                        </div>
+                        <button className="bg-green-600 text-white py-2 px-4 rounded-lg mb-4">Ajukan Sewa</button>
+                        <div className="flex items-center mb-4">
+                            <i className="fas fa-map-marker-alt text-gray-600 mr-2"></i>
+                            <span className="text-gray-600">Jl. Dago Asri No.14, Coblong, Bandung</span>
+                        </div>
+                        <div className="flex items-center mb-4">
+                            <i className="fas fa-user text-gray-600 mr-2"></i>
+                            <span className="text-gray-600">Dikelola oleh <span className="text-green-600">Sinta</span></span>
+                        </div>
+                    </div>
+                </div>
+                <div className="mt-6">
+                    <h2 className="text-xl font-bold mb-2">Yang kamu dapatkan di Singgahsini</h2>
+                    <ul className="list-disc list-inside">
+                        <li className="mb-2">AC</li>
+                        <li className="mb-2">WiFi</li>
+                        <li className="mb-2">Meja</li>
+                        <li className="mb-2">Kursi</li>
+                        <li className="mb-2">Lemari</li>
+                        <li className="mb-2">Kasur</li>
+                        <li className="mb-2">Bantal</li>
+                        <li className="mb-2">Guling</li>
+                    </ul>
+                </div>
+                <div className="mt-6">
+                    <h2 className="text-xl font-bold mb-2">Fasilitas kamar mandi</h2>
+                    <ul className="list-disc list-inside">
+                        <li className="mb-2">Kamar mandi dalam</li>
+                        <li className="mb-2">Shower</li>
+                        <li className="mb-2">Closet duduk</li>
+                    </ul>
+                </div>
+                <div className="mt-6">
+                    <h2 className="text-xl font-bold mb-2">Peraturan khusus tipe kamar ini</h2>
+                    <ul className="list-disc list-inside">
+                        <li className="mb-2">Tidak boleh merokok di dalam kamar</li>
+                        <li className="mb-2">Tidak boleh membawa hewan peliharaan</li>
+                        <li className="mb-2">Tidak boleh membawa tamu lawan jenis ke dalam kamar</li>
+                    </ul>
+                </div>
+                <div className="mt-6">
+                    <h2 className="text-xl font-bold mb-2">Cerita pemilik tentang kost ini</h2>
+                    <p className="text-gray-600 mb-4">Kost ini terletak di lokasi yang strategis, dekat dengan berbagai fasilitas umum seperti minimarket, rumah sakit, dan universitas. Lingkungan sekitar kost juga sangat nyaman dan aman.</p>
+                </div>
+                <div className="mt-6">
+                    <h2 className="text-xl font-bold mb-2">Tipe kamar lainnya</h2>
+                    <div className="flex space-x-4">
+                        <div className="w-1/3 bg-gray-100 p-4 rounded-lg">
+                            <img src="https://placehold.co/200x150" alt="Room Type 1" className="rounded-lg mb-2" />
+                            <h3 className="text-lg font-bold mb-2">Tipe A</h3>
+                            <p className="text-gray-600 mb-2">Rp2.000.000 / bulan</p>
+                            <button className="bg-green-600 text-white py-2 px-4 rounded-lg">Ajukan Sewa</button>
+                        </div>
+                        <div className="w-1/3 bg-gray-100 p-4 rounded-lg">
+                            <img src="https://placehold.co/200x150" alt="Room Type 2" className="rounded-lg mb-2" />
+                            <h3 className="text-lg font-bold mb-2">Tipe B</h3>
+                            <p className="text-gray-600 mb-2">Rp2.500.000 / bulan</p>
+                            <button className="bg-green-600 text-white py-2 px-4 rounded-lg">Ajukan Sewa</button>
+                        </div>
+                    </div>
+                </div>
+                <div className="mt-6">
+                    <h2 className="text-xl font-bold mb-2">Fasilitas umum</h2>
+                    <ul className="list-disc list-inside">
+                        <li className="mb-2">Dapur</li>
+                        <li className="mb-2">Ruang tamu</li>
+                        <li className="mb-2">Ruang makan</li>
+                        <li className="mb-2">Parkir motor</li>
+                        <li className="mb-2">Parkir mobil</li>
+                    </ul>
+                </div>
+                <div className="mt-6">
+                    <h2 className="text-xl font-bold mb-2">Peraturan di kost ini</h2>
+                    <ul className="list-disc list-inside">
+                        <li className="mb-2">Tidak boleh merokok di dalam kamar</li>
+                        <li className="mb-2">Tidak boleh membawa hewan peliharaan</li>
+                        <li className="mb-2">Tidak boleh membawa tamu lawan jenis ke dalam kamar</li>
+                    </ul>
+                </div>
+                <div className="mt-6">
+                    <h2 className="text-xl font-bold mb-2">Lokasi dan lingkungan sekitar</h2>
+                    <div className="w-full h-64 bg-gray-200 rounded-lg mb-4">
+                        <img src="https://placehold.co/600x400" alt="Map" className="w-full h-full object-cover rounded-lg" />
+                    </div>
+                </div>
+                <div className="mt-6">
+                    <h2 className="text-xl font-bold mb-2">Ketentuan pengajuan sewa</h2>
+                    <ul className="list-disc list-inside">
+                        <li className="mb-2">Membayar uang sewa di muka</li>
+                        <li className="mb-2">Membayar uang jaminan sebesar 1 bulan sewa</li>
+                        <li className="mb-2">Menandatangani surat perjanjian sewa</li>
+                    </ul>
+                </div>
+                <div className="mt-6">
+                    <h2 className="text-xl font-bold mb-2">4.9/5 dari 1914 review</h2>
+                    <div className="space-y-4">
+                        <div className="bg-gray-100 p-4 rounded-lg">
+                            <div className="flex items-center mb-2">
+                                <img src="https://placehold.co/40x40" alt="Reviewer 1" className="rounded-full mr-2" />
+                                <div>
+                                    <h3 className="text-lg font-bold">Sinta</h3>
+                                    <div className="flex items-center">
+                                        <i className="fas fa-star text-yellow-500"></i>
+                                        <i className="fas fa-star text-yellow-500"></i>
+                                        <i className="fas fa-star text-yellow-500"></i>
+                                        <i className="fas fa-star text-yellow-500"></i>
+                                        <i className="fas fa-star text-yellow-500"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <p className="text-gray-600">Kost ini sangat nyaman dan bersih. Pemiliknya juga sangat ramah dan membantu.</p>
+                        </div>
+                        <div className="bg-gray-100 p-4 rounded-lg">
+                            <div className="flex items-center mb-2">
+                                <img src="https://placehold.co/40x40" alt="Reviewer 2" className="rounded-full mr-2" />
+                                <div>
+                                    <h3 className="text-lg font-bold">Andi</h3>
+                                    <div className="flex items-center">
+                                        <i className="fas fa-star text-yellow-500"></i>
+                                        <i className="fas fa-star text-yellow-500"></i>
+                                        <i className="fas fa-star text-yellow-500"></i>
+                                        <i className="fas fa-star text-yellow-500"></i>
+                                        <i className="fas fa-star text-yellow-500"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <p className="text-gray-600">Lokasinya sangat strategis, dekat dengan kampus dan pusat perbelanjaan.</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    );
+};
+
+export default KostanDetailClient;

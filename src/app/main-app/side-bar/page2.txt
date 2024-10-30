@@ -1,8 +1,7 @@
 "use client";
-import { useState } from "react";
-import { collection, addDoc } from "firebase/firestore";
-import { dbFire, storage } from "@/app/firebase/config";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { useState } from 'react';
+import { collection, addDoc } from 'firebase/firestore';
+import { dbFire } from '@/app/firebase/config';
 
 interface Fal {
     AC: boolean;
@@ -15,17 +14,17 @@ interface Fal {
     kamar_mandi_dalam: boolean;
     kamar_mandi_luar: boolean;
     areaLoundryJemur: boolean;
-    Free_Electricity: boolean;
+    Free_Electricity: boolean,
     dapur: boolean;
     parkirMotor: boolean;
     parkirMobil: boolean;
 }
 
 interface Images {
-    image1: File | null;
-    image2: File | null;
-    image3: File | null;
-    image4: File | null;
+    image1: string;
+    image2: string;
+    image3: string;
+    image4: string;
 }
 
 interface Alamat {
@@ -47,9 +46,11 @@ interface Peraturan {
 }
 
 interface KostanData {
+    [key: string]: string | number | Fal | Images | Alamat | Peraturan | undefined;
+    id?: string;
     Price: number;
     fal: Fal;
-    images: Images;
+    image: Images;
     jenis: string;
     nama: string;
     region: string;
@@ -79,89 +80,69 @@ export default function KostanPage() {
             parkirMotor: false,
             parkirMobil: false,
         },
-        images: {
-            image1: null,
-            image2: null,
-            image3: null,
-            image4: null,
+        image: {
+            image1: '',
+            image2: '',
+            image3: '',
+            image4: '',
         },
-        jenis: "",
-        nama: "",
-        region: "",
+        jenis: '',
+        nama: '',
+        region: '',
         sisaKamar: 0,
-        ukuranKamar: "",
-        type: "",
+        ukuranKamar: '',
+        type: '',
         alamat: {
-            provinsi: "",
-            kota_kabupaten: "",
-            kecamatan: "",
-            Desa_Kelurahan: "",
-            Jalan: "",
-            Nomor_Rumah: "",
-            Kode_Pos: "",
+            provinsi: '',
+            kota_kabupaten: '',
+            kecamatan: '',
+            Desa_Kelurahan: '',
+            Jalan: '',
+            Nomor_Rumah: '',
+            Kode_Pos: '',
         },
         peraturan: {
-            umum: "",
-            tamu: "",
-            kebersihan: "",
-            pembayaran: "",
-            lainnya: "",
+            umum: '',
+            tamu: '',
+            kebersihan: '',
+            pembayaran: '',
+            lainnya: '',
         },
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type, checked } = e.target as HTMLInputElement;
-        const nameParts = name.split(".");
+        const nameParts = name.split('.');
 
         setFormData((prevData) => {
-            const updatedData: KostanData = { ...prevData }; // Ensure updatedData is of type KostanData
+            const updatedData = { ...prevData };
 
-            if (type === "checkbox") {
+            if (type === 'checkbox') {
                 const facilityKey = name as keyof Fal;
                 updatedData.fal = {
                     ...updatedData.fal,
                     [facilityKey]: checked,
                 };
-            } else if (name.includes("image")) {
-                // Handle image inputs
-                const imageKey = name as keyof Images;
-                updatedData.images[imageKey] = (e.target as HTMLInputElement).files?.[0] || null;
             } else {
                 const firstLevel = nameParts[0] as keyof KostanData;
 
-                // Ensure that firstLevel is a key of KostanData
-                if (firstLevel in updatedData) {
-                    // Check if it's part of 'alamat'
-                    if (firstLevel === "alamat" && nameParts.length > 1) {
-                        updatedData.alamat = {
-                            ...updatedData.alamat,
-                            [nameParts[1] as keyof Alamat]: value, // Update specific alamat field
-                        };
-                    } else if (firstLevel === "peraturan" && nameParts.length > 1) {
-                        updatedData.peraturan = {
-                            ...updatedData.peraturan,
-                            [nameParts[1] as keyof Peraturan]: value, // Update specific peraturan field
-                        };
-                    } else {
-                        // Type assertion to ensure the type matches
-                        switch (firstLevel) {
-                            case 'Price':
-                            case 'sisaKamar':
-                                updatedData[firstLevel] = Number(value) as KostanData[typeof firstLevel]; // Type-safe conversion
-                                break;
-                            case 'jenis':
-                            case 'nama':
-                            case 'region':
-                            case 'ukuranKamar':
-                            case 'type':
-                                updatedData[firstLevel] = value as KostanData[typeof firstLevel]; // Assign as string
-                                break;
-                            default:
-                                // Handle cases that shouldn't happen
-                                console.warn(`Unhandled field: ${firstLevel}`);
-                                break;
-                        }
-                    }
+                // Check if it's part of 'alamat'
+                if (firstLevel === 'alamat' && nameParts.length > 1) {
+                    updatedData.alamat = {
+                        ...updatedData.alamat,
+                        [nameParts[1]]: value,  // Update specific alamat field
+                    };
+                }
+                // Check if it's part of 'peraturan'
+                else if (firstLevel === 'peraturan' && nameParts.length > 1) {
+                    updatedData.peraturan = {
+                        ...updatedData.peraturan,
+                        [nameParts[1]]: value,  // Update specific peraturan field
+                    };
+                }
+                // Handle top-level fields
+                else {
+                    updatedData[firstLevel] = type === 'number' ? Number(value) : value;
                 }
             }
 
@@ -169,68 +150,44 @@ export default function KostanPage() {
         });
     };
 
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         try {
-            // 1. Upload images to Firebase Storage
-            const imageUploadPromises = Object.keys(formData.images).map(async (key) => {
-                const file = formData.images[key as keyof Images];
-                if (file) {
-                    const imageRef = ref(storage, `images/${file.name}`);
-                    await uploadBytes(imageRef, file);
-                    return getDownloadURL(imageRef); // Get the URL of the uploaded image
-                }
-                return null;
-            });
-
-            const imageUrls = await Promise.all(imageUploadPromises);
-
-            // 2. Create a new data object with the image URLs
-            const kostanDataWithImageUrls = {
-                ...formData,
-                images: {
-                    image1: imageUrls[0],
-                    image2: imageUrls[1],
-                    image3: imageUrls[2],
-                    image4: imageUrls[3],
-                },
-            };
-
-            // 3. Save data to Firestore
-            await addDoc(collection(dbFire, "home"), kostanDataWithImageUrls);
-            console.log("Data submitted successfully:", kostanDataWithImageUrls);
-
-            // Optionally reset the form
+            // Add the data to Firestore
+            await addDoc(collection(dbFire, 'home'), formData);
+            console.log('Data submitted successfully:', formData);
+            // Optionally reset the form or show a success message
             setFormData({
                 ...formData,
                 Price: 0,
                 sisaKamar: 0,
-                nama: "",
-                jenis: "",
-                region: "",
-                ukuranKamar: "",
-                images: {
-                    image1: null,
-                    image2: null,
-                    image3: null,
-                    image4: null,
-                },
+                nama: '',
+                jenis: '',
+                region: '',
+                ukuranKamar: '',
                 alamat: {
-                    provinsi: "",
-                    kota_kabupaten: "",
-                    kecamatan: "",
-                    Desa_Kelurahan: "",
-                    Jalan: "",
-                    Nomor_Rumah: "",
-                    Kode_Pos: "",
+                    provinsi: '',
+                    kota_kabupaten: '',
+                    kecamatan: '',
+                    Desa_Kelurahan: '',
+                    Jalan: '',
+                    Nomor_Rumah: '',
+                    Kode_Pos: '',
                 },
                 peraturan: {
-                    umum: "",
-                    tamu: "",
-                    kebersihan: "",
-                    pembayaran: "",
-                    lainnya: "",
+                    umum: '',
+                    tamu: '',
+                    kebersihan: '',
+                    pembayaran: '',
+                    lainnya: '',
+                },
+                image: {
+                    image1: '',
+                    image2: '',
+                    image3: '',
+                    image4: '',
                 },
                 fal: {
                     AC: false,
@@ -250,14 +207,17 @@ export default function KostanPage() {
                 },
             });
         } catch (error) {
-            console.error("Error submitting data:", error);
+            console.error('Error submitting data:', error);
         }
     };
 
+
+
+
     return (
         <div className="p-4">
-            <h1 className="text-2xl font-bold mb-4">Input Kostan Data</h1>
-            <form onSubmit={handleSubmit}>
+            <h1 className="text-2xl text-black font-bold mb-4">Input Kostan Data</h1>
+            <form onSubmit={handleSubmit} className='text-black'>
                 <div>
                     <label>Nama Kostan: </label>
                     <input
@@ -436,40 +396,24 @@ export default function KostanPage() {
                     ))}
                 </div>
                 <div>
-                    <label>Images: </label>
-                    <input
-                        className="border p-2 mb-4 w-full"
-                        type="file"
-                        name="image1"
-                        onChange={handleChange}
-                        required
-                    />
-                    <input
-                        className="border p-2 mb-4 w-full"
-                        type="file"
-                        name="image2"
-                        onChange={handleChange}
-                        required
-                    />
-                    <input
-                        className="border p-2 mb-4 w-full"
-                        type="file"
-                        name="image3"
-                        onChange={handleChange}
-                        required
-                    />
-                    <input
-                        className="border p-2 mb-4 w-full"
-                        type="file"
-                        name="image4"
-                        onChange={handleChange}
-                        required
-                    />
+                    <h2 className="font-bold text-black">Images:</h2>
+                    {Object.keys(formData.image).map((key) => (
+                        <div key={key}>
+                            <label className='text-black'>{key}:</label>
+                            <input
+                                className="border text-black border-black p-2 mb-2 w-full"
+                                type="text"
+                                name={`image.${key}`}
+                                value={formData.image[key as keyof Images]}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                    ))}
                 </div>
-                {/* Form input lainnya di sini */}
                 <button
                     type="submit"
-                    className="bg-blue-500 text-white px-4 py-2 mt-4"
+                    className="bg-blue-500 text-white p-2 mt-4"
                 >
                     Submit
                 </button>

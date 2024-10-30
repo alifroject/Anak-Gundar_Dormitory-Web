@@ -1,57 +1,129 @@
-// sidebar.tsx
+// src/app/main-app/sidebar.tsx
 
-import React from 'react';
-import Link from 'next/link';
+import React, { useEffect, useState } from 'react';
+import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
+import { app } from '@/app/firebase/config';
+import { useRouter } from 'next/navigation'; // Import useRouter
+import ConfirmationModal from '@/app/main-app/ConfirmationModal'; // Import the modal component
+import Cookies from 'js-cookie';
 
 interface SidebarProps {
     isOpen: boolean;
-    toggleSidebar: () => void;
+    onPageChange: (page: 'dashboard' | 'chat') => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onPageChange }) => {
+    const [userEmail, setUserEmail] = useState<string | null>(null);
+    const [userName, setUserName] = useState<string | null>('User'); // Default name
+    const [userImage, setUserImage] = useState<string | null>(null); // State for the user's image
+    const [isModalOpen, setModalOpen] = useState<boolean>(false); // State for the confirmation modal
+    const router = useRouter(); // Initialize useRouter
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(getAuth(app), (user) => {
+            if (user) {
+                setUserEmail(user.email); // Set the user's email
+                setUserName(user.displayName); // Use displayName if available, else default to 'User'
+                setUserImage(user.photoURL || null); // Use photoURL from the user's Google profile
+            } else {
+                setUserEmail(null);
+                setUserName('User'); // Reset to default when logged out
+                setUserImage(null); // Reset the image when logged out
+            }
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    const handleLogout = async () => {
+        setModalOpen(true); // Open the confirmation modal
+    };
+
+    const confirmLogout = async () => {
+        try {
+            Cookies.remove('authToken'); // replace with your actual cookie name
+            await signOut(getAuth(app)); // Logout from Firebase
+            router.push('/'); // Redirect to the home page
+        } catch (error) {
+            console.error('Logout Error:', error);
+        } finally {
+            setModalOpen(false); // Close the modal after confirming
+        }
+    };
+
     return (
-        <div
-            className={`fixed top-0 left-0 h-full bg-gray-900 text-white transform transition-transform duration-300 ${
-                isOpen ? 'translate-x-0' : '-translate-x-full'
-            } w-64`} // Ensure the width is fixed
-        >
-            <div className="flex items-center justify-between h-20 border-b m-10 ml-20 border-gray-700">
+        <div className={`fixed right-0 top-0 left-0 h-full bg-gray-900 text-white transform transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'} w-64 w-48 xs:w-full sm:w-full md:w-72 lg:w-72`}>
+            <div className="flex items-center justify-center h-20  ml-8 m-10 xs:ml-4 sm:ml-15 md:ml-20 770px:ml-8 1026px:ml-8">
                 <div className="text-center">
                     <img
-                        alt="User profile picture"
+                        alt=""
                         className="rounded-full mx-auto mb-2"
                         height={50}
-                        src="https://storage.googleapis.com/a1aa/image/MekN6GSClfmIUEEdSrflA6qPpqDWNfriq4HYO7Ckik7EF5jOB.jpg"
+                        src={userImage || 'https://defaultimage.com/default.jpg'} // Use default image if no photoURL
                         width={50}
                     />
-                    <div>Jhon Smith</div>
-                    <div className="text-sm text-gray-400">Administrator</div>
-                    <div className="text-sm text-green-400">Online</div>
+                    <div className="xs:text-[16px] text-gray-400 sm:text-base md:text-lg lg:text-lg">{userName}</div>
+                    <div className="xs:text-[16px] text-gray-400 sm:text-base md:text-lg lg:text-lg">{userEmail}</div>
+                    <div className="text-green-400 xs:text-[14px] sm:text-base md:text-lg lg:text-lg">Online</div>
                 </div>
-                <button onClick={toggleSidebar} className="p-2">
-                    <i className={`fas fa-chevron-${isOpen ? 'left' : 'right'} text-white`}></i>
-                </button>
             </div>
-            <div className="p-4">
-                <input className="w-full p-2 rounded bg-gray-800 text-gray-400" placeholder="Search..." type="text" />
-            </div>
+            <hr className='border-b border-gray-700' />
+
             <nav className="flex-1 px-4">
-                <ul>
-                    <li className="flex items-center justify-between py-2">
-                        <Link  className="flex items-center text-gray-300 hover:text-white" href="main-app/chat">
-                            <i className="fas fa-tachometer-alt mr-2"></i> Chat
-                        </Link>
+                <ul className='m-5'>
+                    {/* Conditionally render the "User" option for admin email */}
+                    {userEmail === 'admin@gmail.com' && (
+                        <li className="flex items-center justify-between py-2 sm:py-3 md:py-4 lg:py-5">
+                            <button
+                                className="flex items-center text-gray-300 hover:text-white w-full xs:text-sm sm:text-base md:text-sm lg:text-sm"
+                                onClick={() => onPageChange('dashboard')}
+                            >
+                                <i className="fas fa-tachometer-alt mr-2 text-xs xs:text-sm sm:text-base md:text-lg lg:text-xl"></i>
+                                User
+                            </button>
+                        </li>
+                    )}
+                    <li className="flex items-center justify-between py-5">
+                        <button className="flex items-center text-gray-300 hover:text-white w-full xs:text-sm sm:text-base md:text-sm lg:text-sm" onClick={() => onPageChange('dashboard')}>
+                            <i className="fas fa-tachometer-alt mr-2 xs:text-sm sm:text-base md:text-sm lg:text-sm"></i> Dashboard
+                        </button>
                     </li>
-                    {/* Add other nav items here */}
+                    <li className="flex items-center justify-between py-5">
+                        <button className="flex items-center text-gray-300 hover:text-white w-full xs:text-sm sm:text-base md:text-sm lg:text-sm" onClick={() => onPageChange('chat')}>
+                            <i className="fas fa-comments mr-2 xs:text-sm sm:text-base md:text-lg lg:text-xl"></i> Chat
+                        </button>
+                    </li>
+                    <li className="flex items-center justify-between py-5">
+                        <button className="flex items-center text-gray-300 hover:text-white w-full xs:text-sm sm:text-base md:text-sm lg:text-sm" onClick={() => onPageChange('dashboard')}>
+                            <i className="fas fa-tachometer-alt mr-2 xs:text-sm sm:text-base md:text-lg lg:text-xl"></i> Payment
+                        </button>
+                    </li>
+                    <li className="flex items-center justify-between py-5">
+                        <button className="flex items-center text-gray-300 hover:text-white w-full xs:text-sm sm:text-base md:text-sm lg:text-sm" onClick={() => onPageChange('dashboard')}>
+                            <i className="fas fa-tachometer-alt mr-2 xs:text-sm sm:text-base md:text-lg lg:text-xl"></i> Booking
+                        </button>
+                    </li>
+                    {/* Logout button */}
+                    <li className="flex items-center justify-between py-5">
+                        <button className="flex items-center text-red-500 hover:text-white w-full xs:text-sm sm:text-base md:text-sm lg:text-sm" onClick={handleLogout}>
+                            <i className="fas fa-sign-out-alt mr-2 xs:text-sm sm:text-base md:text-lg lg:text-xl"></i> Logout
+                        </button>
+                    </li>
                 </ul>
             </nav>
-            <div className="p-4 border-t border-gray-700">
+            <div className="p-4">
                 <div className="flex items-center justify-between">
                     <i className="fas fa-cog text-gray-400"></i>
                     <i className="fas fa-bell text-gray-400"></i>
-                    <i className="fas fa-sign-out-alt text-gray-400"></i>
                 </div>
             </div>
+
+            {/* Confirmation Modal */}
+            <ConfirmationModal 
+                isOpen={isModalOpen} 
+                onClose={() => setModalOpen(false)} 
+                onConfirm={confirmLogout} 
+            />
         </div>
     );
 };
