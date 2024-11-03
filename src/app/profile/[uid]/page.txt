@@ -1,0 +1,88 @@
+"use client"; // Marking this component as a Client Component
+
+import React, { useEffect, useState } from 'react'; 
+import Image from 'next/image';
+import { FaHome, FaBuilding, FaReceipt, FaCog, FaTimes } from 'react-icons/fa';
+import KosSaya from '@/app/profile/[id]/KosSaya';
+import RiwayatKos from '@/app/profile/[id]/RiwayatKos';
+import RiwayatTransaksi from '@/app/profile/[id]/RiwayatTransaksi';
+import Pengaturan from '@/app/profile/[id]/Pengaturan';
+
+// ProfileType for TypeScript type-checking
+interface ProfileType {
+    id: string;
+    displayName: string;
+    photoURL: string;
+    tanggalLahir?: { seconds: number };
+}
+
+const Profile = ({ userProfile }: { userProfile: ProfileType | null }) => {
+    const [selectedSection, setSelectedSection] = useState('Kos Saya');
+
+    const renderMainContent = () => {
+        switch (selectedSection) {
+            case 'Kos Saya':
+                return <KosSaya key="kos-saya" />;
+            case 'Riwayat Kos':
+                return <RiwayatKos key="riwayat-kos" />;
+            case 'Riwayat Transaksi':
+                return <RiwayatTransaksi key="riwayat-transaksi" />;
+            case 'Pengaturan':
+                return <Pengaturan key="pengaturan" />;
+            default:
+                return null;
+        }
+    };
+
+    return (
+        <div className="flex flex-col md:flex-row h-full bg-gray-100">
+            {/* Sidebar */}
+            <div className="w-full md:w-1/4 bg-white p-6 shadow-lg">
+                <div className="flex items-center mb-8 mt-20">
+                    <Image
+                        src={userProfile?.photoURL || 'https://via.placeholder.com/40'}
+                        alt="Profile"
+                        width={40}
+                        height={40}
+                        className="rounded-full"
+                    />
+                    <div>
+                        <h2 className="font-semibold text-lg text-black m-4">
+                            {userProfile?.displayName || 'User'}
+                        </h2>
+                        {userProfile?.tanggalLahir && (
+                            <p className="text-sm text-gray-500">
+                                Tanggal Lahir: {new Date(userProfile.tanggalLahir.seconds * 1000).toLocaleDateString()}
+                            </p>
+                        )}
+                    </div>
+                    <FaTimes className="ml-auto cursor-pointer text-gray-600 hover:text-gray-800" />
+                </div>
+                <ul className="space-y-5 text-gray-700">
+                    {['Kos Saya', 'Riwayat Kos', 'Riwayat Transaksi', 'Pengaturan'].map((section) => (
+                        <li
+                            key={section}
+                            className="flex items-center text-sm hover:text-blue-500 cursor-pointer"
+                            onClick={() => setSelectedSection(section)}
+                        >
+                            {section === 'Kos Saya' && <FaHome className="mr-3" />}
+                            {section === 'Riwayat Kos' && <FaBuilding className="mr-3" />}
+                            {section === 'Riwayat Transaksi' && <FaReceipt className="mr-3" />}
+                            {section === 'Pengaturan' && <FaCog className="mr-3" />}
+                            <span>{section}</span>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+
+            {/* Main Content */}
+            <div className="flex-1 mt-4 md:mt-20 md:p-8 min-h-full">
+                <div className="bg-white p-6 shadow-lg rounded-lg min-h-full">
+                    {renderMainContent()}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default Profile;

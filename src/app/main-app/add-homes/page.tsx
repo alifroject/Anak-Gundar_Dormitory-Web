@@ -1,8 +1,17 @@
 "use client";
-import { useState } from "react";
+import React, { useState, DragEvent, ChangeEvent } from 'react';
 import { collection, addDoc } from "firebase/firestore";
 import { dbFire, storage } from "@/app/firebase/config";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { GeoPoint } from 'firebase/firestore';
+
+
+interface Price {
+    perBulan: number;
+    perHari: number;
+    perMinggu: number;
+}
+
 
 interface Fal {
     AC: boolean;
@@ -22,10 +31,10 @@ interface Fal {
 }
 
 interface Images {
-    image1: File | null;
-    image2: File | null;
-    image3: File | null;
-    image4: File | null;
+    image1: string; // Change from File | null to string
+    image2: string;
+    image3: string;
+    image4: string;
 }
 
 interface Alamat {
@@ -47,7 +56,7 @@ interface Peraturan {
 }
 
 interface KostanData {
-    Price: number;
+    Price: Price; // Change this to Price type
     fal: Fal;
     images: Images;
     jenis: string;
@@ -58,11 +67,36 @@ interface KostanData {
     type: string;
     alamat: Alamat;
     peraturan: Peraturan;
+    ownerName: string;
+    ownerPhoneNumber: string;
+    geolokasi: GeoPoint; // Geolocation
 }
 
 export default function KostanPage() {
+
+    const [images, setImages] = useState<(File | null)[]>([null, null, null, null]); // State untuk empat gambar
+    const [latitude, setLatitude] = useState<number>(0); // New state for latitude
+    const [longitude, setLongitude] = useState<number>(0); // New state for longitude
+
+    const handleDrop = (event: DragEvent<HTMLDivElement>, index: number) => {
+        event.preventDefault();
+        const files = Array.from(event.dataTransfer.files);
+        if (files.length > 0) {
+            setImages((prevImages) => {
+                const newImages = [...prevImages];
+                newImages[index] = files[0]; // Mengambil hanya gambar pertama
+                return newImages;
+            });
+        }
+    };
+
+    const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+    };
+
+
     const [formData, setFormData] = useState<KostanData>({
-        Price: 0,
+        Price: { perBulan: 0, perHari: 0, perMinggu: 0 },
         fal: {
             AC: false,
             kasur: false,
@@ -78,18 +112,22 @@ export default function KostanPage() {
             dapur: false,
             parkirMotor: false,
             parkirMobil: false,
+
         },
+        geolokasi: new GeoPoint(0, 0), // Initialize with default latitude and longitude
         images: {
-            image1: null,
-            image2: null,
-            image3: null,
-            image4: null,
+            image1: "",
+            image2: "",
+            image3: "",
+            image4: "",
         },
         jenis: "",
         nama: "",
         region: "",
         sisaKamar: 0,
         ukuranKamar: "",
+        ownerName: "",
+        ownerPhoneNumber: "",
         type: "",
         alamat: {
             provinsi: "",
@@ -108,13 +146,28 @@ export default function KostanPage() {
             lainnya: "",
         },
     });
+    const handleInputChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
+        const file = e.target.files?.[0] || null; // Get the selected file
+        setImages((prevImages) => {
+            const newImages = [...prevImages];
+            newImages[index] = file; // Update the image for the specified index
+            return newImages;
+        });
+    };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleLatitudeChange = (e: ChangeEvent<HTMLInputElement>) => {
+        setLatitude(parseFloat(e.target.value));
+    };
+
+    const handleLongitudeChange = (e: ChangeEvent<HTMLInputElement>) => {
+        setLongitude(parseFloat(e.target.value));
+    };
+    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>,) => {
         const { name, value, type, checked } = e.target as HTMLInputElement;
         const nameParts = name.split(".");
 
         setFormData((prevData) => {
-            const updatedData: KostanData = { ...prevData }; // Ensure updatedData is of type KostanData
+            const updatedData: KostanData = { ...prevData };
 
             if (type === "checkbox") {
                 const facilityKey = name as keyof Fal;
@@ -123,48 +176,47 @@ export default function KostanPage() {
                     [facilityKey]: checked,
                 };
             } else if (name.includes("image")) {
-                // Handle image inputs
                 const imageKey = name as keyof Images;
-                updatedData.images[imageKey] = (e.target as HTMLInputElement).files?.[0] || null;
+                updatedData.images[imageKey] = ""; // Initialize with an empty string
             } else {
                 const firstLevel = nameParts[0] as keyof KostanData;
 
-                // Ensure that firstLevel is a key of KostanData
                 if (firstLevel in updatedData) {
-                    // Check if it's part of 'alamat'
                     if (firstLevel === "alamat" && nameParts.length > 1) {
                         updatedData.alamat = {
                             ...updatedData.alamat,
-                            [nameParts[1] as keyof Alamat]: value, // Update specific alamat field
+                            [nameParts[1] as keyof Alamat]: value,
                         };
                     } else if (firstLevel === "peraturan" && nameParts.length > 1) {
                         updatedData.peraturan = {
                             ...updatedData.peraturan,
-                            [nameParts[1] as keyof Peraturan]: value, // Update specific peraturan field
+                            [nameParts[1] as keyof Peraturan]: value,
                         };
                     } else {
-                        // Type assertion to ensure the type matches
                         switch (firstLevel) {
                             case 'Price':
+                                const priceKey = nameParts[1] as keyof Price;
+                                updatedData.Price[priceKey] = Number(value);
+                                break;
                             case 'sisaKamar':
-                                updatedData[firstLevel] = Number(value) as KostanData[typeof firstLevel]; // Type-safe conversion
+                                updatedData.sisaKamar = Number(value);
                                 break;
                             case 'jenis':
                             case 'nama':
                             case 'region':
                             case 'ukuranKamar':
+                            case 'ownerName':
+                            case 'ownerPhoneNumber':
                             case 'type':
-                                updatedData[firstLevel] = value as KostanData[typeof firstLevel]; // Assign as string
+                                updatedData[firstLevel] = value;
                                 break;
                             default:
-                                // Handle cases that shouldn't happen
                                 console.warn(`Unhandled field: ${firstLevel}`);
                                 break;
                         }
                     }
                 }
             }
-
             return updatedData;
         });
     };
@@ -173,15 +225,16 @@ export default function KostanPage() {
         e.preventDefault();
 
         try {
-            // 1. Upload images to Firebase Storage
-            const imageUploadPromises = Object.keys(formData.images).map(async (key) => {
-                const file = formData.images[key as keyof Images];
+            // 1. Upload images to Firebase Storage with unique names
+            const imageUploadPromises = images.map(async (file, index) => {
                 if (file) {
-                    const imageRef = ref(storage, `images/${file.name}`);
+                    // Membuat nama file unik berdasarkan timestamp
+                    const uniqueImageName = `images/image_${Date.now()}_${index + 1}`;
+                    const imageRef = ref(storage, uniqueImageName);
                     await uploadBytes(imageRef, file);
-                    return getDownloadURL(imageRef); // Get the URL of the uploaded image
+                    return await getDownloadURL(imageRef);
                 }
-                return null;
+                return ""; // Return an empty string for missing images
             });
 
             const imageUrls = await Promise.all(imageUploadPromises);
@@ -189,6 +242,7 @@ export default function KostanPage() {
             // 2. Create a new data object with the image URLs
             const kostanDataWithImageUrls = {
                 ...formData,
+                geolokasi: new GeoPoint(latitude, longitude), // Set the GeoPoint here
                 images: {
                     image1: imageUrls[0],
                     image2: imageUrls[1],
@@ -204,17 +258,17 @@ export default function KostanPage() {
             // Optionally reset the form
             setFormData({
                 ...formData,
-                Price: 0,
+                Price: { perHari: 0, perMinggu: 0, perBulan: 0 },
                 sisaKamar: 0,
                 nama: "",
                 jenis: "",
                 region: "",
                 ukuranKamar: "",
                 images: {
-                    image1: null,
-                    image2: null,
-                    image3: null,
-                    image4: null,
+                    image1: "",
+                    image2: "",
+                    image3: "",
+                    image4: "",
                 },
                 alamat: {
                     provinsi: "",
@@ -249,15 +303,18 @@ export default function KostanPage() {
                     parkirMobil: false,
                 },
             });
+            setLatitude(0); // Reset latitude
+            setLongitude(0); // Reset longitude
         } catch (error) {
             console.error("Error submitting data:", error);
         }
     };
 
+
     return (
         <div className="p-4">
             <h1 className="text-2xl font-bold mb-4">Input Kostan Data</h1>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="text-black">
                 <div>
                     <label>Nama Kostan: </label>
                     <input
@@ -325,12 +382,56 @@ export default function KostanPage() {
                     />
                 </div>
                 <div>
-                    <label>Harga: </label>
+                    <label>Harga Per Hari: </label>
+                    <input
+                        className="border border-black p-2 mb-4 w-full"
+                        type="number"
+                        name="Price.perHari" // Nested name for perHari
+                        value={formData.Price.perHari}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div>
+                    <label htmlFor="">Owner Name</label>
                     <input
                         className="border border-black p-2 mb-4 w-full"
                         type="text"
-                        name="Price"
-                        value={formData.Price}
+                        name="ownerName" // Nested name for perHari
+                        value={formData.ownerName}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div>
+                    <label htmlFor="">Owner Phone Number</label>
+                    <input
+                        className="border border-black p-2 mb-4 w-full"
+                        type="text"
+                        name="ownerPhoneNumber" // Nested name for perHari
+                        value={formData.ownerPhoneNumber}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div>
+                    <label>Harga Per Minggu: </label>
+                    <input
+                        className="border border-black p-2 mb-4 w-full"
+                        type="number"
+                        name="Price.perMinggu" // Nested name for perMinggu
+                        value={formData.Price.perMinggu}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div>
+                    <label>Harga Per Bulan: </label>
+                    <input
+                        className="border border-black p-2 mb-4 w-full"
+                        type="number"
+                        name="Price.perBulan" // Nested name for perBulan
+                        value={formData.Price.perBulan}
                         onChange={handleChange}
                         required
                     />
@@ -418,6 +519,23 @@ export default function KostanPage() {
                         required
                     />
                 </div>
+                <label>Latitude:</label>
+                <input
+                    type="number"
+                    value={latitude}
+                    onChange={handleLatitudeChange}
+                    placeholder="Enter latitude"
+                    required
+                />
+
+                <label>Longitude:</label>
+                <input
+                    type="number"
+                    value={longitude}
+                    onChange={handleLongitudeChange}
+                    placeholder="Enter longitude"
+                    required
+                />
 
                 <div>
                     <h2 className="font-bold text-black">Peraturan:</h2>
@@ -435,37 +553,36 @@ export default function KostanPage() {
                         </div>
                     ))}
                 </div>
-                <div>
-                    <label>Images: </label>
-                    <input
-                        className="border p-2 mb-4 w-full"
-                        type="file"
-                        name="image1"
-                        onChange={handleChange}
-                        required
-                    />
-                    <input
-                        className="border p-2 mb-4 w-full"
-                        type="file"
-                        name="image2"
-                        onChange={handleChange}
-                        required
-                    />
-                    <input
-                        className="border p-2 mb-4 w-full"
-                        type="file"
-                        name="image3"
-                        onChange={handleChange}
-                        required
-                    />
-                    <input
-                        className="border p-2 mb-4 w-full"
-                        type="file"
-                        name="image4"
-                        onChange={handleChange}
-                        required
-                    />
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                    {images.map((image, index) => (
+                        <div
+                            key={index}
+                            onDrop={(event) => handleDrop(event, index)}
+                            onDragOver={handleDragOver}
+                            className="border p-4 h-48 flex items-center justify-center"
+                            style={{ border: '2px dashed #ccc', cursor: 'pointer' }}
+                        >
+                            {image ? (
+                                <img
+                                    src={URL.createObjectURL(image)}
+                                    alt={`Preview ${index + 1}`}
+                                    className="object-cover w-full h-full"
+                                />
+                            ) : (
+                                <span>Drag and drop image here or click to upload</span>
+                            )}
+                            <input
+                                type="file"
+                                name={`image${index + 1}`}
+                                onChange={(event) => handleInputChange(event, index)}
+                                style={{ display: 'none' }}
+                                accept="image/*" // Allows only image files
+                            // Ensures only one file is selected at a time
+                            />
+                        </div>
+                    ))}
                 </div>
+
                 {/* Form input lainnya di sini */}
                 <button
                     type="submit"

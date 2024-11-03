@@ -1,10 +1,20 @@
 "use client";
+
 import { useState, useEffect } from 'react';
 import { GeoPoint } from 'firebase/firestore';
-
+import { auth } from "@/app/firebase/config"; // Import db for Firestore
+import { onAuthStateChanged } from 'firebase/auth';
+import Login from '@/app/Login'; // Import komponen login
 import dynamic from 'next/dynamic';
+import { useRouter, usePathname } from 'next/navigation';
+import { FaWhatsapp } from 'react-icons/fa';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
+
 
 const MapComponent = dynamic(() => import('@/app/MapComponent'), { ssr: false });
+import Link from 'next/link';
 
 interface Fal {
     AC: boolean;
@@ -48,9 +58,16 @@ interface Peraturan {
     lainnya: string;
 }
 
+interface Price {
+    perBulan: number;
+    perHari: number;
+    perMinggu: number;
+}
+
+
 interface KostanData {
     id: string;
-    Price: number;
+    Price: Price;
     fal: Fal;
     images: Images;
     jenis: string;
@@ -61,6 +78,8 @@ interface KostanData {
     type: string;
     alamat: Alamat;
     peraturan: Peraturan;
+    ownerName: string;
+    ownerPhoneNumber: string;
     geolokasi: GeoPoint; // Geolocation
 }
 interface TransformedKostanData {
@@ -70,7 +89,7 @@ interface TransformedKostanData {
         latitude: number;
         longitude: number;
     };
-    Price: number; // Add Price here
+    Price: Price; // Add Price here
     images: {
         image1: string | null;
         image2: string | null;
@@ -79,6 +98,8 @@ interface TransformedKostanData {
     }; // Add images here
     fal: Fal; // Add fal if needed
     peraturan: Peraturan; // Add peraturan if needed
+    ownerName: string;
+    ownerPhoneNumber: string;
     alamat: Alamat; // Add alamat if needed
     region: string;
     jenis: string;
@@ -89,11 +110,90 @@ interface TransformedKostanData {
 const KostanDetailClient = ({ initialData }: { initialData: KostanData | null }) => {
     const [kostan] = useState<KostanData | null>(initialData);
     const [loading] = useState(false);
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false); // Assume you have a way to determine if the user is logged in
+    const [redirectPath, setRedirectPath] = useState<string | null>(null); // State to store redirect path
+    const router = useRouter(); // Initialize router
+    const pathname = usePathname(); // Get the current path
 
 
     useEffect(() => {
         console.log("Kostan data:", kostan);
     }, [kostan]);
+
+
+
+    useEffect(() => {
+        console.log("Kostan data:", kostan);
+    }, [kostan]);
+
+    // Listen for authentication state changes
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setIsLoggedIn(true);
+                setIsLoginModalOpen(false); // Close modal if logged in
+                console.log("User is logged in:", user);
+            } else {
+                setIsLoggedIn(false);
+                console.log("No user is logged in.");
+            }
+        });
+
+        return () => unsubscribe(); // Clean up the subscription on unmount
+    }, [auth]);
+
+    const handleAjukanSewaClick = () => {
+        console.log("Check login status:", isLoggedIn);
+
+        if (!isLoggedIn) {
+            console.log("User not logged in. Opening login modal...");
+            setIsLoginModalOpen(true);
+        } else {
+            console.log("User is logged in. Proceeding with rental application...");
+
+            const bookingUrl = `/home/${kostan?.id}/booking?details=${encodeURIComponent(
+                kostan?.nama?.replace(/\s+/g, '-') ?? 'Unnamed'
+            )}&alamat=Kota/Kabupaten=${encodeURIComponent(
+                kostan?.alamat.kota_kabupaten ?? 'Kota Tidak Diketahui'
+            )}&kecamatan=${encodeURIComponent(
+                kostan?.alamat.kecamatan ?? 'Kecamatan Tidak Diketahui'
+            )}&desa=${encodeURIComponent(
+                kostan?.alamat.Desa_Kelurahan ?? 'Desa Tidak Diketahui'
+            )}&NO_Rumah=${encodeURIComponent(
+                kostan?.alamat.Nomor_Rumah ?? 'Nomor Tidak Diketahui'
+            )}`;
+
+            console.log("Redirecting to:", bookingUrl);
+            router.push(bookingUrl); // Redirect to the booking page
+        }
+    };
+
+
+
+    // Handle login success
+    const handleLoginSuccess = () => {
+        setIsLoginModalOpen(false); // Close modal immediately
+        console.log("Login successful.");
+    };
+
+    // Close modal handler
+    const closeLoginModal = () => {
+        setIsLoginModalOpen(false);
+    };
+
+    const formatPhoneNumber = (phoneNumber: string) => {
+        // Pastikan nomor telepon tidak mengandung karakter selain angka
+        const cleaned = ('' + phoneNumber).replace(/\D/g, '');
+
+        // Jika nomor dimulai dengan '0', hapus '0' dan tambahkan '62' di depannya
+        if (cleaned.startsWith('0')) {
+            return `62${cleaned.slice(1)}`;
+        }
+
+        // Jika nomor sudah dalam format internasional, kembalikan langsung
+        return cleaned;
+    };
 
     const transformedKostan: TransformedKostanData | null = kostan
         ? {
@@ -103,7 +203,11 @@ const KostanDetailClient = ({ initialData }: { initialData: KostanData | null })
                 latitude: kostan.geolokasi.latitude, // Directly accessing latitude and longitude
                 longitude: kostan.geolokasi.longitude,
             } : { latitude: 0, longitude: 0 },
-            Price: kostan.Price,
+            Price: {
+                perBulan: kostan.Price.perBulan,
+                perMinggu: kostan.Price.perMinggu,
+                perHari: kostan.Price.perHari,
+            },
             images: {
                 image1: kostan.images.image1,
                 image2: kostan.images.image2,
@@ -142,6 +246,8 @@ const KostanDetailClient = ({ initialData }: { initialData: KostanData | null })
                 Nomor_Rumah: kostan.alamat.Nomor_Rumah,
                 Kode_Pos: kostan.alamat.Kode_Pos,
             },
+            ownerName: kostan.ownerName,
+            ownerPhoneNumber: kostan.ownerPhoneNumber,
             region: kostan.region,
             jenis: kostan.jenis,
             sisaKamar: kostan.sisaKamar,
@@ -155,16 +261,16 @@ const KostanDetailClient = ({ initialData }: { initialData: KostanData | null })
 
     return (
 
-        <div className="container mx-auto p-4">
+        <div className="mx-0 p-2 mt-16">
 
-            <main className="bg-white p-6 rounded-lg shadow-md">
-                <div className="flex flex-col md:flex-row">
-                    <div className="md:w-2/3 w-full">
+            <main className="bg-white p-6 xs:m-2  rounded-lg shadow-md w-full">
+                <div className="flex flex-col  md:flex-row">
+                    <div className="md:w-2/3  w-full">
                         {kostan.images.image1 && (
                             <img
                                 src={kostan.images.image1}
                                 alt="Room Image 1"
-                                className="rounded-lg w-[740px] h-[400px] md:h-[500px] sm:h-[300px] mb-4 object-cover"
+                                className="rounded-lg w-[740px] h-[400px] md:w-[900px] md:h-[500px] sm:h-[300px] mb-4 object-cover"
                             />
                         )}
                         <div className="grid grid-cols-3 gap-4">
@@ -197,15 +303,56 @@ const KostanDetailClient = ({ initialData }: { initialData: KostanData | null })
                         <h1 className="text-2xl font-bold mb-2 text-gray-500">
                             <i className="fas fa-map-marker-alt  mr-2"></i>{kostan.nama}
                         </h1>
-                        <div className="flex items-center mb-4">
-                            <span className="text-green-600 text-xl font-bold">
-                                Rp {parseFloat(kostan.Price.toString()).toLocaleString('id-ID')}
-                            </span>
+                        <div className="flex flex-col mb-4">
+                            {/* Monthly Price */}
+                            <div className="flex items-center mb-2">
+                                <span className="text-green-600 text-xl font-bold">
+                                    Rp {kostan.Price?.perBulan ? parseFloat(kostan.Price.perBulan.toString()).toLocaleString('id-ID') : '0'}
+                                </span>
+                                <span className="text-gray-600 ml-2">/ bulan</span>
+                            </div>
 
+                            {/* Weekly Price */}
+                            <div className="flex items-center mb-2">
+                                <span className="text-green-600 text-xl font-bold">
+                                    Rp {kostan.Price?.perMinggu ? parseFloat(kostan.Price.perMinggu.toString()).toLocaleString('id-ID') : '0'}
+                                </span>
+                                <span className="text-gray-600 ml-2">/ Minggu</span>
+                            </div>
 
-                            <span className="text-gray-600 ml-2">/ bulan</span>
+                            {/* Daily Price */}
+                            <div className="flex items-center mb-2">
+                                <span className="text-green-600 text-xl font-bold">
+                                    Rp {kostan.Price?.perHari ? parseFloat(kostan.Price.perHari.toString()).toLocaleString('id-ID') : '0'}
+                                </span>
+                                <span className="text-gray-600 ml-2">/ Hari</span>
+                            </div>
                         </div>
-                        <button className="bg-green-600 text-white py-2 px-4 rounded-lg mb-4">Ajukan Sewa</button>
+
+                        <button
+                            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg"
+                            onClick={handleAjukanSewaClick}
+                        >
+                            Ajukan Sewa
+                        </button>
+
+
+                        {isLoginModalOpen && (
+                            <Login
+                                onClose={closeLoginModal}
+                                onLoginSuccess={handleLoginSuccess}
+                                originPath={`/home/${kostan?.id}?details=${encodeURIComponent(
+                                    kostan?.nama.replace(/\s+/g, '-')
+                                )}&alamat=Kota/Kabupaten=${encodeURIComponent(
+                                    kostan?.alamat.kota_kabupaten
+                                )}&kecamatan=${encodeURIComponent(
+                                    kostan?.alamat.kecamatan
+                                )}&desa=${encodeURIComponent(
+                                    kostan?.alamat.Desa_Kelurahan
+                                )}&NO_Rumah=${encodeURIComponent(kostan?.alamat.Nomor_Rumah)}`}
+                            />
+                        )}
+
                         <div className="flex items-start mb-4">
                             <i className="fas fa-map-marker-alt text-gray-600 mr-2 mt-1"></i>
                             <div className="flex flex-col">
@@ -215,10 +362,32 @@ const KostanDetailClient = ({ initialData }: { initialData: KostanData | null })
                                 <h2 className="text-gray-600">{kostan.alamat.provinsi}</h2>
                             </div>
                         </div>
-                        <div className="flex items-center mb-4">
-                            <i className="fas fa-user text-gray-600 mr-2"></i>
-                            <span className="text-gray-600">Dikelola oleh <span className="text-green-600">Alif Yang Ganteng ngaku dewek</span></span>
+                        <div className="flex items-center mb-2">
+                            <span className="text-green-600 text-xl font-bold">
+                                Sisa Kamar  {kostan.sisaKamar}
+                            </span>
                         </div>
+
+                        <div className="mb-4 mt-10">
+                            <div className="flex items-center mb-2">
+                                <i className="fas fa-user text-gray-600 mr-2"></i>
+                                <span className="text-gray-600">
+                                    Dikelola oleh <span className="text-green-600">{kostan.ownerName}</span>
+                                </span>
+                            </div>
+                            <Link
+                                href={`https://wa.me/${transformedKostan?.ownerPhoneNumber ? formatPhoneNumber(transformedKostan.ownerPhoneNumber) : ''}`}
+                                target="_blank"
+                                className="flex items-center gap-2"
+                            >
+                                <FontAwesomeIcon icon={faWhatsapp} style={{ color: 'green' }} className="h-12 w-12" />
+                                <p>Chat Owner</p>
+                            </Link>
+                        </div>
+
+
+
+
                     </div>
                 </div>
 
@@ -253,13 +422,13 @@ const KostanDetailClient = ({ initialData }: { initialData: KostanData | null })
                 </div>
 
                 <div className="mt-6">
-                    <h2 className="text-xl font-bold mb-2">Lokasi dan lingkungan sekitar</h2>
-                    <div style={{ width: '100%', height: '400px', border: '1px solid #ccc', borderRadius: '8px', overflow: 'hidden' }} className="w-full h-64 bg-gray-200 rounded-lg mb-4">
-                        <div className="map-box">
+                    <h2 className="text-xl text-black font-bold mb-2">Lokasi dan lingkungan sekitar</h2>
+                    <div style={{ width: '100%', height: '400px', border: '1px solid #ccc', borderRadius: '8px', overflow: 'hidden', position: 'relative', zIndex: 1 }} className="w-full h-64 bg-gray-200 rounded-lg mb-4">
+                        <div className="map-box" style={{ width: '100%', height: '100%' }}>
                             {transformedKostan && (
                                 <MapComponent
-                                    key={transformedKostan.id} // Ensure unique key
                                     kostanData={[transformedKostan]} // Only pass the necessary data
+
                                 />
                             )}
                         </div>

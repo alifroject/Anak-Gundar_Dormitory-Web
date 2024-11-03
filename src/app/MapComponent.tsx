@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import "leaflet/dist/leaflet.css";
 
 const customIcon = L.icon({
     iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
@@ -11,59 +12,78 @@ const customIcon = L.icon({
     shadowSize: [41, 41],
 });
 
+interface Geolocation {
+    latitude: number;
+    longitude: number;
+}
+
 interface TransformedKostanData {
-    id: string;
     nama: string;
-    geolokasi: {
-        latitude: number;
-        longitude: number;
-    };
+    geolokasi: Geolocation;
 }
 
 interface MapComponentProps {
     kostanData: TransformedKostanData[];
+    hideXAxis?: boolean; // Optional prop to hide the x-axis
 }
 
-const MapComponent: React.FC<MapComponentProps> = ({ kostanData }) => {
+const MapComponent: React.FC<MapComponentProps> = ({ kostanData, hideXAxis }) => {
     const map = useMap();
 
     useEffect(() => {
-        console.log("Data Kostan:", kostanData); // Log data kostan
-
         if (kostanData.length > 0) {
-            const bounds = L.latLngBounds(kostanData.map(kostan => [
-                kostan.geolokasi.latitude,
-                kostan.geolokasi.longitude,
-            ]));
-            map.fitBounds(bounds);
+            const bounds = L.latLngBounds(
+                kostanData.map(kostan => [
+                    kostan.geolokasi.latitude,
+                    kostan.geolokasi.longitude,
+                ])
+            );
+
+            // Tunggu peta siap sebelum memanggil fitBounds
+            map.whenReady(() => {
+                map.fitBounds(bounds, { padding: [10, 10] }); // Sesuaikan padding
+            });
         }
     }, [kostanData, map]);
 
+    if (kostanData.length === 0) return null;
+
     return (
         <>
-            {kostanData.map((kostan) => (
-                <Marker 
-                    key={kostan.id} 
-                    position={[kostan.geolokasi.latitude, kostan.geolokasi.longitude] as [number, number]}
+            {!hideXAxis && (
+                <div className="x-axis"> {/* Render x-axis here if hideXAxis is false */} 
+                    {/* Implement your x-axis rendering logic here */}
+                </div>
+            )}
+            {kostanData.map(({ nama, geolokasi }, index) => (
+                <Marker
+                    key={index} // Pastikan key unik
+                    position={[geolokasi.latitude, geolokasi.longitude]}
                     icon={customIcon}
                 >
-                    <Popup>{kostan.nama}</Popup>
+                    <Popup>{nama}</Popup>
                 </Marker>
             ))}
         </>
     );
 };
 
-const MapWrapper: React.FC<{ kostanData: TransformedKostanData[] }> = ({ kostanData }) => {
-    const initialPosition: [number, number] = [-7.7956, 110.4165]; // Contoh posisi awal yang lebih relevan
+const MapWrapper: React.FC<{ kostanData: TransformedKostanData[]; hideXAxis?: boolean }> = ({ kostanData, hideXAxis }) => {
+    const initialPosition: [number, number] = [51.505, -0.09]; // Ganti dengan koordinat yang sesuai jika perlu
 
     return (
-        <MapContainer center={initialPosition} zoom={10} style={{ height: "400px", width: "100%" }}>
+        <MapContainer 
+            center={initialPosition} 
+            zoom={13} 
+            scrollWheelZoom={true} // Mengizinkan zoom dengan scroll
+            style={{ height: '100%', width: '100%' }} 
+            zoomControl={true} // Menampilkan kontrol zoom
+        >
             <TileLayer
-                url="https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png" // Sumber tile alternatif
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            <MapComponent kostanData={kostanData} />
+            <MapComponent kostanData={kostanData} hideXAxis={hideXAxis} />
         </MapContainer>
     );
 };

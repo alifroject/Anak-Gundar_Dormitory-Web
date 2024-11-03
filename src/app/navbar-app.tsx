@@ -4,20 +4,58 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { ChevronDownIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
+import { auth } from '@/app/firebase/config';
+import Cookies from 'js-cookie';
+import { getAuth, signOut } from 'firebase/auth';
+import { app } from '@/app/firebase/config';
+import { useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
+import { dbFire } from '@/app/firebase/config';
+import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 
-
-
-interface NavbarProps { //button masuk si klik
+interface NavbarProps {
     onLoginClick: () => void;
 }
 
+interface UserProfile {
+    uid: string;
+    email: string | null;
+    displayName?: string | null;
+    nama: string;
+    jenisKelamin: string;
+    tanggalLahir: Date | null;
+    pekerjaan: string;
+    namaKampus: string;
+    kotaAsal: string;
+    statusPernikahan: string;
+    pendidikanTerakhir: string;
+    kontakDarurat: string;
+    photoURL: string;
+}
+
+
 const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
-    const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+    const [isCariDropdownOpen, setIsCariDropdownOpen] = useState<boolean>(false);
+    const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState<boolean>(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+    const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
+    const router = useRouter();
+    const pathname = usePathname();
 
-    const toggleDropdown = () => {
-        setIsDropdownOpen(!isDropdownOpen);
+    useEffect(() => {
+        setIsCariDropdownOpen(false);
+        setIsProfileDropdownOpen(false);
+        setIsSidebarOpen(false);
+    }, [pathname]); // Trigger effect on path change
+
+    const toggleCariDropdown = () => {
+        setIsCariDropdownOpen(!isCariDropdownOpen);
+    };
+
+    const toggleProfileDropdown = () => {
+        setIsProfileDropdownOpen(!isProfileDropdownOpen);
     };
 
     const toggleSidebar = () => {
@@ -28,21 +66,69 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
         setIsSidebarOpen(false);
     };
 
-    // Auto close sidebar when window is resized to desktop size
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth > 768) {
-                setIsSidebarOpen(false); // Tutup sidebar jika ukuran layar lebih dari 768px
+                setIsSidebarOpen(false);
             }
         };
 
         window.addEventListener('resize', handleResize);
 
-        // Cleanup the event listener when component unmounts
         return () => {
             window.removeEventListener('resize', handleResize);
         };
     }, []);
+
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                setIsLoggedIn(true);
+                // Fetch user profile data from Firestore
+                const userDoc = doc(dbFire, 'user', user.uid);
+                const userSnapshot = await getDoc(userDoc);
+                if (userSnapshot.exists()) {
+                    const userData = userSnapshot.data() as UserProfile; // Cast to UserProfile
+                    const userProfileData: UserProfile = {
+                        uid: user.uid,
+                        email: user.email,
+                        displayName: user.displayName || "Anonymous",
+                        nama: userData.nama || "",
+                        jenisKelamin: userData.jenisKelamin || "",
+                        tanggalLahir: userData.tanggalLahir || null,
+                        pekerjaan: userData.pekerjaan || "",
+                        namaKampus: userData.namaKampus || "",
+                        kotaAsal: userData.kotaAsal || "",
+                        statusPernikahan: userData.statusPernikahan || "",
+                        pendidikanTerakhir: userData.pendidikanTerakhir || "",
+                        kontakDarurat: userData.kontakDarurat || "",
+                        photoURL: userData.photoURL || user.photoURL || "", // Get from Firestore or Auth
+                    };
+                    setUserProfile(userProfileData);
+                } else {
+                    console.error("No such user document!");
+                    // Handle the case when user data doesn't exist
+                }
+            } else {
+                setIsLoggedIn(false);
+                setUserProfile(null);
+            }
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+
+
+    const handleLogout = async () => {
+        try {
+            Cookies.remove('authToken'); // replace with your actual cookie name
+            await signOut(getAuth(app));
+            router.push('/');
+        } catch (error) {
+            console.error('Logout Error:', error);
+        }
+    };
 
     return (
         <>
@@ -57,7 +143,6 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                             height={100}
                             className="ml-10"
                         />
-
                     </Link>
                 </div>
 
@@ -65,7 +150,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                 <div className="md:hidden">
                     <button onClick={toggleSidebar} className="text-black hover:text-gray-400 focus:outline-none">
                         {isSidebarOpen ? (
-                            <></>
+                            <XMarkIcon className="h-8 w-8" />
                         ) : (
                             <Bars3Icon className="h-8 w-8" />
                         )}
@@ -76,46 +161,75 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                 <ul className="hidden md:flex items-center justify-center space-x-8 flex-grow" style={{ fontFamily: 'Lato, sans-serif' }}>
                     <div className="relative">
                         <button
-                            onClick={toggleDropdown}
+                            onClick={toggleCariDropdown}
                             className="flex items-center text-black hover:text-gray-400"
-                            aria-expanded={isDropdownOpen}
+                            aria-expanded={isCariDropdownOpen}
                         >
                             Masih Cari?
                             <ChevronDownIcon className="w-5 h-5 ml-1" />
                         </button>
-                        {isDropdownOpen && (
+                        {isCariDropdownOpen && (
                             <ul className="w-30 absolute bg-white text-black shadow-lg mt-2 rounded">
                                 <li>
                                     <Link href="/item1" className="flex items-center px-4 py-2 hover:bg-gray-200">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
-                                            <path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
-                                            <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
-                                        </svg>
-                                        <span className='pl-5'>Kosan</span>
+                                        Kostan
                                     </Link>
                                 </li>
                                 <li>
                                     <Link href="/item2" className="flex items-center px-4 py-2 hover:bg-gray-200">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
-                                            <path fill-rule="evenodd" d="M3 2.25a.75.75 0 0 0 0 1.5v16.5h-.75a.75.75 0 0 0 0 1.5H15v-18a.75.75 0 0 0 0-1.5H3ZM6.75 19.5v-2.25a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75v2.25a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75ZM6 6.75A.75.75 0 0 1 6.75 6h.75a.75.75 0 0 1 0 1.5h-.75A.75.75 0 0 1 6 6.75ZM6.75 9a.75.75 0 0 0 0 1.5h.75a.75.75 0 0 0 0-1.5h-.75ZM6 12.75a.75.75 0 0 1 .75-.75h.75a.75.75 0 0 1 0 1.5h-.75a.75.75 0 0 1-.75-.75ZM10.5 6a.75.75 0 0 0 0 1.5h.75a.75.75 0 0 0 0-1.5h-.75Zm-.75 3.75A.75.75 0 0 1 10.5 9h.75a.75.75 0 0 1 0 1.5h-.75a.75.75 0 0 1-.75-.75ZM10.5 12a.75.75 0 0 0 0 1.5h.75a.75.75 0 0 0 0-1.5h-.75ZM16.5 6.75v15h5.25a.75.75 0 0 0 0-1.5H21v-12a.75.75 0 0 0 0-1.5h-4.5Zm1.5 4.5a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75h-.008a.75.75 0 0 1-.75-.75v-.008Zm.75 2.25a.75.75 0 0 0-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75v-.008a.75.75 0 0 0-.75-.75h-.008ZM18 17.25a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75h-.008a.75.75 0 0 1-.75-.75v-.008Z" clip-rule="evenodd" />
-                                        </svg>
-                                        <span className='pl-5'>Apartment</span>
+                                        Apartment
                                     </Link>
                                 </li>
                             </ul>
                         )}
                     </div>
                     <li>
-                        <Link href="/rules" className="text-black hover:text-gray-400 block">
+                        <Link href="/rules" className="text-black hover:text-gray-400 block" passHref>
                             Syarat yang berlaku dan aturan
                         </Link>
                     </li>
-                    <li>
-                        <button onClick={onLoginClick} className="text-blue-700 hover:bg-gray-100 hover:text-blue-400  border-2 border-blue-500 px-4 py-1 rounded w-full">
-                            Masuk
-                        </button>
-                    </li>
+                    {isLoggedIn ? (
+                        <div className="relative">
+                            <button
+                                onClick={toggleProfileDropdown}
+                                className="flex items-center text-black hover:text-gray-400"
+                                aria-expanded={isProfileDropdownOpen}
+                            >
+                                <Image
+                                    src={userProfile?.photoURL || 'https://via.placeholder.com/40'} // Default image
+                                    alt="Profile"
+                                    width={40}
+                                    height={40}
+                                    className="rounded-full" // Makes the image circular
+                                />
 
+                                <ChevronDownIcon className="w-5 h-5 ml-1" />
+                            </button>
+                            {isProfileDropdownOpen && (
+                                <ul className="absolute bg-white text-black shadow-lg mt-2 rounded w-40">
+                                    <li>
+                                        <Link href={`/profile/${userProfile?.uid}`} className="block px-4 py-2 hover:bg-gray-200" passHref>
+                                            Lihat Profil
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <button
+                                            onClick={handleLogout}
+                                            className="block px-4 py-2 hover:bg-gray-200 w-full text-left"
+                                        >
+                                            Logout
+                                        </button>
+                                    </li>
+                                </ul>
+                            )}
+                        </div>
+                    ) : (
+                        <li>
+                            <button onClick={onLoginClick} className="text-blue-700 hover:bg-gray-100 hover:text-blue-400 border-2 border-blue-500 px-4 py-1 rounded w-full">
+                                Masuk
+                            </button>
+                        </li>
+                    )}
                 </ul>
             </nav>
 
@@ -124,8 +238,8 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                 <div className="fixed inset-0 z-20 bg-black bg-opacity-50" onClick={closeSidebar}></div>
             )}
             <div className={`fixed top-0 left-0 h-full w-64 p-5 bg-white transition-transform transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} z-30`}>
-                <div className={`p-4  ${isSidebarOpen ? 'block' : 'hidden'}`}>
-                    <Link href="/" onClick={closeSidebar}> {/* Panggil closeSidebar saat link di-klik */}
+                <div className={`p-4 ${isSidebarOpen ? 'block' : 'hidden'}`}>
+                    <Link href="/" onClick={closeSidebar}>
                         <img
                             src="https://firebasestorage.googleapis.com/v0/b/anak-gundar.appspot.com/o/anakGundar.png?alt=media"
                             alt="Description of the image"
@@ -134,7 +248,6 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                             className='ml-6'
                         />
                     </Link>
-                    {/* Tambahkan link lain di sidebar jika diperlukan */}
                 </div>
                 <div className="flex justify-end p-4">
                     <button onClick={closeSidebar}>
@@ -142,56 +255,83 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                     </button>
                 </div>
                 <ul className="space-y-4 mt-4">
+                    {isLoggedIn ? (
+                        <div className="relative">
+                            <button
+                                onClick={toggleProfileDropdown}
+                                className="flex items-center text-black hover:text-gray-400"
+                                aria-expanded={isProfileDropdownOpen}
+                            >
+                                <Image
+                                    src={userProfile?.photoURL || 'https://via.placeholder.com/40'} // Default image
+                                    alt="Profile"
+                                    width={40}
+                                    height={40}
+                                    className="rounded-full" // Makes the image circular
+                                />
+
+                                <ChevronDownIcon className="w-5 h-5 ml-1" />
+                            </button>
+                            {isProfileDropdownOpen && (
+                                <ul className="absolute bg-white text-black shadow-lg mt-2 rounded w-40">
+                                    <li>
+                                        <Link href={`/profile/${userProfile?.uid}`} onClick={closeSidebar} className="block px-4 py-2 hover:bg-gray-200">
+                                            Lihat Profil
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <button
+                                            onClick={handleLogout}
+                                            className="block px-4 py-2 hover:bg-gray-200 w-full text-left"
+                                        >
+                                            Logout
+                                        </button>
+                                    </li>
+                                </ul>
+                            )}
+                        </div>
+                    ) : (
+                        <li>
+                            <button onClick={() => { onLoginClick(); closeSidebar(); }} className="text-blue-700 hover:bg-gray-100 hover:text-blue-400 border-2 border-blue-500 px-4 py-1 rounded w-full">
+                                Masuk
+                            </button>
+                        </li>
+                    )}
                     <li>
-                        {/* Masih Cari dropdown */}
                         <button
-                            onClick={toggleDropdown}
-                            className="flex items-center text-black hover:text-gray-400"
-                            aria-expanded={isDropdownOpen}
+                            onClick={toggleCariDropdown}
+                            className="flex items-center text-black hover:text-gray-400 mt-20"
+                            aria-expanded={isCariDropdownOpen}
                         >
                             Masih Cari?
                             <ChevronDownIcon className="w-5 h-5 ml-1" />
                         </button>
-
-                        {/* Inline dropdown, elemen di bawah akan bergeser */}
-                        {isDropdownOpen && (
+                        {isCariDropdownOpen && (
                             <ul className="bg-white text-black shadow-lg mt-2 rounded w-full space-y-2">
                                 <li>
-                                    <Link href="/item1" onClick={toggleSidebar} className="flex items-center px-4 py-2 hover:bg-gray-200">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
-                                            <path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
-                                            <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
-                                        </svg>
-                                        <span className='ml-5'>Kosan</span>
+                                    <Link href="/item1" onClick={closeSidebar} className="flex items-center px-4 py-2 hover:bg-gray-200">
+                                        Kostan
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/item2" onClick={toggleSidebar} className="flex items-center px-4 py-2 hover:bg-gray-200">
-
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
-                                            <path fill-rule="evenodd" d="M3 2.25a.75.75 0 0 0 0 1.5v16.5h-.75a.75.75 0 0 0 0 1.5H15v-18a.75.75 0 0 0 0-1.5H3ZM6.75 19.5v-2.25a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75v2.25a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1-.75-.75ZM6 6.75A.75.75 0 0 1 6.75 6h.75a.75.75 0 0 1 0 1.5h-.75A.75.75 0 0 1 6 6.75ZM6.75 9a.75.75 0 0 0 0 1.5h.75a.75.75 0 0 0 0-1.5h-.75ZM6 12.75a.75.75 0 0 1 .75-.75h.75a.75.75 0 0 1 0 1.5h-.75a.75.75 0 0 1-.75-.75ZM10.5 6a.75.75 0 0 0 0 1.5h.75a.75.75 0 0 0 0-1.5h-.75Zm-.75 3.75A.75.75 0 0 1 10.5 9h.75a.75.75 0 0 1 0 1.5h-.75a.75.75 0 0 1-.75-.75ZM10.5 12a.75.75 0 0 0 0 1.5h.75a.75.75 0 0 0 0-1.5h-.75ZM16.5 6.75v15h5.25a.75.75 0 0 0 0-1.5H21v-12a.75.75 0 0 0 0-1.5h-4.5Zm1.5 4.5a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75h-.008a.75.75 0 0 1-.75-.75v-.008Zm.75 2.25a.75.75 0 0 0-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75v-.008a.75.75 0 0 0-.75-.75h-.008ZM18 17.25a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75h-.008a.75.75 0 0 1-.75-.75v-.008Z" clip-rule="evenodd" />
-                                        </svg>
-                                        <span className='ml-4'>Apartment</span>
+                                    <Link href="/item2" onClick={closeSidebar} className="flex items-center px-4 py-2 hover:bg-gray-200">
+                                        Apartment
                                     </Link>
                                 </li>
                             </ul>
                         )}
                     </li>
                     <li>
-                        <Link href="/rules" onClick={toggleSidebar} className="text-black hover:text-gray-400 block">
+                        <Link href="/rules" onClick={closeSidebar} className="text-black hover:text-gray-400 block">
                             Syarat yang berlaku dan aturan
                         </Link>
                     </li>
-                    <li>
-                        <button onClick={onLoginClick} className="text-blue-700 hover:bg-gray-100 hover:text-blue-400 border-2 border-blue-500 px-4 py-1 rounded w-full">
-                            Masuk
-                        </button>
-                    </li>
+                    {/* Conditional rendering for login/logout in the sidebar */}
+
                 </ul>
             </div>
         </>
     );
-}
-
+};
 
 export default Navbar;

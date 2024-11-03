@@ -107,45 +107,62 @@ export default function PromoComponent() {
 
     return (
         <div className="bg-gray-100">
-            <div className="max-w-7xl mx-auto">
-
-
+            <div className="max-w-7xl mx-auto flex flex-col gap-8">
                 {regions.map((region) => (
-                    <div key={region}>
-                        <h2 className="text-xl font-semibold text-black mt-6">{region}</h2>
-                        <div className="grid grid-cols-1 xs:w-full sm:w-80 md:w-96 lg:w-1/4 gap-6 ">
+                    <div key={region} className="w-full flex-shrink-0">
+                        <div className="flex justify-center">
+                            <h2 className="bg-white text-lg sm:text-xl font-semibold text-black mt-6 px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200 ease-in-out">
+                                {region}
+                            </h2>
+                        </div>
+
+                        <div className="grid grid-cols-2 sm:flex sm:flex-row sm:flex-wrap gap-4 mr-4 mt-4">
                             {kostanData
-                                .filter(kostan => kostan.region === region)
-                                .slice(0, 4)  // Limit to 4 items
+                                .filter((kostan) => kostan.region === region)
+                                .slice(0, 4) // Limit to 4 items
                                 .map((kostan) => (
-                                    <Link key={kostan.id} href={`/home/${kostan.id}?details=${encodeURIComponent(kostan.nama.replace(/\s+/g, '-'))}&alamat=Kota/Kabupeten=${encodeURIComponent(kostan.alamat.kota_kabupaten)}&kecamatan=${encodeURIComponent(kostan.alamat.kecamatan)}&desa=${encodeURIComponent(kostan.alamat.Desa_Kelurahan)}&NO_Rumah=${encodeURIComponent(kostan.alamat.Nomor_Rumah)}`} passHref>
-                                        <div className="bg-white rounded-lg m-2 shadow-md overflow-hidden cursor-pointer 240px:h-[350px]">
+                                    <Link
+                                        key={kostan.id}
+                                        href={`/home/${kostan.id}?details=${encodeURIComponent(
+                                            kostan.nama.replace(/\s+/g, '-')
+                                        )}&alamat=Kota/Kabupeten=${encodeURIComponent(
+                                            kostan.alamat.kota_kabupaten
+                                        )}&kecamatan=${encodeURIComponent(
+                                            kostan.alamat.kecamatan
+                                        )}&desa=${encodeURIComponent(
+                                            kostan.alamat.Desa_Kelurahan
+                                        )}&NO_Rumah=${encodeURIComponent(kostan.alamat.Nomor_Rumah)}`}
+                                        passHref
+                                    >
+                                        <div className="bg-white rounded-lg shadow-md overflow-hidden xs:mr-4 cursor-pointer m-2 w-full sm:w-[240px]">
                                             {kostan.images.image1 && (
                                                 <img
                                                     src={kostan.images.image1}
                                                     alt="Room Image 1"
-                                                    className="rounded-lg w-full h-[400px] md:h-[300px] sm:h-[300px] 240px:h-[150px] mb-4 object-cover"
+                                                    className="rounded-lg w-full h-[120px] sm:h-[150px] md:h-[300px] object-cover mb-4"
                                                 />
                                             )}
                                             <div className="p-4">
-                                                <h3 className="text-lg font-semibold text-black">{kostan.nama}</h3>
-                                                <p className="text-gray-500">{kostan.region}</p>
-                                                <p className="text-gray-500 text-sm">{kostan.jenis}</p>
-                                                <p className="text-gray-500 text-sm">Sisa Kamar: {kostan.sisaKamar}</p>
-                                                <span className="text-green-600 text-xl font-bold">
+                                                <h3 className="text-md sm:text-lg font-semibold text-black">{kostan.nama}</h3>
+                                                <p className="text-gray-500 text-sm sm:text-base">{kostan.region}</p>
+                                                <p className="text-gray-500 text-xs sm:text-sm">{kostan.jenis}</p>
+                                                <p className="text-gray-500 text-xs sm:text-sm">Sisa Kamar: {kostan.sisaKamar}</p>
+                                                <span className="text-green-600 text-lg sm:text-xl font-bold">
                                                     Rp {parseFloat(kostan.Price.toString()).toLocaleString('id-ID')}
                                                 </span>
-                                                <p className="text-sm text-gray-600 mt-2">Ukuran Kamar: {kostan.ukuranKamar}</p>
-                                                <p className="text-sm text-gray-600">Tipe: {kostan.type}</p>
+                                                <p className="text-xs sm:text-sm text-gray-600 mt-2">Ukuran Kamar: {kostan.ukuranKamar}</p>
+                                                <p className="text-xs sm:text-sm text-gray-600">Tipe: {kostan.type}</p>
                                             </div>
                                         </div>
+
                                     </Link>
                                 ))}
                         </div>
-
                     </div>
                 ))}
             </div>
+
+
 
             <footer className="bg-black py-8 mt-10 text-white">
                 <div className="container mx-auto px-4">

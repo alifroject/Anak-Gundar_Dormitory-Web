@@ -7,6 +7,10 @@
         "destination": "/app/home/[id]/page.html"
       },
       {
+        "source": "/profile/**",
+        "destination": "/app/profile/[uid]/page.html"
+      },
+      {
         "source": "/main-app/dashboard/**",
         "destination": "/app/main-app/dashboard/index.html"
       },

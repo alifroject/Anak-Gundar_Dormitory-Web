@@ -3,32 +3,33 @@
 import React, { useEffect, useState } from 'react';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { app } from '@/app/firebase/config';
-import { useRouter } from 'next/navigation'; // Import useRouter
-import ConfirmationModal from '@/app/main-app/ConfirmationModal'; // Import the modal component
+import { useRouter } from 'next/navigation';
+import ConfirmationModal from '@/app/main-app/ConfirmationModal';
 import Cookies from 'js-cookie';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 interface SidebarProps {
     isOpen: boolean;
-    onPageChange: (page: 'dashboard' | 'chat') => void;
+    onPageChange: (page: 'dashboard' | 'chat' | 'add-homes') => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onPageChange }) => {
     const [userEmail, setUserEmail] = useState<string | null>(null);
-    const [userName, setUserName] = useState<string | null>('User'); // Default name
-    const [userImage, setUserImage] = useState<string | null>(null); // State for the user's image
-    const [isModalOpen, setModalOpen] = useState<boolean>(false); // State for the confirmation modal
-    const router = useRouter(); // Initialize useRouter
+    const [userName, setUserName] = useState<string | null>('User');
+    const [userImage, setUserImage] = useState<string | null>(null);
+    const [isModalOpen, setModalOpen] = useState<boolean>(false);
+    const router = useRouter();
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(getAuth(app), (user) => {
             if (user) {
-                setUserEmail(user.email); // Set the user's email
-                setUserName(user.displayName); // Use displayName if available, else default to 'User'
-                setUserImage(user.photoURL || null); // Use photoURL from the user's Google profile
+                setUserEmail(user.email);
+                setUserName(user.displayName);
+                setUserImage(user.photoURL || null);
             } else {
                 setUserEmail(null);
-                setUserName('User'); // Reset to default when logged out
-                setUserImage(null); // Reset the image when logged out
+                setUserName('User');
+                setUserImage(null);
             }
         });
 
@@ -36,30 +37,30 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onPageChange }) => {
     }, []);
 
     const handleLogout = async () => {
-        setModalOpen(true); // Open the confirmation modal
+        setModalOpen(true);
     };
 
     const confirmLogout = async () => {
         try {
             Cookies.remove('authToken'); // replace with your actual cookie name
-            await signOut(getAuth(app)); // Logout from Firebase
-            router.push('/'); // Redirect to the home page
+            await signOut(getAuth(app));
+            router.push('/');
         } catch (error) {
             console.error('Logout Error:', error);
         } finally {
-            setModalOpen(false); // Close the modal after confirming
+            setModalOpen(false);
         }
     };
 
     return (
         <div className={`fixed right-0 top-0 left-0 h-full bg-gray-900 text-white transform transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'} w-64 w-48 xs:w-full sm:w-full md:w-72 lg:w-72`}>
-            <div className="flex items-center justify-center h-20  ml-8 m-10 xs:ml-4 sm:ml-15 md:ml-20 770px:ml-8 1026px:ml-8">
+            <div className="flex items-center justify-center h-20 ml-8 m-10 xs:ml-4 sm:ml-15 md:ml-20 770px:ml-8 1026px:ml-8">
                 <div className="text-center">
                     <img
                         alt=""
                         className="rounded-full mx-auto mb-2"
                         height={50}
-                        src={userImage || 'https://defaultimage.com/default.jpg'} // Use default image if no photoURL
+                        src={userImage || 'https://defaultimage.com/default.jpg'}
                         width={50}
                     />
                     <div className="xs:text-[16px] text-gray-400 sm:text-base md:text-lg lg:text-lg">{userName}</div>
@@ -78,14 +79,25 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onPageChange }) => {
                                 className="flex items-center text-gray-300 hover:text-white w-full xs:text-sm sm:text-base md:text-sm lg:text-sm"
                                 onClick={() => onPageChange('dashboard')}
                             >
-                                <i className="fas fa-tachometer-alt mr-2 text-xs xs:text-sm sm:text-base md:text-lg lg:text-xl"></i>
+                                <i className="fas fa-user-cog mr-2 text-xs xs:text-sm sm:text-base md:text-lg lg:text-xl text-white"></i>
                                 User
+                            </button>
+                        </li>
+                    )}
+                    {userEmail === 'admin@gmail.com' && (
+                        <li className="flex items-center justify-between py-2 sm:py-3 md:py-4 lg:py-5">
+                            <button
+                                className="flex items-center text-gray-300 hover:text-white w-full xs:text-sm sm:text-base md:text-sm lg:text-sm"
+                                onClick={() => onPageChange('add-homes')}
+                            >
+                                <i className="fas fa-plus-circle mr-2 text-xs xs:text-sm sm:text-base md:text-lg lg:text-xl"></i>
+                                Add Homes
                             </button>
                         </li>
                     )}
                     <li className="flex items-center justify-between py-5">
                         <button className="flex items-center text-gray-300 hover:text-white w-full xs:text-sm sm:text-base md:text-sm lg:text-sm" onClick={() => onPageChange('dashboard')}>
-                            <i className="fas fa-tachometer-alt mr-2 xs:text-sm sm:text-base md:text-sm lg:text-sm"></i> Dashboard
+                            <i className="fas fa-home mr-2 xs:text-sm sm:text-base md:text-sm lg:text-sm"></i> Dashboard
                         </button>
                     </li>
                     <li className="flex items-center justify-between py-5">
@@ -95,12 +107,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onPageChange }) => {
                     </li>
                     <li className="flex items-center justify-between py-5">
                         <button className="flex items-center text-gray-300 hover:text-white w-full xs:text-sm sm:text-base md:text-sm lg:text-sm" onClick={() => onPageChange('dashboard')}>
-                            <i className="fas fa-tachometer-alt mr-2 xs:text-sm sm:text-base md:text-lg lg:text-xl"></i> Payment
+                            <i className="fas fa-credit-card mr-2 xs:text-sm sm:text-base md:text-lg lg:text-xl"></i> Payment
                         </button>
                     </li>
                     <li className="flex items-center justify-between py-5">
                         <button className="flex items-center text-gray-300 hover:text-white w-full xs:text-sm sm:text-base md:text-sm lg:text-sm" onClick={() => onPageChange('dashboard')}>
-                            <i className="fas fa-tachometer-alt mr-2 xs:text-sm sm:text-base md:text-lg lg:text-xl"></i> Booking
+                            <i className="fas fa-calendar-check mr-2 xs:text-sm sm:text-base md:text-lg lg:text-xl"></i> Booking
                         </button>
                     </li>
                     {/* Logout button */}

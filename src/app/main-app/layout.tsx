@@ -14,7 +14,7 @@ const AppLayout = ({ children }: LayoutProps) => {
         setIsOpen((prev) => !prev);
     };
 
-    const onPageChange = (page: 'dashboard' | 'chat') => {
+    const onPageChange = (page: 'dashboard' | 'chat' | 'add-homes') => {
         console.log(`Navigating to ${page}`);
         window.location.href = `/main-app/${page}`; 
     };

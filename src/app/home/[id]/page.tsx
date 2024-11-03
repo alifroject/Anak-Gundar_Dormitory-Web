@@ -1,9 +1,14 @@
+
 // Your existing imports
 import { dbFire } from '@/app/firebase/config';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import KostanDetailClient from './KostanDetailClient';
 import { GeoPoint } from 'firebase/firestore';
-
+interface Price {
+    perBulan: number;
+    perHari: number;
+    perMinggu: number;
+}
 // Update the Kostan interface to include geolokasi
 interface Fal {
     AC: boolean;
@@ -49,7 +54,7 @@ interface Peraturan {
 
 interface Kostan {
     id: string;
-    Price: number;
+    Price: Price;
     fal: Fal;
     images: Images;
     jenis: string;
@@ -59,6 +64,8 @@ interface Kostan {
     ukuranKamar: string;
     type: string;
     alamat: Alamat;
+    ownerName: string;
+    ownerPhoneNumber: string;
     peraturan: Peraturan;
     geolokasi: GeoPoint; // Add the geolokasi property
 }
@@ -75,7 +82,9 @@ const KostanDetail = async ({ params }: { params: { id: string } }) => {
         if (docSnap.exists()) {
             kostan = {
                 id: docSnap.id,
+                
                 ...(docSnap.data() as Omit<Kostan, 'id'>), // Ensure 'geolokasi' is included in the data
+                
             };
         } else {
             console.error('Kostan tidak ditemukan');
@@ -99,3 +108,4 @@ export async function generateStaticParams() {
 }
 
 export default KostanDetail;
+
