@@ -60,9 +60,6 @@ const ActiveSlider = () => {
 
   return (
     <>
-      <Navbar onLoginClick={handleLoginClick} />
-      {isLoginOpen && <Login onClose={handleCloseLogin} />} {/* Menampilkan popup login */}
-
       <div className="flex items-center justify-center flex-col min-h-[900px] w-full overflow-hidden 240px:overflow-hidden">
         <h1 className="text-4xl text-black font-bold mb-4">Lagi cari kos deket Gundar?</h1>
         <p className="text-lg text-black font-bold mb-10">Coba pilih gundar region mana dibawah ini.</p>

@@ -1,13 +1,12 @@
 "use client";
 import React, { useState, useEffect, ChangeEvent, DragEvent } from "react";
-import { auth, dbFire, storage } from "@/app/firebase/config"; // Pastikan file konfigurasi Firebase Anda benar
+import { auth, dbFire } from "@/app/firebase/config"; // Pastikan file konfigurasi Firebase Anda benar
 import { onAuthStateChanged } from "firebase/auth";
-import { collection, getDocs, QuerySnapshot, getDoc, doc, addDoc, updateDoc, deleteDoc, where } from 'firebase/firestore';
+import { collection, getDocs, QuerySnapshot, getDoc, doc, addDoc, query, where } from 'firebase/firestore';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocation } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid'; // pastikan kamu menginstal uuid
-import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+
 
 
 
@@ -30,13 +29,10 @@ interface Kostan {
 
 interface BookingDetailsProps {
     kostan: Kostan;
-    name: string;
-    price: number;
 }
 interface UploadedFile {
-    file: File;       // The actual file
-    name: string;     // The name of the file
-    preview: string;  // The preview URL of the file
+    file: File;
+    preview: string;
 }
 
 
@@ -82,13 +78,11 @@ interface RentalData {
     id: string;
     documents: Document[];
     kostanId: string;
-    priceOption: 'perBulan' | 'perMinggu' | 'perHari';
+    priceOption: 'perBulan' | 'perMinggu' | 'perHari'; // Change this line
     startDate: string;
     tenant: Tenant;
-    price: number;
-    nama: string;
-    uid: string;
-
+    price: number; // Add the price field
+    nama: string
 }
 
 const BookingDetails = ({ kostan }: BookingDetailsProps) => {
@@ -103,25 +97,28 @@ const BookingDetails = ({ kostan }: BookingDetailsProps) => {
 
 
 
-    const [displayedPrice, setDisplayedPrice] = useState<number>(0);
 
 
     const [files, setFiles] = useState<UploadedFile[]>([]);
     const [documentFiles, setDocumentFiles] = useState<(UploadedFile | null)[]>(Array(4).fill(null));
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const [rentalData, setRentalData] = useState<RentalData[]>([]);
+    const router = useRouter(); // This will be used if you need to navigate
     const searchParams = useSearchParams(); // To access query parameters
+    const [editedPrice, setEditedPrice] = useState(0);
+
     const draftId = searchParams.get('draftId'); // Retrieve 'draftId' from URL query
 
 
     useEffect(() => {
         const fetchRentalData = async () => {
-            if (!draftId) {
-                console.log("Draft ID is missing.");
-                return;
-            }
-
             try {
+                if (!draftId) {
+                    console.log("Draft ID is null or undefined");
+                    return;
+                }
+
+                console.log("Fetching rental data with Draft ID:", draftId);
                 const rentalDocRef = doc(dbFire, 'draft', draftId);
                 const rentalSnapshot = await getDoc(rentalDocRef);
 
@@ -135,17 +132,11 @@ const BookingDetails = ({ kostan }: BookingDetailsProps) => {
                         startDate: data.startDate || new Date().toISOString().split("T")[0],
                         tenant: data.tenant || { displayName: '', jenisKelamin: '', kampus: '', pekerjaan: '', phoneNumber: '' },
                         price: data.price || 0,
-                        nama: data.nama || '',
-                        uid: data.uid || ''
-
+                        nama: data.nama || ''
                     };
 
+                    console.log("Fetched Rental Data:", rentalDocument);
                     setRentalData([rentalDocument]);
-                    setEditedData(rentalDocument);
-
-                    setDisplayedPrice(rentalDocument.price);
-                    setPriceOption(rentalDocument.priceOption);
-                    setStartDate(rentalDocument.startDate);
                 } else {
                     console.log("No document found with the provided Draft ID.");
                 }
@@ -154,8 +145,17 @@ const BookingDetails = ({ kostan }: BookingDetailsProps) => {
             }
         };
 
-        fetchRentalData();
+        if (draftId) {
+            fetchRentalData();
+        }
     }, [draftId]);
+
+    const handleEdit = (data: RentalData) => {
+        setEditedData(data); // Set data yang akan diedit
+        setPriceOption(data.priceOption);
+        setEditedPrice(data.price);
+        setIsEditing(true);
+    };
 
 
 
@@ -165,110 +165,34 @@ const BookingDetails = ({ kostan }: BookingDetailsProps) => {
         handleFileUpload(droppedFiles, index);
     };
 
-    const uploadImageToServer = async (file: File): Promise<File> => {
-        // Convert file to base64 before sending
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-
-        const compressedFile = await new Promise<File>((resolve, reject) => {
-            reader.onload = async () => {
-                const base64File = reader.result as string;
-                const response = await fetch("/api/compressImage", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ fileBuffer: base64File }),  // Send base64 file
-                });
-
-                if (!response.ok) {
-                    console.error("Server response error:", response.status, response.statusText);
-                    reject(new Error("Error during image upload."));
-                }
-
-                const compressedBlob = await response.blob();
-                resolve(new File([compressedBlob], file.name, { type: "image/jpeg" }));
-            };
-
-            reader.onerror = reject;
-        });
-
-        return compressedFile;
-    };
-
-
-
-
+    // Pastikan hanya ada satu definisi handleFileChange
     const handleFileChange = (event: ChangeEvent<HTMLInputElement>, index: number) => {
-        const selectedFile = event.target.files?.[0]; // Dapatkan file yang dipilih
-        if (selectedFile) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const previewUrl = reader.result as string; // Simpan preview URL
-
-                setDocumentFiles(prev => {
-                    const newDocumentFiles = [...prev];
-                    newDocumentFiles[index] = {
-                        file: selectedFile,  // Sertakan file asli
-                        name: selectedFile.name, // Gunakan nama file tanpa batasan panjang
-                        preview: previewUrl,  // Simpan preview
-                    } as UploadedFile; // Cast ke UploadedFile
-                    return newDocumentFiles;
-                });
-
-                setFiles(prevFiles => {
-                    const newFiles = [...prevFiles];
-                    newFiles[index] = {
-                        file: selectedFile,
-                        name: selectedFile.name,
-                        preview: previewUrl,
-                    } as UploadedFile; // Cast ke UploadedFile
-                    return newFiles;
-                });
-            };
-            reader.readAsDataURL(selectedFile); // Baca file sebagai data URL untuk preview
-        }
+        const selectedFiles = Array.from(event.target.files || []);
+        handleFileUpload(selectedFiles, index);
     };
 
-
-    const handleFileUpload = async (newFiles: File[], index: number) => {
+    const handleFileUpload = (newFiles: File[], index: number) => {
         const validImageTypes = ['image/jpeg', 'image/png', 'image/heic'];
         const filteredFiles = newFiles.filter(file => validImageTypes.includes(file.type));
 
         if (filteredFiles.length === 0) {
-            alert("Only image files are allowed!");
-            return;
+            alert("Hanya file gambar yang diperbolehkan!");
+            return; // Tidak melakukan apa-apa jika tidak ada file valid
         }
 
-        const fileArray = await Promise.all(filteredFiles.map(async (file) => {
-            const compressedFile = await uploadImageToServer(file);
-            const previewUrl = URL.createObjectURL(compressedFile);
-
-            const shortName = `file_${index}_${Date.now()}`;
-
-            return {
-                file: compressedFile,
-                name: shortName,
-                originalName: file.name,
-                preview: previewUrl,
-            };
+        const fileArray = filteredFiles.map(file => ({
+            file,
+            preview: URL.createObjectURL(file),
         }));
 
         setDocumentFiles(prev => {
             const newDocumentFiles = [...prev];
-            newDocumentFiles[index] = fileArray[0];  // Replace the file at the specified index
+            newDocumentFiles[index] = fileArray[0];
             return newDocumentFiles;
         });
 
-        setFiles(prevFiles => {
-            const newFiles = [...prevFiles];
-            newFiles[index] = fileArray[0];  // Replace the file at the specified index
-            return newFiles;
-        });
+        setFiles(prevFiles => [...prevFiles, ...fileArray]);
     };
-
-
-
 
 
     const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
@@ -372,248 +296,72 @@ const BookingDetails = ({ kostan }: BookingDetailsProps) => {
     }
 
     const handlePriceOptionChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        const value = event.target.value as 'perBulan' | 'perMinggu' | 'perHari';
-        setPriceOption(value);
-        updateDisplayedPrice(value);
+        setPriceOption(event.target.value as 'perBulan' | 'perMinggu' | 'perHari');
     };
-
 
     const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setStartDate(event.target.value);
     };
 
-
-
-    const updateDisplayedPrice = (option: 'perBulan' | 'perMinggu' | 'perHari') => {
-        let price = 0;
-
-        // Calculate price based on the selected option
-        switch (option) {
-            case 'perBulan':
-                price = kostan.Price.perBulan;
-                break;
-            case 'perMinggu':
-                price = kostan.Price.perMinggu;
-                break;
-            case 'perHari':
-                price = kostan.Price.perHari;
-                break;
-        }
-
-        setDisplayedPrice(price); // Update the displayed price state
-    };
-
-
-
-
-
+    const displayedPrice = priceOption === 'perBulan'
+        ? kostan.Price.perBulan
+        : priceOption === 'perMinggu'
+            ? kostan.Price.perMinggu
+            : kostan.Price.perHari;
 
     const formatDate = (dateString: string) => {
         const options: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         return new Date(dateString).toLocaleDateString('id-ID', options);
     };
 
-    const handleSave = async () => {
-        if (editedData && draftId && userProfile && userProfile.uid) {
-            const docRef = doc(dbFire, "draft", draftId);
-            const priceToSave = displayedPrice;
-
-            try {
-                // Fetch the existing document to get old document URLs
-                const docSnapshot = await getDoc(docRef);
-                const existingData = docSnapshot.data();
-
-                // Check if there are existing files and delete them from Firebase Storage
-                if (existingData && existingData.documents) {
-                    await Promise.all(existingData.documents.map(async (oldDoc: Document) => {
-                        const oldFileRef = ref(storage, `drafts/${userProfile.uid}/${oldDoc.name}`);
-                        await deleteObject(oldFileRef).catch((error) => {
-                            console.warn(`Error deleting existing file ${oldDoc.name}: ${error.message}`);
-                        });
-                    }));
-                }
-
-                // Upload the new file and get the URL
-                const documentURLs = await Promise.all(files.map(async (fileObj) => {
-                    try {
-                        const compressedFile = await uploadImageToServer(fileObj.file);
-                        const url = await uploadFileToStorage(compressedFile, userProfile.uid);
-                        console.log(`File ${fileObj.file.name} uploaded successfully with URL: ${url}`);
-                        return { name: fileObj.file.name, url };
-                    } catch (error) {
-                        console.error(`Error processing file ${fileObj.file.name}:`, error);
-                        throw error;
-                    }
-                }));
-
-                // Ensure only the latest file is kept in Firestore
-                await updateDoc(docRef, {
-                    ...editedData,
-                    price: priceToSave,
-                    priceOption,
-                    startDate,
-                    documents: [documentURLs[documentURLs.length - 1]], // Store only the last uploaded file
-                });
-
-                alert("Draft updated successfully!");
-                setIsEditing(false);
-
-                setRentalData((prev) =>
-                    prev.map((item) =>
-                        item.id === editedData.id ? { ...editedData, price: priceToSave, priceOption } : item
-                    )
-                );
-            } catch (error) {
-                console.error("Error updating draft: ", error);
-                alert("Failed to update draft.");
-            }
-        } else {
-            alert("User profile or draft data is missing.");
-        }
-    };
-
-
-
-    const generateUniqueFileName = (originalFileName: string): string => {
-        const fileExtension = originalFileName.split('.').pop();  // Mendapatkan ekstensi file
-        return `${uuidv4()}.${fileExtension}`;  // Menambahkan ekstensi ke nama file unik
-    };
-
-
-    const uploadFileToStorage = async (file: File, uid: string): Promise<string> => {
-        const uniqueFileName = generateUniqueFileName(file.name);
-        const fileRef = ref(storage, `drafts/${uid}/${uniqueFileName}`);
-
-        try {
-            await uploadBytes(fileRef, file);
-            const downloadURL = await getDownloadURL(fileRef);
-            console.log("File uploaded successfully, URL:", downloadURL);
-            return downloadURL;
-        } catch (error) {
-            console.error("Error uploading file to Firebase Storage:", error);
-            throw error; // Lempar ulang kesalahan untuk penanganan lebih lanjut
+    const handleSave = () => {
+        if (editedData) {
+            const updatedRentalData = rentalData.map(item =>
+                item.id === editedData.id ? { ...editedData, price: editedPrice } : item
+            );
+            router.push(`/profile/${userProfile?.uid}`);
+            setRentalData(updatedRentalData); // Update rentalData dengan data yang diedit
+            setIsEditing(false);
         }
     };
 
 
     const saveDraft = async () => {
-        if (!tenant || files.length === 0 || displayedPrice <= 0 || !userProfile || !userProfile.uid) {
-            alert("Please complete tenant information, upload documents, and ensure a price and user UID are available.");
-            return;
-        }
+        // Assuming kostan.Price[priceOption] holds the relevant price
+        const price = displayedPrice; // Use displayedPrice directly
 
-        console.log("Saving with user UID:", userProfile.uid);
-
-        try {
-            const documentURLs = await Promise.all(files.map(async fileObj => {
-                const uniqueFileName = generateUniqueFileName(fileObj.file.name);
-
-                // Cek jika ada gambar lama dan hapus
-                const oldFileRef = ref(storage, `drafts/${userProfile.uid}/${fileObj.file.name}`);
-                await deleteObject(oldFileRef).catch((error) => {
-                    console.warn("No existing file to delete:", error);
-                });
-
-                // Unggah gambar baru
-                const compressedFile = await uploadImageToServer(fileObj.file);
-                const newFileUrl = await uploadFileToStorage(compressedFile, userProfile.uid);
-                console.log(`File ${fileObj.file.name} uploaded successfully with URL: ${newFileUrl}`);
-                return { name: fileObj.file.name, url: newFileUrl };
-            }));
-
+        if (tenant && files.length > 0 && price > 0) {
             const draftData = {
                 tenant: tenant,
                 kostanId: kostan.id,
                 nama: kostan.nama,
                 priceOption: priceOption,
-                price: displayedPrice,
+                price: price, // Use the price directly
                 startDate: startDate,
-                documents: documentURLs,
-                uid: userProfile.uid,
+                documents: files.map(file => ({ name: file.file.name, preview: file.preview })),
             };
 
-            await addDoc(collection(dbFire, "draft"), draftData);
-            alert("Draft saved successfully!");
-            setIsEditing(false);
-        } catch (error) {
-            console.error("Error saving draft: ", error);
-            alert("Failed to save draft.");
-        }
-    };
-
-
-
-    const handleBooking = async () => {
-        // Periksa nilai yang dibutuhkan
-        if (!tenant || files.length === 0 || displayedPrice <= 0 || !userProfile || !userProfile.uid) {
-            alert("Please complete all required fields.");
-            return;
-        }
-
-        // Pastikan startDate, tenant, dan file memiliki nilai yang benar
-        if (!startDate || !tenant || files.length === 0) {
-            console.log("Missing required fields:", { startDate, tenant, files });
-            alert("Some required fields are missing.");
-            return;
-        }
-        const documentURLs = await Promise.all(files.map(async fileObj => {
-            const uniqueFileName = generateUniqueFileName(fileObj.file.name);
-
-            // Cek jika ada gambar lama dan hapus
-            const oldFileRef = ref(storage, `drafts/${userProfile.uid}/${fileObj.file.name}`);
-            await deleteObject(oldFileRef).catch((error) => {
-                console.warn("No existing file to delete:", error);
-            });
-
-            // Unggah gambar baru
-            const compressedFile = await uploadImageToServer(fileObj.file);
-            const newFileUrl = await uploadFileToStorage(compressedFile, userProfile.uid);
-            console.log(`File ${fileObj.file.name} uploaded successfully with URL: ${newFileUrl}`);
-            return { name: fileObj.file.name, url: newFileUrl };
-        }));
-        // Cek data yang akan disimpan
-        const bookingData = {
-            tenant: tenant,
-            kostanId: kostan.id,
-            nama: kostan.nama,
-            priceOption: priceOption,
-            price: displayedPrice,
-            startDate: startDate,
-            documents: documentURLs,
-            uid: userProfile.uid,
-            status: "unverified", // Set status awal sebagai unverified
-        };
-
-        console.log("Booking Data:", bookingData); // Cek data sebelum disimpan
-
-        try {
-            // Menyimpan data ke koleksi 'booking'
-            const bookingRef = await addDoc(collection(dbFire, "booking"), bookingData);
-
-            // Jika data berhasil disimpan ke booking, hapus data draft
-            if (draftId) {
-                const draftRef = doc(dbFire, "draft", draftId);
-                await deleteDoc(draftRef); // Hapus data dari koleksi draft
-                console.log("Draft data deleted successfully.");
+            try {
+                await addDoc(collection(dbFire, "draft"), draftData);
+                alert("Draft saved successfully!");
+                router.push(`/profile/${userProfile?.uid}`);
+            } catch (error) {
+                console.error("Error saving draft: ", error);
+                alert("Failed to save draft.");
             }
-
-            alert("Booking request submitted successfully!");
-        } catch (error) {
-            console.error("Error submitting booking: ", error);
-            alert("Failed to submit booking request.");
+        } else {
+            alert("Please fill in tenant information, upload documents, and ensure a price is selected before saving.");
         }
     };
-
-
 
     const chooseSave = () => {
         if (draftId) {
             handleSave(); // Panggil saveEditDraft jika ada draftId
         } else {
-            saveDraft(); // Panggil saveDraft jika tidak ada draftId
+          saveDraft(); // Panggil saveDraft jika tidak ada draftId
         }
-    };
-
+      };
+    
 
 
 
@@ -698,23 +446,18 @@ const BookingDetails = ({ kostan }: BookingDetailsProps) => {
                                             id={`file-input-${index}`}
                                             className="hidden"
                                             accept=".jpg, .jpeg, .png, .heic"
-                                            onChange={(e) => handleFileChange(e, index)} // Handle file change
+                                            onChange={(e) => handleFileChange(e, index)}
                                         />
 
                                         <div
                                             className="border-2 border-dashed border-gray-300 p-4 rounded-lg w-full h-24 flex items-center justify-center"
-                                            onDrop={(e) => handleDrop(e, index)} // Handle drop event
-                                            onDragOver={handleDragOver} // Allow drag over
+                                            onDrop={(e) => handleDrop(e, index)}
+                                            onDragOver={handleDragOver}
                                         >
-                                            {/* Show uploaded image if available, else show placeholder text */}
-                                            {editedData?.documents && editedData.documents[index]?.preview ? (
-                                                <img
-                                                    src={editedData.documents[index].preview}
-                                                    alt={editedData.documents[index].name || 'Document Image'}
-                                                    className="w-full h-full object-cover"
-                                                />
+                                            {documentFiles[index] ? (
+                                                <img src={documentFiles[index]?.preview} alt={documentFiles[index]?.file.name} className="w-full h-full object-cover" />
                                             ) : (
-                                                <div className="text-gray-500">{doc}</div>
+                                                <p className="text-gray-500">{doc}</p>
                                             )}
                                         </div>
                                     </div>
@@ -728,16 +471,12 @@ const BookingDetails = ({ kostan }: BookingDetailsProps) => {
                                         {files.map((fileObj, index) => (
                                             <li key={index} className="text-gray-600 flex justify-between items-center">
                                                 <span className="flex items-center">
-                                                    <img
-                                                        src={fileObj.preview}
-                                                        alt={fileObj.file.name}
-                                                        className="w-12 h-12 object-cover mr-2"
-                                                    />
+                                                    <img src={fileObj.preview} alt={fileObj.file.name} className="w-12 h-12 object-cover mr-2" />
                                                     {fileObj.file.name}
                                                 </span>
                                                 <button
                                                     className="text-red-500 ml-4"
-                                                    onClick={() => handleRemoveFile(index)} // Handle file removal
+                                                    onClick={() => handleRemoveFile(index)}
                                                 >
                                                     Hapus
                                                 </button>
@@ -751,13 +490,12 @@ const BookingDetails = ({ kostan }: BookingDetailsProps) => {
                         </section>
 
 
-
-
                         {rentalData.length > 0 ? (
                             rentalData.map((data) => (
                                 <section className="mb-6" key={data.id}>
                                     <div className="flex justify-between items-center mb-4">
                                         <h2 className="text-xl font-bold text-black">Biaya sewa kos</h2>
+                                        <button onClick={() => handleEdit(data)} className="text-green-500">Ubah</button>
                                     </div>
                                     <div className="flex justify-between mb-2">
                                         <span className="text-black">Pilih biaya sewa:</span>
@@ -777,12 +515,25 @@ const BookingDetails = ({ kostan }: BookingDetailsProps) => {
                                         </span>
                                         <span className="text-black">Rp {displayedPrice.toLocaleString('id-ID')}</span>
                                     </div>
+                                    {isEditing && (
+                                        <div className="flex mt-4">
+                                            <input
+                                                type="number"
+                                                value={editedPrice}
+                                                onChange={(e) => setEditedPrice(Number(e.target.value))} // Convert string to number
+                                                className="border border-gray-300 text-black rounded-md p-2 mr-2"
+                                            />
+                                            <button onClick={handleSave} className="text-blue-500">Simpan</button>
+                                            <button onClick={() => setIsEditing(false)} className="text-red-500 ml-2">Batal</button>
+                                        </div>
+                                    )}
                                 </section>
                             ))
                         ) : (
                             <section className="mb-6">
                                 <div className="flex justify-between items-center mb-4">
                                     <h2 className="text-xl font-bold text-black">Biaya sewa kos</h2>
+                                    <button onClick={() => setIsEditing(true)} className="text-green-500">Ubah</button>
                                 </div>
                                 <div className="flex flex-col mb-2">
                                     <div className="flex justify-between mb-2">
@@ -860,9 +611,9 @@ const BookingDetails = ({ kostan }: BookingDetailsProps) => {
                             <button className="text-green-500">&gt;</button>
                         </section> */}
 
-                        <Link href={`/profile/${userProfile?.uid}`} onClick={chooseSave} className="w-full  bg-green-500 text-white py-3 rounded-lg">Simpan Draft(Jika ingin melihat yang lainnya)</Link>
+                        <Link href={`/profile/${userProfile?.uid}`} onClick={saveDraft} className="w-full  bg-green-500 text-white py-3 rounded-lg">Simpan Draft(Jika ingin melihat yang lainnya)</Link>
 
-                        <button onClick={handleBooking} className="w-full mt-4 bg-green-500 text-white py-3 rounded-lg">Ajukan Sewa</button>
+                        <button className="w-full mt-4 bg-green-500 text-white py-3 rounded-lg">Ajukan Sewa</button>
                     </div>
                 </div>
             </main>

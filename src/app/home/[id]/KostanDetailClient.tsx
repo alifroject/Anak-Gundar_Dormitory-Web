@@ -115,6 +115,7 @@ const KostanDetailClient = ({ initialData }: { initialData: KostanData | null })
     const [redirectPath, setRedirectPath] = useState<string | null>(null); // State to store redirect path
     const router = useRouter(); // Initialize router
     const pathname = usePathname(); // Get the current path
+    const [kostanData, setKostanData] = useState<KostanData[]>([]);
 
 
     useEffect(() => {
@@ -381,7 +382,7 @@ const KostanDetailClient = ({ initialData }: { initialData: KostanData | null })
                                 className="flex items-center gap-2"
                             >
                                 <FontAwesomeIcon icon={faWhatsapp} style={{ color: 'green' }} className="h-12 w-12" />
-                                <p>Chat Owner</p>
+                                <p className='text-black'>Chat Owner</p>
                             </Link>
                         </div>
 

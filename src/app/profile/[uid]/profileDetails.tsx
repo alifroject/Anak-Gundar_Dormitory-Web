@@ -1,13 +1,16 @@
-"use client"; // This indicates it's a client component
-
-import React, { useState } from 'react';
+"use client";
+import React, { useState, useEffect } from 'react';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Image from 'next/image';
-import { FaHome, FaBuilding, FaReceipt, FaCog, FaUser, FaTimes } from 'react-icons/fa';
+import { FaHome, FaBuilding, FaReceipt, FaCog, FaUser } from 'react-icons/fa';
 import KosSaya from '@/app/profile/[uid]/KosSaya';
 import RiwayatKos from '@/app/profile/[uid]/RiwayatKos';
 import RiwayatTransaksi from '@/app/profile/[uid]/RiwayatTransaksi';
 import Pengaturan from '@/app/profile/[uid]/Pengaturan';
 import UpdateProfile from '@/app/profile/[uid]/updateProfile';
+import AddHomes from '@/app/profile/[uid]/Add-homes';
+import Verify from '@/app/profile/[uid]/StatusVerify';
+import BookPageVerify from '@/app/profile/[uid]/bookingVerify/[id]/bookingDetailsVerify';
 
 interface ProfileType {
     uid: string;
@@ -16,8 +19,19 @@ interface ProfileType {
     tanggalLahir?: { seconds: number };
 }
 
-const Profile = ({ userProfile }: { userProfile: ProfileType }) => {
+const Profile = ({ userProfile }: { userProfile: ProfileType | null }) => {
     const [selectedSection, setSelectedSection] = useState('Kos Saya');
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => {
+        const auth = getAuth();
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setIsAdmin(user.email === 'admin@gmail.com'); // Ganti dengan email admin sebenarnya
+            }
+        });
+        return () => unsubscribe();
+    }, []);
 
     const renderMainContent = () => {
         switch (selectedSection) {
@@ -30,7 +44,11 @@ const Profile = ({ userProfile }: { userProfile: ProfileType }) => {
             case 'Pengaturan':
                 return <Pengaturan />;
             case 'Update Profile':
-                return <UpdateProfile/>;
+                return <UpdateProfile />;
+            case 'Admin Panel':
+                return <AddHomes />
+            case 'Verify':
+                return <Verify />
             default:
                 return null;
         }
@@ -38,10 +56,8 @@ const Profile = ({ userProfile }: { userProfile: ProfileType }) => {
 
     return (
         <div className="flex flex-col md:flex-row h-full bg-gray-100">
-            {/* Sidebar */}
             <div className="w-full md:w-1/4 mt-20 bg-white p-6 shadow-lg">
                 <ul className="space-y-5 text-gray-700">
-                    {/* Profile Section */}
                     <li
                         className="flex items-center cursor-pointer"
                         onClick={() => setSelectedSection('Update Profile')}
@@ -65,28 +81,64 @@ const Profile = ({ userProfile }: { userProfile: ProfileType }) => {
                         </div>
                     </li>
 
-                    {/* Navigation Sections */}
-                    {['Kos Saya', 'Riwayat Kos', 'Riwayat Transaksi', 'Pengaturan'].map((section) => (
-                        <li
-                            key={section}
-                            className="flex items-center text-sm hover:text-blue-500 cursor-pointer"
-                            onClick={() => setSelectedSection(section)}
-                        >
-                            {section === 'Kos Saya' && <FaHome className="mr-3" />}
-                            {section === 'Riwayat Kos' && <FaBuilding className="mr-3" />}
-                            {section === 'Riwayat Transaksi' && <FaReceipt className="mr-3" />}
-                            {section === 'Pengaturan' && <FaCog className="mr-3" />}
-                            <span>{section}</span>
-                        </li>
-                    ))}
+                    {/* Tampilkan hanya "Admin Panel" jika pengguna adalah admin */}
+                    {isAdmin ? (
+                        <>
+                            <li
+                                className="flex items-center text-sm hover:text-blue-500 cursor-pointer"
+                                onClick={() => setSelectedSection('Admin Panel')}
+                            >
+                                <FaUser className="mr-3" />
+                                <span>Admin Panel</span>
+                            </li>
+                            <li
+                                className="flex items-center text-sm hover:text-blue-500 cursor-pointer"
+                                onClick={() => setSelectedSection('Verify')}
+                            >
+                                <FaUser className="mr-3" />
+                                <span>Verify</span>
+                            </li>
+                        </>
+
+                    ) : (
+                        // Tampilkan bagian lainnya jika pengguna bukan admin
+                        <>
+                            <li
+                                className="flex items-center text-sm hover:text-blue-500 cursor-pointer"
+                                onClick={() => setSelectedSection('Kos Saya')}
+                            >
+                                <FaHome className="mr-3" />
+                                <span>Kos Saya</span>
+                            </li>
+                            <li
+                                className="flex items-center text-sm hover:text-blue-500 cursor-pointer"
+                                onClick={() => setSelectedSection('Riwayat Kos')}
+                            >
+                                <FaBuilding className="mr-3" />
+                                <span>Riwayat Kos</span>
+                            </li>
+                            <li
+                                className="flex items-center text-sm hover:text-blue-500 cursor-pointer"
+                                onClick={() => setSelectedSection('Riwayat Transaksi')}
+                            >
+                                <FaReceipt className="mr-3" />
+                                <span>Riwayat Transaksi</span>
+                            </li>
+                            <li
+                                className="flex items-center text-sm hover:text-blue-500 cursor-pointer"
+                                onClick={() => setSelectedSection('Pengaturan')}
+                            >
+                                <FaCog className="mr-3" />
+                                <span>Pengaturan</span>
+                            </li>
+                        </>
+                    )}
                 </ul>
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 mt-4 md:mt-20  md:p-8 min-h-full">
-                <div>
-                    {renderMainContent()}
-                </div>
+            <div className="flex-1 mt-4 md:mt-20 md:p-8 min-h-full">
+                <div>{renderMainContent()}</div>
             </div>
         </div>
     );

@@ -107,7 +107,7 @@ export default function UpdateProfile() {
                         <p>Loading...</p>
                     ) : (
                         <form className="space-y-4" onSubmit={handleSave}>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-500">
                                 <div>
                                     <label className="block text-red-700">Nama Lengkap</label>
                                     <input
