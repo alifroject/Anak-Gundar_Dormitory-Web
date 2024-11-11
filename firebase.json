@@ -29,7 +29,15 @@
       {
         "source": "**",
         "destination": "/index.html"
+      },
+      {
+        "source": "/api/**",
+        "destination": "/.next/server/api/:path*"
       }
     ]
+  },
+  "functions": {
+    "predeploy": [],
+    "source": "functions"
   }
 }

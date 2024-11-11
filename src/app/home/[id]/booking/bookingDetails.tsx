@@ -2,10 +2,10 @@
 import React, { useState, useEffect, ChangeEvent, DragEvent } from "react";
 import { auth, dbFire, storage } from "@/app/firebase/config"; // Pastikan file konfigurasi Firebase Anda benar
 import { onAuthStateChanged } from "firebase/auth";
-import { collection, getDocs, QuerySnapshot, getDoc, doc, addDoc, updateDoc, deleteDoc, where } from 'firebase/firestore';
+import { collection, getDocs, QuerySnapshot, getDoc, doc, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useLocation } from 'react-router-dom';
+import { useSearchParams } from 'next/navigation';
+
 import { v4 as uuidv4 } from 'uuid'; // pastikan kamu menginstal uuid
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 
@@ -29,9 +29,9 @@ interface Kostan {
 }
 
 interface BookingDetailsProps {
-    kostan: Kostan;
-    name: string;
-    price: number;
+    kostann: Kostan;
+
+
 }
 interface UploadedFile {
     file: File;       // The actual file
@@ -91,13 +91,13 @@ interface RentalData {
 
 }
 
-const BookingDetails = ({ kostan }: BookingDetailsProps) => {
+const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
     const [tenant, setTenant] = useState<TenantInfo | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [kostans, setKostans] = useState<Kostan[]>([]); // Tetapkan tipe state
+    const [, setKostans] = useState<Kostan[]>([]); // Tetapkan tipe state
     const [priceOption, setPriceOption] = useState<'perBulan' | 'perMinggu' | 'perHari'>('perBulan');
     const [startDate, setStartDate] = useState<string>(new Date().toISOString().split("T")[0]);
-    const [isEditing, setIsEditing] = useState(false); // Tambahkan state untuk mode edit
+    const [, setIsEditing] = useState(false); // Tambahkan state untuk mode edit
     const [editedData, setEditedData] = useState<RentalData | null>(null);
 
 
@@ -107,7 +107,7 @@ const BookingDetails = ({ kostan }: BookingDetailsProps) => {
 
 
     const [files, setFiles] = useState<UploadedFile[]>([]);
-    const [documentFiles, setDocumentFiles] = useState<(UploadedFile | null)[]>(Array(4).fill(null));
+    const [, setDocumentFiles] = useState<(UploadedFile | null)[]>(Array(4).fill(null));
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const [rentalData, setRentalData] = useState<RentalData[]>([]);
     const searchParams = useSearchParams(); // To access query parameters
@@ -385,18 +385,20 @@ const BookingDetails = ({ kostan }: BookingDetailsProps) => {
 
 
     const updateDisplayedPrice = (option: 'perBulan' | 'perMinggu' | 'perHari') => {
-        let price = 0;
-
+        let price: number;
         // Calculate price based on the selected option
         switch (option) {
             case 'perBulan':
-                price = kostan.Price.perBulan;
+                price = kostann.Price.perBulan;
                 break;
             case 'perMinggu':
-                price = kostan.Price.perMinggu;
+                price = kostann.Price.perMinggu;
                 break;
             case 'perHari':
-                price = kostan.Price.perHari;
+                price = kostann.Price.perHari;
+                break;
+            default:
+                price = 0;  // Provide a default value or handle it accordingly
                 break;
         }
 
@@ -506,7 +508,7 @@ const BookingDetails = ({ kostan }: BookingDetailsProps) => {
 
         try {
             const documentURLs = await Promise.all(files.map(async fileObj => {
-                const uniqueFileName = generateUniqueFileName(fileObj.file.name);
+
 
                 // Cek jika ada gambar lama dan hapus
                 const oldFileRef = ref(storage, `drafts/${userProfile.uid}/${fileObj.file.name}`);
@@ -523,8 +525,8 @@ const BookingDetails = ({ kostan }: BookingDetailsProps) => {
 
             const draftData = {
                 tenant: tenant,
-                kostanId: kostan.id,
-                nama: kostan.nama,
+                kostanId: kostann.id,
+                nama: kostann.nama,
                 priceOption: priceOption,
                 price: displayedPrice,
                 startDate: startDate,
@@ -544,56 +546,53 @@ const BookingDetails = ({ kostan }: BookingDetailsProps) => {
 
 
     const handleBooking = async () => {
-        // Periksa nilai yang dibutuhkan
+        // Validate required fields
         if (!tenant || files.length === 0 || displayedPrice <= 0 || !userProfile || !userProfile.uid) {
             alert("Please complete all required fields.");
             return;
         }
 
-        // Pastikan startDate, tenant, dan file memiliki nilai yang benar
         if (!startDate || !tenant || files.length === 0) {
             console.log("Missing required fields:", { startDate, tenant, files });
             alert("Some required fields are missing.");
             return;
         }
-        const documentURLs = await Promise.all(files.map(async fileObj => {
-            const uniqueFileName = generateUniqueFileName(fileObj.file.name);
 
-            // Cek jika ada gambar lama dan hapus
+        const documentURLs = await Promise.all(files.map(async fileObj => {
             const oldFileRef = ref(storage, `drafts/${userProfile.uid}/${fileObj.file.name}`);
             await deleteObject(oldFileRef).catch((error) => {
                 console.warn("No existing file to delete:", error);
             });
 
-            // Unggah gambar baru
             const compressedFile = await uploadImageToServer(fileObj.file);
             const newFileUrl = await uploadFileToStorage(compressedFile, userProfile.uid);
             console.log(`File ${fileObj.file.name} uploaded successfully with URL: ${newFileUrl}`);
             return { name: fileObj.file.name, url: newFileUrl };
         }));
-        // Cek data yang akan disimpan
+
         const bookingData = {
             tenant: tenant,
-            kostanId: kostan.id,
-            nama: kostan.nama,
+            kostanId: kostann.id,
+            nama: kostann.nama,
             priceOption: priceOption,
             price: displayedPrice,
             startDate: startDate,
             documents: documentURLs,
             uid: userProfile.uid,
-            status: "unverified", // Set status awal sebagai unverified
+            status: "unverified",
         };
 
-        console.log("Booking Data:", bookingData); // Cek data sebelum disimpan
+        console.log("Booking Data:", bookingData);
 
         try {
-            // Menyimpan data ke koleksi 'booking'
+            // Save booking data to Firestore
             const bookingRef = await addDoc(collection(dbFire, "booking"), bookingData);
+            console.log("Booking data saved successfully with ID:", bookingRef.id);
 
-            // Jika data berhasil disimpan ke booking, hapus data draft
+            // Delete draft if booking data was saved successfully
             if (draftId) {
                 const draftRef = doc(dbFire, "draft", draftId);
-                await deleteDoc(draftRef); // Hapus data dari koleksi draft
+                await deleteDoc(draftRef);
                 console.log("Draft data deleted successfully.");
             }
 

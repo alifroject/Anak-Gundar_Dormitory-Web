@@ -6,8 +6,8 @@ import { auth } from "@/app/firebase/config"; // Import db for Firestore
 import { onAuthStateChanged } from 'firebase/auth';
 import Login from '@/app/Login'; // Import komponen login
 import dynamic from 'next/dynamic';
-import { useRouter, usePathname } from 'next/navigation';
-import { FaWhatsapp } from 'react-icons/fa';
+import { useRouter } from 'next/navigation';
+
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
@@ -112,10 +112,9 @@ const KostanDetailClient = ({ initialData }: { initialData: KostanData | null })
     const [loading] = useState(false);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false); // Assume you have a way to determine if the user is logged in
-    const [redirectPath, setRedirectPath] = useState<string | null>(null); // State to store redirect path
+  
     const router = useRouter(); // Initialize router
-    const pathname = usePathname(); // Get the current path
-    const [kostanData, setKostanData] = useState<KostanData[]>([]);
+
 
 
     useEffect(() => {

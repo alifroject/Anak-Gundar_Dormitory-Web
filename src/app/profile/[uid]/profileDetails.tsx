@@ -10,7 +10,9 @@ import Pengaturan from '@/app/profile/[uid]/Pengaturan';
 import UpdateProfile from '@/app/profile/[uid]/updateProfile';
 import AddHomes from '@/app/profile/[uid]/Add-homes';
 import Verify from '@/app/profile/[uid]/StatusVerify';
-import BookPageVerify from '@/app/profile/[uid]/bookingVerify/[id]/bookingDetailsVerify';
+import UserVerify from '@/app/profile/[uid]/userStatusVerify';
+import { GeoPoint } from 'firebase/firestore';
+import {FaCheckCircle} from 'react-icons/fa'; // Import the icon
 
 interface ProfileType {
     uid: string;
@@ -19,9 +21,79 @@ interface ProfileType {
     tanggalLahir?: { seconds: number };
 }
 
+
+
+
+interface Fal {
+    AC: boolean;
+    kasur: boolean;
+    kipas: boolean;
+    kursi: boolean;
+    lemari: boolean;
+    meja: boolean;
+    ventilasi: boolean;
+    kamar_mandi_dalam: boolean;
+    kamar_mandi_luar: boolean;
+    areaLoundryJemur: boolean;
+    Free_Electricity: boolean;
+    dapur: boolean;
+    parkirMotor: boolean;
+    parkirMobil: boolean;
+}
+
+interface Images {
+    image1: string | null;
+    image2: string | null;
+    image3: string | null;
+    image4: string | null;
+}
+
+interface Alamat {
+    provinsi: string;
+    kota_kabupaten: string;
+    kecamatan: string;
+    Desa_Kelurahan: string;
+    Jalan: string;
+    Nomor_Rumah: string;
+    Kode_Pos: string;
+}
+
+interface Peraturan {
+    umum: string;
+    tamu: string;
+    kebersihan: string;
+    pembayaran: string;
+    lainnya: string;
+}
+
+interface Price {
+    perBulan: number;
+    perHari: number;
+    perMinggu: number;
+}
+
+interface KostanData {
+    id: string;
+    Price: Price;
+    fal: Fal;
+    images: Images;
+    jenis: string;
+    nama: string;
+    region: string;
+    sisaKamar: number;
+    ukuranKamar: string;
+    type: string;
+    alamat: Alamat;
+    peraturan: Peraturan;
+    ownerName: string;
+    ownerPhoneNumber: string;
+    geolokasi: GeoPoint; // Geolocation
+}
+
 const Profile = ({ userProfile }: { userProfile: ProfileType | null }) => {
     const [selectedSection, setSelectedSection] = useState('Kos Saya');
     const [isAdmin, setIsAdmin] = useState(false);
+    const initialData: KostanData | null = null;
 
     useEffect(() => {
         const auth = getAuth();
@@ -38,7 +110,7 @@ const Profile = ({ userProfile }: { userProfile: ProfileType | null }) => {
             case 'Kos Saya':
                 return <KosSaya />;
             case 'Riwayat Kos':
-                return <RiwayatKos />;
+                return <RiwayatKos initialData={initialData} />;
             case 'Riwayat Transaksi':
                 return <RiwayatTransaksi />;
             case 'Pengaturan':
@@ -49,6 +121,8 @@ const Profile = ({ userProfile }: { userProfile: ProfileType | null }) => {
                 return <AddHomes />
             case 'Verify':
                 return <Verify />
+            case 'Status Verifikasi':
+                return <UserVerify />
             default:
                 return null;
         }
@@ -124,6 +198,17 @@ const Profile = ({ userProfile }: { userProfile: ProfileType | null }) => {
                                 <FaReceipt className="mr-3" />
                                 <span>Riwayat Transaksi</span>
                             </li>
+                            
+
+                            
+                            <li
+                                className="flex items-center text-sm hover:text-blue-500 cursor-pointer"
+                                onClick={() => setSelectedSection('Status Verifikasi')}
+                            >
+                                <FaCheckCircle className="mr-3" /> {/* Use FaCheckCircle for a verification icon */}
+                                <span>Status Verifikasi</span>
+                            </li>
+
                             <li
                                 className="flex items-center text-sm hover:text-blue-500 cursor-pointer"
                                 onClick={() => setSelectedSection('Pengaturan')}

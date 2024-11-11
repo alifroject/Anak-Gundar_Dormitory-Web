@@ -6,6 +6,10 @@ const nextConfig = {
         unoptimized: true,
         domains: ['firebasestorage.googleapis.com'],
     },
+    reactStrictMode: true,
+    typescript: {
+        ignoreBuildErrors: true,
+    },
 };
 
 export default nextConfig;

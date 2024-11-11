@@ -1,16 +1,7 @@
 "use client";
-import React, { useEffect, useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
-import { auth, dbFire } from "@/app/firebase/config";
-import { collection, getDocs, deleteDoc, doc, getDoc } from 'firebase/firestore';
-import { GeoPoint } from 'firebase/firestore';
-
-interface Document {
-    name: string;
-    preview: string;
-}
-
+import React, { useState } from 'react';
+import { dbFire } from "@/app/firebase/config";
+import { doc, updateDoc } from 'firebase/firestore';
 interface Tenant {
     displayName: string;
     jenisKelamin: string;
@@ -19,93 +10,12 @@ interface Tenant {
     phoneNumber: string;
 }
 
-interface RentalData {
-    id: string;
-    documents: Document[];
-    kostanId: string;
-    priceOption: string;
-    startDate: string;
-    tenant: Tenant;
-    price: number;
-    nama: string;
-    uid: string;
+interface Document {
+    name: string;
+    url: string;
 }
 
-interface adminProfile {
-    uid: string;
-    email: string | null;
-    username?: string | null;
-    nama: string;
-    role: string;
-}
-
-interface Fal {
-    AC: boolean;
-    kasur: boolean;
-    kipas: boolean;
-    kursi: boolean;
-    lemari: boolean;
-    meja: boolean;
-    ventilasi: boolean;
-    kamar_mandi_dalam: boolean;
-    kamar_mandi_luar: boolean;
-    areaLoundryJemur: boolean;
-    Free_Electricity: boolean;
-    dapur: boolean;
-    parkirMotor: boolean;
-    parkirMobil: boolean;
-}
-
-interface Images {
-    image1: string | null;
-    image2: string | null;
-    image3: string | null;
-    image4: string | null;
-}
-
-interface Alamat {
-    provinsi: string;
-    kota_kabupaten: string;
-    kecamatan: string;
-    Desa_Kelurahan: string;
-    Jalan: string;
-    Nomor_Rumah: string;
-    Kode_Pos: string;
-}
-
-interface Peraturan {
-    umum: string;
-    tamu: string;
-    kebersihan: string;
-    pembayaran: string;
-    lainnya: string;
-}
-
-interface Price {
-    perBulan: number;
-    perHari: number;
-    perMinggu: number;
-}
-
-interface KostanData {
-    id: string;
-    Price: Price;
-    fal: Fal;
-    images: Images;
-    jenis: string;
-    nama: string;
-    region: string;
-    sisaKamar: number;
-    ukuranKamar: string;
-    type: string;
-    alamat: Alamat;
-    peraturan: Peraturan;
-    ownerName: string;
-    ownerPhoneNumber: string;
-    geolokasi: GeoPoint;
-}
-
-interface bookingData {
+interface BookingData {
     id: string;
     nama: string;
     price: number;
@@ -114,25 +24,63 @@ interface bookingData {
     status: string;
     tenant: Tenant;
     uid: string;
+    documents?: Document[];
 }
 
+const BookingDetails = ({ useBooking }: { useBooking: BookingData }) => {
+    // State untuk status
+    const [status, setStatus] = useState(useBooking.status);
 
+    // Fungsi untuk mengubah status
+    const handleStatusChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        setStatus(event.target.value);
+    };
 
-
-const BookingDetails = ({ useBooking }: { useBooking: bookingData }) => {
-    const [bookingg] = useState<bookingData | null>(useBooking)
-   
+    // Fungsi untuk mengupdate status di Firestore
+    const updateStatusInFirestore = async () => {
+        try {
+            const bookingRef = doc(dbFire, "booking", useBooking.id); // Mengakses dokumen booking berdasarkan id
+            await updateDoc(bookingRef, { status: status }); // Mengupdate status
+            alert("Status updated successfully!"); // Menampilkan notifikasi
+        } catch (error) {
+            console.error("Error updating status: ", error);
+            alert("Failed to update status.");
+        }
+    };
 
     return (
-        <div>
-            <h3>{useBooking.nama}</h3>
-            <p>Price: {useBooking.price}</p>
-            <p>Status: {useBooking.status}</p>
-            <p>Start Date: {useBooking.startDate}</p>
-            <p>Tenant: {useBooking.tenant.displayName}</p>
-            {/* Add other details about the booking here */}
+        <div className="m-5 mt-20 h-screen text-black">
+            {/* Box untuk menampilkan detail booking */}
+            <div className="border border-gray-300 p-4 rounded-lg shadow-md mb-6">
+                <h3 className="text-xl font-semibold mb-2">{useBooking.nama}</h3>
+                <p className="mb-2">Price: {useBooking.price}</p>
+                <p className="mb-2">Start Date: {useBooking.startDate}</p>
+                <p className="mb-2">Tenant: {useBooking.tenant.displayName}</p>
+
+                {/* Status dengan dropdown untuk mengubah status */}
+                <div className="mb-4">
+                    <label htmlFor="status" className="block text-lg font-medium mb-2">Status:</label>
+                    <select
+                        id="status"
+                        value={status}
+                        onChange={handleStatusChange}
+                        className="w-full p-2 border border-gray-300 rounded-md"
+                    >
+                        <option value="unverified">Unverified</option>
+                        <option value="verified">Verified</option>
+                    </select>
+                </div>
+
+                {/* Tombol untuk mengupdate status */}
+                <button
+                    onClick={updateStatusInFirestore}
+                    className="w-full bg-blue-500 text-white py-2 px-4 rounded-md mt-4"
+                >
+                    Update Status
+                </button>
+            </div>
         </div>
     );
-}
+};
 
 export default BookingDetails;

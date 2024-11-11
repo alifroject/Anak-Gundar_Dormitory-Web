@@ -1,30 +1,35 @@
 "use client";
 import React, { useState } from 'react';
-import { usePathname } from 'next/navigation'; 
+import { usePathname } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { ReactNode } from 'react';
-import './globals.css'; 
+import './globals.css';
 import Navbar from '@/app/navbar-app';
-import Login from '@/app/Login'; 
+import Login from '@/app/Login';
 
 interface RootLayoutProps {
   children: ReactNode;
 }
 
 export default function RootLayout({ children }: RootLayoutProps) {
-  const pathname = usePathname(); 
+  const pathname = usePathname();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
 
   const handleLoginClick = () => {
-    setIsLoginOpen(true); 
+    setIsLoginOpen(true);
   };
 
   const handleCloseLogin = () => {
-    setIsLoginOpen(false); 
+    setIsLoginOpen(false);
   };
+  const handleLoginSuccess = () => {
+    // Optional logic after successful login, e.g., refresh user data, etc.
+    console.log("Login successful");
+};
 
-  const isRegisterPage = pathname === '/register'; 
+
+  const isRegisterPage = pathname === '/register';
 
   return (
     <html lang="en">
@@ -38,7 +43,15 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <body className="overflow-hidden min-h-screen">
         {!isRegisterPage && <Header />}
         <Navbar onLoginClick={handleLoginClick} />
-        {isLoginOpen && <Login onClose={handleCloseLogin} />} 
+        {isLoginOpen && (
+          <Login
+            onClose={handleCloseLogin}
+            onLoginSuccess={handleLoginSuccess} // Define this function if it isn't already
+            originPath="/" // Or use any path you want as default
+          />
+        )}
+
+
 
         <div className={`h-screen overflow-y-auto transition-all duration-300 ease-in-out`}>
           <main className={`pt-${!isRegisterPage ? '16' : '0'} bg-white w-full`}>

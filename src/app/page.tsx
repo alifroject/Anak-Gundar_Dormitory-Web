@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { Swiper, SwiperSlide } from "swiper/react";
 import { RxArrowTopRight } from "react-icons/rx";
 import "swiper/css";
@@ -9,9 +9,9 @@ import { Pagination } from "swiper/modules";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
-import Navbar from '@/app/navbar-app';
+
 import PromoComponent from '@/app/region_section';
-import Login from '@/app/Login'; // Import komponen login
+
 import { Swiper as SwiperCore } from 'swiper';
 
 const images = [
@@ -35,16 +35,8 @@ const images = [
 
 const ActiveSlider = () => {
   const swiperRef = useRef<SwiperCore | null>(null);
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
 
 
-  const handleLoginClick = () => {
-    setIsLoginOpen(true); // Menampilkan popup login
-  };
-
-  const handleCloseLogin = () => {
-    setIsLoginOpen(false); // Menutup popup login
-  };
 
   const handlePrevSlide = () => {
     if (swiperRef.current) {

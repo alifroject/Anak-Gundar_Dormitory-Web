@@ -1,9 +1,9 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { auth, dbFire } from "@/app/firebase/config";
-import { collection, getDocs, deleteDoc, doc, getDoc, QuerySnapshot } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc, getDoc } from 'firebase/firestore';
 import { GeoPoint } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 interface Document {
@@ -116,15 +116,16 @@ interface KostanData {
     ownerPhoneNumber: string;
     geolokasi: GeoPoint; // Geolocation
 }
+interface RiwayatKosProps {
+    initialData: KostanData | null;
+}
 
 
-
-const RentalApplication = ({ initialData }: { initialData: KostanData | null }) => {
+const RiwayatKos: React.FC<RiwayatKosProps> = ({ initialData }) =>{
     const [rentalData, setRentalData] = useState<RentalData[]>([]); // Store an array of rental data
     const [loading, setLoading] = useState<boolean>(true);
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [kostanData, setKostanData] = useState<KostanData[]>([]);
     const router = useRouter();
     const [kostan, setKostan] = useState<KostanData | null>(initialData);
 
@@ -277,7 +278,7 @@ const RentalApplication = ({ initialData }: { initialData: KostanData | null }) 
     }
 
     return (
-        <div className="bg-gray-100 min-h-screen flex flex-col items-center">
+        <div className="min-h-screen p-4 bg-gray-100 flex flex-col items-center">
             <h1 className="text-2xl font-semibold mb-4 text-black">Pengajuan Sewa</h1>
 
             <div className="bg-white p-4 rounded-lg mb-4 flex-1 w-full">
@@ -327,4 +328,4 @@ const RentalApplication = ({ initialData }: { initialData: KostanData | null }) 
     );
 };
 
-export default RentalApplication;
+export default RiwayatKos;

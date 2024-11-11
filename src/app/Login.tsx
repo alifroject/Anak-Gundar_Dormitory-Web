@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { faFacebookF } from "@fortawesome/free-brands-svg-icons";
-import Cookies from "js-cookie"; import Link from 'next/link';
+import Cookies from "js-cookie";
 
 
 interface LoginProps {
@@ -29,11 +29,15 @@ const Login: React.FC<LoginProps> = ({ onClose, onLoginSuccess, originPath }) =>
     const [isAdminMode, setIsAdminMode] = useState(false); // State for admin mode
     const router = useRouter();
 
+  
+
     interface User {
         uid: string;
         email: string | null;
         displayName?: string | null;
     }
+
+
 
     useEffect(() => {
         setIsOpen(true);
@@ -96,7 +100,15 @@ const Login: React.FC<LoginProps> = ({ onClose, onLoginSuccess, originPath }) =>
             const user = result.user;
             const token = await user.getIdToken();
             Cookies.set("authToken", token, { expires: 1 });
-            await createAdminDocument(user);
+            const userDocument = {
+                uid: user.uid,
+                email: user.email || "",
+                image_profile: user.photoURL || "", // or default image
+                password: "", // Optional: Don't store plaintext passwords
+                role: "user", // Default role
+                username: user.displayName || "Anonymous",
+            };
+            await createAdminDocument(userDocument);
             handleClose();
             router.push(originPath || "/");
         } catch (error) {
@@ -112,8 +124,17 @@ const Login: React.FC<LoginProps> = ({ onClose, onLoginSuccess, originPath }) =>
             const user = result.user;
             const token = await user.getIdToken();
             Cookies.set("authToken", token, { expires: 1 });
-            await createAdminDocument(user);
+            const userDocument = {
+                uid: user.uid,
+                email: user.email || "",
+                image_profile: user.photoURL || "", // or default image
+                password: "", // Optional: Don't store plaintext passwords
+                role: "user", // Default role
+                username: user.displayName || "Anonymous",
+            };
+            await createAdminDocument(userDocument);
             handleClose();
+            if (onLoginSuccess) onLoginSuccess();  // Call onLoginSuccess if provided
             router.push(originPath || "/");
         } catch (error) {
             console.error("Login Error:", error);

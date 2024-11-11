@@ -1,8 +1,7 @@
 import React from 'react';
-import { doc, getDoc, getDocs, collection } from 'firebase/firestore';
-import { dbFire } from "@/app/firebase/config";
+import { doc, getDoc, getDocs, collection} from 'firebase/firestore';
+import { dbFire } from '@/app/firebase/config';
 import VerifyBook from '@/app/profile/[uid]/bookingVerify/[id]/bookingDetailsVerify';
-import { Params } from 'next/dist/shared/lib/router/utils/route-matcher';
 
 interface BookingData {
     id: string;
@@ -20,25 +19,41 @@ interface BookingData {
     };
     uid: string;
 }
+export const generateStaticParams = async () => {
+    try {
+        const adminUID = "MFqxgnvEr0dqIKpxa7RVmSO4GyQ2";
+        const bookingCollectionRef = collection(dbFire, 'booking');
+        const bookingSnapshot = await getDocs(bookingCollectionRef);
 
-// Function to generate static paths for SSG
-// Updated generateStaticParams to properly handle dynamic paths
-export async function generateStaticParams(): Promise<Params[]> {
-    const bookingCollectionRef = collection(dbFire, 'booking');
-    const snapshot = await getDocs(bookingCollectionRef);
-    const params = snapshot.docs.map(doc => ({
-        id: doc.id,
-    }));
-    return params;
-}
+        if (bookingSnapshot.empty) {
+            console.error("No bookings found.");
+            return [];
+        }
 
-// Server-side component to fetch booking details
+        // Generate params with admin UID for all booking IDs
+        const params = bookingSnapshot.docs.map((doc) => {
+            const uid = adminUID; // Use admin UID
+            const id = doc.id;    // Document ID as booking ID
+            return { uid, id };
+        });
+
+        // Debug log for each generated parameter
+        console.log("Generated Static Params:", params);
+
+        return params; // Return array of parameters
+    } catch (error) {
+        console.error("Error in generateStaticParams:", error);
+        return [];
+    }
+};
+
+
+
 const BookingDetail = async ({ params }: { params: { uid: string; id: string } }) => {
-    const { uid, id } = params;
+    const { id } = params;  // Fetch the booking ID from the params
 
-    // If missing params, show a fallback message
-    if (!uid || !id) {
-        return <div>Invalid parameters. Please check the URL.</div>;
+    if (!id) {
+        return <div>Invalid booking ID.</div>;
     }
 
     let booking: BookingData | null = null;
@@ -53,7 +68,6 @@ const BookingDetail = async ({ params }: { params: { uid: string; id: string } }
                 ...(docSnap.data() as Omit<BookingData, 'id'>),
             };
         } else {
-            console.error('Booking document not found');
             return <div>Booking not found.</div>;
         }
     } catch (error) {
@@ -61,15 +75,21 @@ const BookingDetail = async ({ params }: { params: { uid: string; id: string } }
         return <div>Error fetching booking details.</div>;
     }
 
-    // Render the booking details
-    return booking ? (
+    // Now we can pass the booking data to the verification component
+    return (
         <div>
-            <VerifyBook useBooking={booking} />
+            {booking ? (
+                <div>
+                    <VerifyBook useBooking={booking} />
+                    <div>
+                        <strong>User UID:</strong> {booking.uid} {/* User's UID from the booking */}
+                    </div>
+                </div>
+            ) : (
+                <div>Booking not found</div>
+            )}
         </div>
-    ) : (
-        <div>Booking not found</div>
     );
 };
-
 
 export default BookingDetail;

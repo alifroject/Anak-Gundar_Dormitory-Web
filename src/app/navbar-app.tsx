@@ -11,7 +11,7 @@ import { app } from '@/app/firebase/config';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
 import { dbFire } from '@/app/firebase/config';
-import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { doc, getDoc} from 'firebase/firestore';
 
 interface NavbarProps {
     onLoginClick: () => void;
@@ -171,12 +171,12 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                         {isCariDropdownOpen && (
                             <ul className="w-30 absolute bg-white text-black shadow-lg mt-2 rounded">
                                 <li>
-                                    <Link href="/item1" className="flex items-center px-4 py-2 hover:bg-gray-200">
+                                    <Link href="/kostan" className="flex items-center px-4 py-2 hover:bg-gray-200">
                                         Kostan
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/item2" className="flex items-center px-4 py-2 hover:bg-gray-200">
+                                    <Link href="/apartment" className="flex items-center px-4 py-2 hover:bg-gray-200">
                                         Apartment
                                     </Link>
                                 </li>
@@ -309,12 +309,12 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                         {isCariDropdownOpen && (
                             <ul className="bg-white text-black shadow-lg mt-2 rounded w-full space-y-2">
                                 <li>
-                                    <Link href="/item1" onClick={closeSidebar} className="flex items-center px-4 py-2 hover:bg-gray-200">
+                                    <Link href="/kostan" onClick={closeSidebar} className="flex items-center px-4 py-2 hover:bg-gray-200">
                                         Kostan
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/item2" onClick={closeSidebar} className="flex items-center px-4 py-2 hover:bg-gray-200">
+                                    <Link href="/apartment" onClick={closeSidebar} className="flex items-center px-4 py-2 hover:bg-gray-200">
                                         Apartment
                                     </Link>
                                 </li>
