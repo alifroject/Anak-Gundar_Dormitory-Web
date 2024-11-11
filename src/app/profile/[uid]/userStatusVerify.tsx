@@ -4,7 +4,6 @@ import { auth, dbFire } from "@/app/firebase/config";
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { FaCheckCircle } from 'react-icons/fa';
 
-
 interface Tenant {
     displayName: string;
     jenisKelamin: string;
@@ -24,27 +23,9 @@ interface BookingData {
     uid: string;
 }
 
-interface SnapPaymentResult {
-    transaction_status: string;
-    order_id: string;
-    gross_amount: number;
-    payment_type: string;
-    bank: string;
-    // Add any other fields you expect in the result
-}
-
-
-
 declare global {
     interface Window {
-        snap: {
-            pay: (token: string, options: {
-                onSuccess: (result: SnapPaymentResult) => void;
-                onPending: (result: SnapPaymentResult) => void;
-                onError: (result: SnapPaymentResult) => void;
-                onClose: () => void;
-            }) => void;
-        };
+        snap: any; // Add type declaration for Midtrans Snap
     }
 }
 
@@ -87,7 +68,7 @@ const UserVerify: React.FC = () => {
     useEffect(() => {
         const script = document.createElement("script");
         script.src = "https://app.sandbox.midtrans.com/snap/snap.js";
-        script.setAttribute("data-client-key", "SB-Mid-server-DKxXZ0SL9yAPYufosHJNjXrI");
+        script.setAttribute("data-client-key", process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || "");
         script.async = true;
         document.body.appendChild(script);
 
@@ -115,36 +96,20 @@ const UserVerify: React.FC = () => {
                 }),
             });
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error("Error fetching payment token:", errorText);  // Log the full error
-                throw new Error(`Failed to fetch: ${response.statusText}`);
-            }
-    
-
-            const textResponse = await response.text();  // Get raw response as text first
-            console.log("Response Text:", textResponse); // Log the raw response
-
-            let data;
-            try {
-                data = JSON.parse(textResponse);  // Try to parse as JSON
-            } catch (err) {
-                console.error("Error parsing JSON:", err);  // Log the error
-                throw new Error("Failed to parse JSON response");
-            }
+            const data = await response.json();
 
             if (data.token) {
                 // Open the Snap popup
                 window.snap.pay(data.token, {
-                    onSuccess: function (result: SnapPaymentResult) {
+                    onSuccess: function (result: any) {
                         alert("Payment successful!");
                         console.log(result);
                     },
-                    onPending: function (result: SnapPaymentResult) {
+                    onPending: function (result: any) {
                         alert("Payment pending...");
                         console.log(result);
                     },
-                    onError: function (result: SnapPaymentResult) {
+                    onError: function (result: any) {
                         alert("Payment failed.");
                         console.log(result);
                     },
@@ -157,7 +122,6 @@ const UserVerify: React.FC = () => {
             console.error("Error fetching payment token:", error);
         }
     };
-
 
     return (
         <div className="min-h-screen p-4 bg-gray-100">

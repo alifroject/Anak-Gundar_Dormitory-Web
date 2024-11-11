@@ -26,7 +26,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
   const handleLoginSuccess = () => {
     // Optional logic after successful login, e.g., refresh user data, etc.
     console.log("Login successful");
-};
+  };
 
 
   const isRegisterPage = pathname === '/register';
@@ -34,6 +34,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
       <head>
+        <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-QtpXNwWP9ptVjpel"></script>
         <link
           href="https://fonts.googleapis.com/css2?family=Roboto&family=Open+Sans&family=Lato&family=Montserrat&display=swap"
           rel="stylesheet"

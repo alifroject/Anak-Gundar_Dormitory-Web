@@ -1,32 +1,39 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextResponse } from 'next/server';
 import midtransClient from 'midtrans-client';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'POST') {
-    const { orderId, grossAmount, customerDetails } = req.body;
+interface CustomerDetails {
+    first_name: string;
+    email: string;
+    phone: string;
+}
 
-    // Initialize Midtrans Snap API with proper configuration
+interface TransactionRequestBody {
+    orderId: string;
+    grossAmount: number;
+    customerDetails: CustomerDetails;
+}
+
+export async function POST(req: Request) {
+    const { orderId, grossAmount, customerDetails }: TransactionRequestBody = await req.json();
+
     const snap = new midtransClient.Snap({
-      isProduction: false,  // Set to true in production
-      serverKey: process.env.MIDTRANS_SERVER_KEY || '',  // Set the server key here
+        isProduction: false,
+        serverKey: process.env.MIDTRANS_SERVER_KEY || '',
     });
 
-    try {
-      const parameter = {
+    const transactionDetails = {
         transaction_details: {
-          order_id: orderId,
-          gross_amount: grossAmount,
+            order_id: orderId,
+            gross_amount: grossAmount,
         },
         customer_details: customerDetails,
-      };
+    };
 
-      const transaction = await snap.createTransaction(parameter);
-      res.status(200).json({ token: transaction.token });
+    try {
+        const transaction = await snap.createTransaction(transactionDetails);
+        return NextResponse.json(transaction);
     } catch (error) {
-      console.error("Error generating Midtrans token:", error);
-      res.status(500).json({ error: 'Failed to generate Midtrans token' });
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
-  } else {
-    res.status(405).json({ error: 'Method Not Allowed' });
-  }
 }
