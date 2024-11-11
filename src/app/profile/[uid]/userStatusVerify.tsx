@@ -22,13 +22,32 @@ interface BookingData {
     tenant: Tenant;
     uid: string;
 }
+interface SnapPaymentOptions {
+    onSuccess: (result: SnapPaymentResult) => void;
+    onPending: (result: SnapPaymentResult) => void;
+    onError: (result: SnapPaymentResult) => void;
+    onClose: () => void;
+}
+
+interface SnapPaymentResult {
+    transaction_status: string;
+    order_id: string;
+    gross_amount: number;
+    payment_type: string;
+    bank: string;
+    // Add other properties based on Midtrans Snap API response
+}
+
+interface Snap {
+    pay: (token: string, options: SnapPaymentOptions) => void;
+    // Add any other methods if needed, e.g., for handling payment status, etc.
+}
 
 declare global {
     interface Window {
-        snap: any; // Add type declaration for Midtrans Snap
+        snap: Snap; // Add type declaration for Midtrans Snap
     }
 }
-
 const UserVerify: React.FC = () => {
     const [booking, setBooking] = useState<BookingData[]>([]);
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -101,15 +120,15 @@ const UserVerify: React.FC = () => {
             if (data.token) {
                 // Open the Snap popup
                 window.snap.pay(data.token, {
-                    onSuccess: function (result: any) {
+                    onSuccess: function (result: SnapPaymentResult) {
                         alert("Payment successful!");
                         console.log(result);
                     },
-                    onPending: function (result: any) {
+                    onPending: function (result: SnapPaymentResult) {
                         alert("Payment pending...");
                         console.log(result);
                     },
-                    onError: function (result: any) {
+                    onError: function (result: SnapPaymentResult) {
                         alert("Payment failed.");
                         console.log(result);
                     },
