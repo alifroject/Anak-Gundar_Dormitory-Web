@@ -4,6 +4,7 @@ import { auth, dbFire } from "@/app/firebase/config";
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { FaCheckCircle } from 'react-icons/fa';
 
+
 interface Tenant {
     displayName: string;
     jenisKelamin: string;
@@ -31,6 +32,8 @@ interface SnapPaymentResult {
     bank: string;
     // Add any other fields you expect in the result
 }
+
+
 
 declare global {
     interface Window {

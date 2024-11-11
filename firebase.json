@@ -35,9 +35,5 @@
         "destination": "/.next/server/api/:path*"
       }
     ]
-  },
-  "functions": {
-    "predeploy": [],
-    "source": "functions"
   }
 }
