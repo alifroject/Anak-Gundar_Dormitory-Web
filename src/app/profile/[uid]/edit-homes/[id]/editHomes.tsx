@@ -56,7 +56,7 @@ interface Peraturan {
     [key: string]: string;
 }
 
-interface KostanData {
+export interface KostanData{
     id: string;
     Price: Price;
     fal: Fal;
@@ -72,7 +72,8 @@ interface KostanData {
     ownerName: string;
     ownerPhoneNumber: string;
     geolokasi: GeoPoint;
-    [key: string]: any;  // Allow for any additional string-based keys
+    [key: string]: string | number | boolean | Price | Fal | Images | Alamat | Peraturan | GeoPoint; // Tambahkan tipe yang sesuai
+    // Allow for any additional string-based keys
 }
 
 const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
@@ -183,7 +184,7 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
     };
 
     const handleLongitudeChange = (e: ChangeEvent<HTMLInputElement>) => {
-        setLongitude(parseFloat(e.target.value)); 106.84052841560502
+        setLongitude(parseFloat(e.target.value)); 
 
     };
     const handleDragOver = (event: DragEvent<HTMLDivElement>): void => {
@@ -266,11 +267,7 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
             setImageUrls(updatedUrls);
         }
     };
-    const handleFileUpload = (file: File, index: number) => {
-        const newImages = [...images];
-        newImages[index] = file;
-        setImages(newImages);
-    };
+
 
     const handleInputChange = (event: ChangeEvent<HTMLInputElement>, index: number): void => {
         const file = event.target.files ? event.target.files[0] : null;

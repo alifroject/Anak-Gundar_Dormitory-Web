@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { dbFire } from "@/app/firebase/config";
 import { doc, updateDoc } from 'firebase/firestore';
-import { Timestamp } from 'firebase/firestore'; // Import Timestamp from Firestore
+
 interface Tenant {
     displayName: string;
     jenisKelamin: string;
@@ -103,7 +103,7 @@ const BookingDetails = ({ useBooking }: { useBooking: BookingData }) => {
                 <h3 className="text-xl font-semibold mb-2">{useBooking.nama}</h3>
                 <p className="mb-2">Price: {useBooking.price}</p>
                 <p className="mb-2">Tanggal masuk: {useBooking.startDate}</p>
-                <p className="mb-2">Nama: {useBooking.tenant.tanggalLahir.toLocaleDateString("id-ID", { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+             
 
 
 

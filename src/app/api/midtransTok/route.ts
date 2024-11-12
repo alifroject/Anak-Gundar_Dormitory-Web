@@ -1,6 +1,6 @@
 // src/app/api/midtransToken/route.ts
 
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';  // Importing from 'next/server'
 import midtransClient from 'midtrans-client';
 
 interface TransactionParameters {
@@ -12,14 +12,19 @@ interface TransactionParameters {
   };
 }
 
-export async function POST(req: NextApiRequest, res: NextApiResponse) {
-  console.log('Request Body:', req.body);  // Log the incoming request
+export async function POST(req: NextRequest) {
+  const body = await req.json();
+  console.log('Request Body:', body);  // Log the incoming request body
 
-  const { orderId, grossAmount, customerDetails }: TransactionParameters = req.body;
+  const { orderId, grossAmount, customerDetails }: TransactionParameters = body;
 
   if (!orderId || !grossAmount || !customerDetails) {
     console.error('Missing parameters in the request body');
-    return res.status(400).json({ error: 'Missing parameters in the request body' });
+    // Return a response with status code 400 and a JSON message
+    return NextResponse.json(
+      { error: 'Missing parameters in the request body' },
+      { status: 400 }
+    );
   }
 
   const snap = new midtransClient.Snap({
@@ -38,9 +43,12 @@ export async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const transaction = await snap.createTransaction(parameter);
     console.log('Transaction response:', transaction);
-    res.status(200).json({ token: transaction.token });
+    return NextResponse.json({ token: transaction.token });
   } catch (error) {
     console.error('Error generating Midtrans token:', error);
-    res.status(500).json({ error: 'Failed to generate Midtrans token', message:  error });
+    return NextResponse.json(
+      { error: 'Failed to generate Midtrans token', message: error },
+      { status: 500 }
+    );
   }
 }

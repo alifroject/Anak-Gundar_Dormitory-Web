@@ -112,7 +112,7 @@ const KostanDetailClient = ({ initialData }: { initialData: KostanData | null })
     const [loading] = useState(false);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false); // Assume you have a way to determine if the user is logged in
-  
+
     const router = useRouter(); // Initialize router
 
 
@@ -121,6 +121,10 @@ const KostanDetailClient = ({ initialData }: { initialData: KostanData | null })
         console.log("Kostan data:", kostan);
     }, [kostan]);
 
+    const handleLoginSubmit = () => {
+        // Add your login submit logic here
+        console.log("Login submitted");
+    };
 
 
     useEffect(() => {
@@ -339,6 +343,7 @@ const KostanDetailClient = ({ initialData }: { initialData: KostanData | null })
 
                         {isLoginModalOpen && (
                             <Login
+                                onLoginSubmit={handleLoginSubmit}
                                 onClose={closeLoginModal}
                                 onLoginSuccess={handleLoginSuccess}
                                 originPath={`/home/${kostan?.id}?details=${encodeURIComponent(

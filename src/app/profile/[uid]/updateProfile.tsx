@@ -24,7 +24,7 @@ interface ProfileType {
 export default function UpdateProfile() {
     const [userData, setUserData] = useState<ProfileType | null>(null);
     const [loading, setLoading] = useState(true);
-    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+    const [, setIsLoggedIn] = useState<boolean>(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);

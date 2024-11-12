@@ -123,7 +123,7 @@ interface RiwayatKosProps {
 
 const RiwayatKos: React.FC<RiwayatKosProps> = ({ initialData }) => {
     const [rentalData, setRentalData] = useState<RentalData[]>([]); // Store an array of rental data
-    const [loading, setLoading] = useState<boolean>(true);
+    const [, setLoading] = useState<boolean>(true);
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const router = useRouter();

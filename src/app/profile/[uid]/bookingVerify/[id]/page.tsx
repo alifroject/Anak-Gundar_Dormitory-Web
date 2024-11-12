@@ -3,6 +3,22 @@ import { doc, getDoc, getDocs, collection} from 'firebase/firestore';
 import { dbFire } from '@/app/firebase/config';
 import VerifyBook from '@/app/profile/[uid]/bookingVerify/[id]/bookingDetailsVerify';
 
+interface Tenant {
+    displayName: string;
+    jenisKelamin: string;
+    kampus: string;
+    pekerjaan: string;
+    phoneNumber: string;
+    statusNikah: string;
+    tanggalLahir: Date
+
+}
+
+interface Document {
+    name: string;
+    url: string;
+}
+
 interface BookingData {
     id: string;
     nama: string;
@@ -10,15 +26,11 @@ interface BookingData {
     priceOption: string;
     startDate: string;
     status: string;
-    tenant: {
-        displayName: string;
-        jenisKelamin: string;
-        kampus: string;
-        pekerjaan: string;
-        phoneNumber: string;
-    };
+    tenant: Tenant;
     uid: string;
+    documents: Document[];
 }
+
 export const generateStaticParams = async () => {
     try {
         const adminUID = "MFqxgnvEr0dqIKpxa7RVmSO4GyQ2";
@@ -40,7 +52,8 @@ export const generateStaticParams = async () => {
         // Debug log for each generated parameter
         console.log("Generated Static Params:", params);
 
-        return params; // Return array of parameters
+        // Ensure params are generated correctly and return
+        return params;
     } catch (error) {
         console.error("Error in generateStaticParams:", error);
         return [];
@@ -49,11 +62,12 @@ export const generateStaticParams = async () => {
 
 
 
-const BookingDetail = async ({ params }: { params: { uid: string; id: string } }) => {
-    const { id } = params;  // Fetch the booking ID from the params
 
-    if (!id) {
-        return <div>Invalid booking ID.</div>;
+const BookingDetail = async ({ params }: { params: { uid: string; id: string } }) => {
+    const { id, uid } = params;  // Fetch both uid and id from params
+
+    if (!id || !uid) {
+        return <div>Invalid booking ID or UID.</div>;
     }
 
     let booking: BookingData | null = null;
@@ -75,7 +89,6 @@ const BookingDetail = async ({ params }: { params: { uid: string; id: string } }
         return <div>Error fetching booking details.</div>;
     }
 
-    // Now we can pass the booking data to the verification component
     return (
         <div>
             {booking ? (

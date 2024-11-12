@@ -37,8 +37,8 @@ export default function EditHomes() {
     const [selectedRegion, setSelectedRegion] = useState<string>('');
     const [homes, setHomes] = useState<Home[]>([]);
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-    const [admin, setIsAdmin] = useState(false);
-    const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
+    const [, setIsAdmin] = useState(false);
+    const [, setAdminProfile] = useState<AdminProfile | null>(null);
 
     // Fetch unique regions from Firestore
     useEffect(() => {
