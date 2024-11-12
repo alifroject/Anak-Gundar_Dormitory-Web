@@ -14,12 +14,16 @@ interface TransactionRequestBody {
 }
 
 export async function POST(req: Request) {
+    const headers = new Headers();
+
+    // Dynamically set CORS origin based on environment
+    const allowedOrigin = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '*';
+    headers.set('Access-Control-Allow-Origin', allowedOrigin);  // Allow the current Vercel deployment domain
+    headers.set('Access-Control-Allow-Methods', 'POST');
+    headers.set('Access-Control-Allow-Headers', 'Content-Type');
+
     // Handle preflight OPTIONS request
     if (req.method === 'OPTIONS') {
-        const headers = new Headers();
-        headers.set('Access-Control-Allow-Origin', '*');
-        headers.set('Access-Control-Allow-Methods', 'POST');
-        headers.set('Access-Control-Allow-Headers', 'Content-Type');
         return new NextResponse(null, { status: 200, headers });
     }
 
@@ -42,12 +46,12 @@ export async function POST(req: Request) {
 
         try {
             const transaction = await snap.createTransaction(transactionDetails);
-            return NextResponse.json(transaction, { status: 200 });
+            return new NextResponse(JSON.stringify(transaction), { status: 200, headers });
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-            return NextResponse.json({ error: errorMessage }, { status: 500 });
+            return new NextResponse(JSON.stringify({ error: errorMessage }), { status: 500, headers });
         }
     } else {
-        return NextResponse.json({ error: 'Method Not Allowed' }, { status: 405 });
+        return new NextResponse(JSON.stringify({ error: 'Method Not Allowed' }), { status: 405, headers });
     }
 }

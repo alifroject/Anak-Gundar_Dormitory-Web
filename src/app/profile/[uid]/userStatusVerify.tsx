@@ -116,24 +116,22 @@ const UserVerify: React.FC = () => {
             });
 
             const data = await response.json();
+            console.log('Token response:', data);
+            console.log("client", process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY)
 
             if (data.token) {
-                // Open the Snap popup
                 window.snap.pay(data.token, {
                     onSuccess: function (result: SnapPaymentResult) {
-                        alert("Payment successful!");
-                        console.log(result);
+                        console.log("Payment success:", result);
                     },
                     onPending: function (result: SnapPaymentResult) {
-                        alert("Payment pending...");
-                        console.log(result);
+                        console.log("Payment pending:", result);
                     },
                     onError: function (result: SnapPaymentResult) {
-                        alert("Payment failed.");
-                        console.log(result);
+                        console.log("Payment error:", result);
                     },
                     onClose: function () {
-                        alert("You closed the payment popup.");
+                        console.log("Payment popup closed");
                     },
                 });
             }
