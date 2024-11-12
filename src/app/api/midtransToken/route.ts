@@ -1,3 +1,4 @@
+import { NextResponse } from 'next/server';
 import midtransClient from 'midtrans-client';
 
 interface CustomerDetails {
@@ -19,9 +20,10 @@ export async function POST(req: Request) {
         headers.set('Access-Control-Allow-Origin', '*');
         headers.set('Access-Control-Allow-Methods', 'POST');
         headers.set('Access-Control-Allow-Headers', 'Content-Type');
-        return new Response(null, { status: 200, headers });
+        return new NextResponse(null, { status: 200, headers });
     }
 
+    // Handle POST request for transaction
     const { orderId, grossAmount, customerDetails }: TransactionRequestBody = await req.json();
 
     const snap = new midtransClient.Snap({
@@ -39,9 +41,9 @@ export async function POST(req: Request) {
 
     try {
         const transaction = await snap.createTransaction(transactionDetails);
-        return new Response(JSON.stringify(transaction), { status: 200 });
+        return NextResponse.json(transaction, { status: 200 });
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        return new Response(JSON.stringify({ error: errorMessage }), { status: 500 });
+        return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
 }
