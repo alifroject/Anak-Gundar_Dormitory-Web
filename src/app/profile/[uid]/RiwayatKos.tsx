@@ -121,7 +121,7 @@ interface RiwayatKosProps {
 }
 
 
-const RiwayatKos: React.FC<RiwayatKosProps> = ({ initialData }) =>{
+const RiwayatKos: React.FC<RiwayatKosProps> = ({ initialData }) => {
     const [rentalData, setRentalData] = useState<RentalData[]>([]); // Store an array of rental data
     const [loading, setLoading] = useState<boolean>(true);
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -139,7 +139,7 @@ const RiwayatKos: React.FC<RiwayatKosProps> = ({ initialData }) =>{
                 const rentalDocuments = rentalSnapshot.docs
                     .map(doc => ({ id: doc.id, ...doc.data() }) as RentalData)
                     .filter(doc => doc.uid === userProfile?.uid); // Filter berdasarkan uid
-    
+
                 if (rentalDocuments.length > 0) {
                     setRentalData(rentalDocuments);
                 } else {
@@ -151,12 +151,12 @@ const RiwayatKos: React.FC<RiwayatKosProps> = ({ initialData }) =>{
                 setLoading(false);
             }
         };
-    
+
         if (userProfile) {
             fetchRentalData(); // Hanya panggil fetch jika ada userProfile
         }
     }, [userProfile]); // Tambahkan userProfile sebagai dependensi
-    
+
 
     useEffect(() => {
         const fetchKostanData = async () => {
@@ -191,7 +191,7 @@ const RiwayatKos: React.FC<RiwayatKosProps> = ({ initialData }) =>{
         fetchKostanData();
     }, []);
 
-  
+
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -273,58 +273,65 @@ const RiwayatKos: React.FC<RiwayatKosProps> = ({ initialData }) =>{
     };
 
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }
+
 
     return (
-        <div className="min-h-screen p-4 bg-gray-100 flex flex-col items-center">
-            <h1 className="text-2xl font-semibold mb-4 text-black">Pengajuan Sewa</h1>
 
-            <div className="bg-white p-4 rounded-lg mb-4 flex-1 w-full">
+        <div className='h-screen'>
+            <>
+                {isLoggedIn ? (
+                    <div className="min-h-screen flex flex-col items-start w-full flex-grow">
+                        <h1 className="text-2xl font-semibold mb-4 text-black">Pengajuan Sewa</h1>
 
-                <div className="h-full flex flex-col">
-                    {rentalData.length > 0 ? (
-                        rentalData.map(rental => (
-                            <div key={rental.id} className="border p-4 rounded-lg mb-4 flex flex-col text-black">
-                                <div className="flex">
-
-                                </div>
-                                <h2 className="text-lg font-semibold">{rental.nama}</h2>
-                                <div className="flex items-center text-sm text-gray-500 mb-2">
-                                    <span className="text-green-500">Tersedia 2 Kamar</span>
-                                </div>
-                                <div className="text-sm text-gray-500 mb-2">Hitungan Sewa</div>
-                                <div className="text-lg font-semibold text-red-500 mb-2">
-                                    Rp {rental.price.toLocaleString('id-ID')} <span className="text-sm text-gray-500">(Pembayaran pertama)</span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <div>
-                                        <div className="text-sm text-gray-500">Tanggal Masuk</div>
-                                        <div className="text-sm font-semibold">{new Date(rental.startDate).toLocaleDateString()}</div>
+                        <div className="bg-white p-4 rounded-lg mb-4 flex-1 w-full">
+                            <div className="h-full flex flex-col">
+                                {rentalData.length > 0 ? (
+                                    rentalData.map((rental) => (
+                                        <div key={rental.id} className="border p-4 rounded-lg mb-4 flex flex-col text-black">
+                                            <div className="flex">
+                                                {/* Your other content */}
+                                            </div>
+                                            <h2 className="text-lg font-semibold">{rental.nama}</h2>
+                                            <div className="flex items-center text-sm text-gray-500 mb-2">
+                                                <span className="text-green-500">Tersedia 2 Kamar</span>
+                                            </div>
+                                            <div className="text-sm text-gray-500 mb-2">Hitungan Sewa</div>
+                                            <div className="text-lg font-semibold text-red-500 mb-2">
+                                                Rp {rental.price.toLocaleString('id-ID')} <span className="text-sm text-gray-500">(Pembayaran pertama)</span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <div>
+                                                    <div className="text-sm text-gray-500">Tanggal Masuk</div>
+                                                    <div className="text-sm font-semibold">{new Date(rental.startDate).toLocaleDateString()}</div>
+                                                </div>
+                                                <div>
+                                                    <div className="text-sm text-gray-500">Durasi Sewa</div>
+                                                    <div className="text-sm font-semibold">{rental.priceOption}</div>
+                                                </div>
+                                            </div>
+                                            <div className="flex justify-between items-center mt-4">
+                                                <button className="text-gray-500" onClick={() => handleDeleteDraft(rental.id)}>
+                                                    <FontAwesomeIcon icon={faTrash} />
+                                                </button>
+                                                <button onClick={handleNavigateToBooking}>Lanjutkan ke Booking</button>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="h-full flex justify-center items-center">
+                                        <div className="text-gray-500">No rental data available.</div>
                                     </div>
-                                    <div>
-                                        <div className="text-sm text-gray-500">Durasi Sewa</div>
-                                        <div className="text-sm font-semibold">{rental.priceOption}</div>
-                                    </div>
-                                </div>
-                                <div className="flex justify-between items-center mt-4">
-                                    <button className="text-gray-500" onClick={() => handleDeleteDraft(rental.id)}>
-                                        <FontAwesomeIcon icon={faTrash} />
-                                    </button>
-                                    <button onClick={handleNavigateToBooking}>Lanjutkan ke Booking</button>
-                                </div>
-
+                                )}
                             </div>
-                        ))
-                    ) : (
-                        <div className="h-full flex justify-center items-center">
-                            <div className="text-gray-500">No rental data available.</div>
                         </div>
-                    )}
-                </div>
-            </div>
+                    </div>
+                ) : (
+                    <div>Silakan login terlebih dahulu.</div>
+                )}
+
+            </>
         </div>
+
     );
 };
 

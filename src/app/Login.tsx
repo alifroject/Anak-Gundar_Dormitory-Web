@@ -19,9 +19,10 @@ interface LoginProps {
     onClose: () => void;
     onLoginSuccess: () => void;
     originPath: string;
+    onLoginSubmit: () => void; // Add this property to LoginProps
 }
 
-const Login: React.FC<LoginProps> = ({ onClose, onLoginSuccess, originPath }) => {
+const Login: React.FC<LoginProps> = ({ onClose, onLoginSuccess, originPath, onLoginSubmit }) => {
     const modalRef = useRef<HTMLDivElement>(null);
     const [isOpen, setIsOpen] = useState(false);
     const [email, setEmail] = useState(""); // New state for email
@@ -108,6 +109,7 @@ const Login: React.FC<LoginProps> = ({ onClose, onLoginSuccess, originPath }) =>
                 role: "user", // Default role
                 username: user.displayName || "Anonymous",
             };
+            onLoginSubmit();
             await createAdminDocument(userDocument);
             handleClose();
             router.push(originPath || "/");

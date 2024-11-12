@@ -154,13 +154,12 @@ const UserVerify: React.FC = () => {
                                     <h2 className="text-lg font-semibold mb-2">{booking.nama}</h2>
                                     <div className="flex items-center text-sm text-gray-600 mb-2">
                                         <span>Status: </span>
-                                        {booking.status === 'verified' && (
+                                        {booking.status === 'verified' ? (
                                             <div className="flex items-center ml-2 text-green-600">
                                                 <FaCheckCircle className="mr-2" />
                                                 <span>{booking.status}</span>
                                             </div>
-                                        )}
-                                        {booking.status !== 'verified' && (
+                                        ) : (
                                             <span className="ml-2 text-red-600">{booking.status}</span>
                                         )}
                                     </div>
@@ -169,18 +168,21 @@ const UserVerify: React.FC = () => {
                                     </div>
                                     <div className="text-sm text-gray-500 mb-4">Durasi: {booking.priceOption}</div>
 
-                                    {/* Display "Lanjutkan Bayar" button for Verified status */}
-                                    <button
-                                        onClick={() => handleLanjutkanBayar(booking.id)}
-                                        className="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 transition"
-                                    >
-                                        Lanjutkan Bayar
-                                    </button>
+                                    {/* Tampilkan tombol "Lanjutkan Bayar" hanya jika status adalah "verified" */}
+                                    {booking.status === 'verified' && (
+                                        <button
+                                            onClick={() => handleLanjutkanBayar(booking.id)}
+                                            className="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 transition"
+                                        >
+                                            Lanjutkan Bayar
+                                        </button>
+                                    )}
                                 </div>
                             ))
                         ) : (
                             <div className="text-gray-500">Belum ada data booking yang tersedia.</div>
                         )}
+
                     </div>
                 </>
             ) : (

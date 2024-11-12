@@ -7,6 +7,7 @@ import { ReactNode } from 'react';
 import './globals.css';
 import Navbar from '@/app/navbar-app';
 import Login from '@/app/Login';
+import Spinner from '@/components/spinner/Spinner'; // Import the Spinner component
 
 interface RootLayoutProps {
   children: ReactNode;
@@ -15,6 +16,7 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   const pathname = usePathname();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Track loading state
 
   const handleLoginClick = () => {
     setIsLoginOpen(true);
@@ -23,11 +25,15 @@ export default function RootLayout({ children }: RootLayoutProps) {
   const handleCloseLogin = () => {
     setIsLoginOpen(false);
   };
+
   const handleLoginSuccess = () => {
-    // Optional logic after successful login, e.g., refresh user data, etc.
+    setIsLoading(false); // Stop loading when login is successful
     console.log("Login successful");
   };
 
+  const handleLoginSubmit = () => {
+    setIsLoading(true); // Set loading to true when login is being processed
+  };
 
   const isRegisterPage = pathname === '/register';
 
@@ -43,15 +49,18 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <body className="overflow-hidden min-h-screen">
         {!isRegisterPage && <Header />}
         <Navbar onLoginClick={handleLoginClick} />
+        
         {isLoginOpen && (
           <Login
             onClose={handleCloseLogin}
-            onLoginSuccess={handleLoginSuccess} // Define this function if it isn't already
+            onLoginSuccess={handleLoginSuccess}
+            onLoginSubmit={handleLoginSubmit} // Pass function to trigger loading during login
             originPath="/" // Or use any path you want as default
           />
         )}
 
-
+        {/* Show Spinner while loading */}
+        {isLoading && <Spinner />}
 
         <div className={`h-screen overflow-y-auto transition-all duration-300 ease-in-out`}>
           <main className={`pt-${!isRegisterPage ? '16' : '0'} bg-white w-full`}>

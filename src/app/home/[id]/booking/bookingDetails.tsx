@@ -5,7 +5,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { collection, getDocs, QuerySnapshot, getDoc, doc, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-
+import { useRouter } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid'; // pastikan kamu menginstal uuid
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 
@@ -46,6 +46,8 @@ interface TenantInfo {
     jenisKelamin: string;
     pekerjaan: string;
     kampus: string;
+    tanggalLahir: Date;
+    statusNikah: string;
 }
 
 interface UserProfile {
@@ -76,6 +78,8 @@ interface Tenant {
     kampus: string;
     pekerjaan: string;
     phoneNumber: string;
+    tanggalLahir: Date;
+    statusNikah: string;
 }
 
 interface RentalData {
@@ -100,19 +104,27 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
     const [, setIsEditing] = useState(false); // Tambahkan state untuk mode edit
     const [editedData, setEditedData] = useState<RentalData | null>(null);
 
+    const [isSaving, setIsSaving] = useState(false);
+    const [showModalUpdated, setModalUpdated] = useState(false);
+    const [modalMessageodalUpdated, setModalMessageodalUpdated] = useState("");
+
+    const [showModalBooking, setModalBooking] = useState(false);
+    const [modalMessageodalBoking, setModalMessageodalBooking] = useState("");
 
 
+    const [showModal, setShowModal] = useState(false);
+    const [modalMessage, setModalMessage] = useState<string>('');
 
     const [displayedPrice, setDisplayedPrice] = useState<number>(0);
 
 
     const [files, setFiles] = useState<UploadedFile[]>([]);
-    const [, setDocumentFiles] = useState<(UploadedFile | null)[]>(Array(4).fill(null));
+    const [documentFiles, setDocumentFiles] = useState<(UploadedFile | null)[]>(Array(4).fill(null));
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const [rentalData, setRentalData] = useState<RentalData[]>([]);
     const searchParams = useSearchParams(); // To access query parameters
     const draftId = searchParams.get('draftId'); // Retrieve 'draftId' from URL query
-
+    const router = useRouter();
 
     useEffect(() => {
         const fetchRentalData = async () => {
@@ -353,7 +365,10 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                         jenisKelamin: userData.jenisKelamin || "Jenis kelamin belum terisi",
                         pekerjaan: userData.pekerjaan || "Pekerjaan belum terisi",
                         kampus: userData.kampus || "Perguruan tinggi belum terisi",
+                        tanggalLahir: new Date(),
+                        statusNikah: userData.statusNikah || "Status belum terisi" // Include this line
                     });
+
                 } else {
                     console.log("No such document!");
                 }
@@ -419,7 +434,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
         if (editedData && draftId && userProfile && userProfile.uid) {
             const docRef = doc(dbFire, "draft", draftId);
             const priceToSave = displayedPrice;
-
+            setIsSaving(true);
             try {
                 // Fetch the existing document to get old document URLs
                 const docSnapshot = await getDoc(docRef);
@@ -457,7 +472,15 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                     documents: [documentURLs[documentURLs.length - 1]], // Store only the last uploaded file
                 });
 
-                alert("Draft updated successfully!");
+                setModalUpdated(true)
+                setModalMessageodalUpdated("Berhasil update data anda")
+                setTimeout(() => {
+                    // After 2 seconds, stop the spinner and perform the save action
+                    setIsSaving(false);
+                    console.log('Save completed!');
+                    // Add your actual save logic here
+                }, 2000);  // 2000 milliseconds = 2 seconds
+
                 setIsEditing(false);
 
                 setRentalData((prev) =>
@@ -467,7 +490,12 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                 );
             } catch (error) {
                 console.error("Error updating draft: ", error);
-                alert("Failed to update draft.");
+                setTimeout(() => {
+                    // After 2 seconds, stop the spinner and perform the save action
+                    setIsSaving(false);
+                    console.log('Save completed!');
+                    // Add your actual save logic here
+                }, 2000);  // 2000 milliseconds = 2 seconds
             }
         } else {
             alert("User profile or draft data is missing.");
@@ -500,12 +528,14 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
 
     const saveDraft = async () => {
         if (!tenant || files.length === 0 || displayedPrice <= 0 || !userProfile || !userProfile.uid) {
-            alert("Please complete tenant information, upload documents, and ensure a price and user UID are available.");
+
+            alert("Harap isi semua data document anda!.");
             return;
         }
 
         console.log("Saving with user UID:", userProfile.uid);
 
+        setIsSaving(true);
         try {
             const documentURLs = await Promise.all(files.map(async fileObj => {
 
@@ -535,7 +565,12 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
             };
 
             await addDoc(collection(dbFire, "draft"), draftData);
-            alert("Draft saved successfully!");
+            setTimeout(() => {
+                // After 2 seconds, stop the spinner and perform the save action
+                setIsSaving(false);
+                console.log('Save completed!');
+                // Add your actual save logic here
+            }, 2000);  // 2000 milliseconds = 2 seconds
             setIsEditing(false);
         } catch (error) {
             console.error("Error saving draft: ", error);
@@ -548,15 +583,18 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
     const handleBooking = async () => {
         // Validate required fields
         if (!tenant || files.length === 0 || displayedPrice <= 0 || !userProfile || !userProfile.uid) {
-            alert("Please complete all required fields.");
+            setModalMessage("Harap isi semua data document anda!");
+            setShowModal(true); // Show modal// Show an alert or use another notification method
             return;
         }
 
         if (!startDate || !tenant || files.length === 0) {
             console.log("Missing required fields:", { startDate, tenant, files });
-            alert("Some required fields are missing.");
+            setModalMessage("Harap isi semua data document anda!");
+            setShowModal(true); // Show modal// Show an alert or use another notification method
             return;
         }
+        setIsSaving(true);
 
         const documentURLs = await Promise.all(files.map(async fileObj => {
             const oldFileRef = ref(storage, `drafts/${userProfile.uid}/${fileObj.file.name}`);
@@ -579,6 +617,8 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
             startDate: startDate,
             documents: documentURLs,
             uid: userProfile.uid,
+            tanggalLahir: userProfile.tanggalLahir,
+            statusPernikahan: userProfile.statusPernikahan,
             status: "unverified",
         };
 
@@ -595,23 +635,51 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                 await deleteDoc(draftRef);
                 console.log("Draft data deleted successfully.");
             }
+            setModalBooking(true)
+            setModalMessageodalBooking("Booking berhasil, tunggu hingga dokument di verifikasi dalam 1 hari kerja.")
 
-            alert("Booking request submitted successfully!");
+            setTimeout(() => {
+                // After 2 seconds, stop the spinner and perform the save action
+                setIsSaving(false);
+                console.log('Booking completed!');
+                const bookingUrl = `/profile/${userProfile?.uid}`;
+                router.push(bookingUrl); // Redirect to the booking page
+                // Add your actual save logic here
+            }, 3000);  // 2000 milliseconds = 2 seconds
         } catch (error) {
             console.error("Error submitting booking: ", error);
             alert("Failed to submit booking request.");
         }
     };
 
+    const closeModal = () => {
+        setShowModal(false); // Close the modal
+        setModalUpdated(false)
+    };
 
+    const chooseSave = (e: React.MouseEvent<HTMLAnchorElement>) => {
+        // Check if all necessary data is provided
+        if (!tenant || files.length === 0 || displayedPrice <= 0 || !userProfile || !userProfile.uid) {
+            e.preventDefault(); // Prevent navigation if data is missing
+            setModalMessage("Harap isi semua data document anda!");
+            setShowModal(true); // Show modal// Show an alert or use another notification method
+            return; // Stop further action if data is incomplete
+        }
 
-    const chooseSave = () => {
+        if (!startDate || !documentFiles.length || !priceOption) {
+            e.preventDefault(); // Prevent navigation if data is missing
+            alert("Semua data wajib diisi sebelum melanjutkan!"); // Show an alert or use another notification method
+            return; // Stop further action if any of these fields are missing
+        }
+
+        // Proceed with saving or editing the draft if the data is valid
         if (draftId) {
-            handleSave(); // Panggil saveEditDraft jika ada draftId
+            handleSave(); // Call saveEditDraft if there is a draftId
         } else {
-            saveDraft(); // Panggil saveDraft jika tidak ada draftId
+            saveDraft(); // Call saveDraft if there is no draftId
         }
     };
+
 
 
 
@@ -619,6 +687,62 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
 
     return (
         <div className="max-w-7xl mx-auto p-4 m-4">
+            {isSaving && (
+                <div className="spinner-overlay absolute inset-0 flex justify-center items-center bg-opacity-50 bg-gray-800 z-50">
+                    <div className="spinner-border animate-spin border-t-4 border-blue-500 border-solid rounded-full w-16 h-16"></div>
+                </div>
+            )}
+
+            {showModalUpdated && (
+                <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+                    <div className="bg-green-100 rounded-lg shadow-xl p-8 text-center max-w-sm transform scale-95 transition-all duration-300 ease-out">
+                        <h2 className="text-xl font-semibold text-green-600 mb-4">Update Data berhasil</h2>
+                        <p className="text-green-700 mb-6">{modalMessageodalUpdated}</p>
+                        <div className="flex justify-center">
+                            <button
+                                className="bg-green-600 text-white px-6 py-3 rounded-md text-lg font-medium shadow-lg hover:bg-green-700 transition-colors duration-200"
+                                onClick={closeModal}
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {showModalBooking && (
+                <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+                    <div className="bg-green-100 rounded-lg shadow-xl p-8 text-center max-w-sm transform scale-95 transition-all duration-300 ease-out">
+                        <h2 className="text-xl font-semibold text-green-600 mb-4">Booking berhasil</h2>
+                        <p className="text-green-700 mb-6">{modalMessageodalBoking}</p>
+                        <div className="flex justify-center">
+                            <button
+                                className="bg-green-600 text-white px-6 py-3 rounded-md text-lg font-medium shadow-lg hover:bg-green-700 transition-colors duration-200"
+                                onClick={closeModal}
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showModal && (
+                <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+                    <div className="bg-white rounded-lg shadow-xl p-8 text-center max-w-sm transform scale-95 transition-all duration-300 ease-out">
+                        <h2 className="text-xl font-semibold text-red-600 mb-4">Error</h2>
+                        <p className="text-gray-700 mb-6">{modalMessage}</p>
+                        <div className="flex justify-center">
+                            <button
+                                className="bg-red-500 text-white px-6 py-3 rounded-md text-lg font-medium shadow-lg hover:bg-red-600 transition-colors duration-200"
+                                onClick={closeModal}
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <main className="bg-white p-6 rounded-lg shadow-md">
                 {/* Right Sidebar - moved to the top */}
                 {/* Right Sidebar - moved to the top
@@ -640,7 +764,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                  */}
 
                 <div className="flex justify-between items-start">
-                    <div className="w-full">
+                    <div className="w-full mt-10">
                         <h1 className="text-3xl items-center mt-4   md:ml-[500px] md:text-green-500  text-green-500 font-bold mb-4 ">Pengajuan Sewa</h1>
 
                         {/* Tenant Information */}
@@ -687,7 +811,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                                         <i className="fas fa-upload text-gray-500 text-2xl mb-2"></i>
                                         <div
                                             className="text-green-500 cursor-pointer mb-2 h-12 flex items-center justify-center border border-green-500 rounded-lg"
-                                            style={{ height: '50px' }} // Tinggi yang diinginkan
+                                            style={{ height: '50px' }} // Height for the upload button
                                             onClick={() => document.getElementById(`file-input-${index}`)?.click()}
                                         >
                                             Upload di sini
@@ -704,16 +828,20 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                                             className="border-2 border-dashed border-gray-300 p-4 rounded-lg w-full h-24 flex items-center justify-center"
                                             onDrop={(e) => handleDrop(e, index)} // Handle drop event
                                             onDragOver={handleDragOver} // Allow drag over
+                                            style={{ height: '200px', width: '100%', position: 'relative' }}
                                         >
                                             {/* Show uploaded image if available, else show placeholder text */}
-                                            {editedData?.documents && editedData.documents[index]?.preview ? (
+                                            {documentFiles[index]?.preview ? (
                                                 <img
-                                                    src={editedData.documents[index].preview}
-                                                    alt={editedData.documents[index].name || 'Document Image'}
-                                                    className="w-full h-full object-cover"
+                                                    src={documentFiles[index].preview}
+                                                    alt={documentFiles[index].name || 'Uploaded File'}
+                                                    className="object-contain w-full h-full"
+                                                    style={{ objectFit: 'contain' }} // Ensure image fits within the container
                                                 />
                                             ) : (
-                                                <div className="text-gray-500">{doc}</div>
+                                                <div className="text-gray-500">
+                                                    {doc}
+                                                </div>
                                             )}
                                         </div>
                                     </div>
@@ -833,18 +961,18 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                         <section className="mb-6">
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-xl font-bold text-black">Tanggal mulai ngekos</h2>
-
                             </div>
                             <div className="flex flex-col">
                                 <input
                                     type="date"
                                     value={startDate}
                                     onChange={handleDateChange}
-                                    className="border text-green-700 border-gray-300 rounded-md p-2 mb-2 focus:outline-none focus:ring-2 focus:ring-green-400 transition duration-150"
+                                    className="border border-gray-300 rounded-md p-3 mb-2 text-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-150 ease-in-out shadow-sm hover:border-green-400"
                                 />
                                 <p className="text-gray-700 text-lg">{formatDate(startDate)}</p>
                             </div>
                         </section>
+
 
                         {/*  <section className="mb-6">
                             <div className="flex justify-between items-center mb-4">
@@ -858,10 +986,21 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                             <h2 className="text-xl font-bold mb-4">FAQ tentang pengajuan sewa</h2>
                             <button className="text-green-500">&gt;</button>
                         </section> */}
+                        <Link
+                            href={`/profile/${userProfile?.uid}`}
+                            onClick={(e) => chooseSave(e)}
+                            className=" bg-green-400 text-white py-3 px-6 rounded-lg text-center font-semibold transition-all duration-300 ease-in-out transform hover:bg-green-500 hover:shadow-md active:bg-green-600"
+                        >
+                            Simpan Draft
+                        </Link>
 
-                        <Link href={`/profile/${userProfile?.uid}`} onClick={chooseSave} className="w-full  bg-green-500 text-white py-3 rounded-lg">Simpan Draft(Jika ingin melihat yang lainnya)</Link>
+                        <button
+                            onClick={handleBooking}
+                            className="mt-4 m-[3px] md:m-5 bg-green-600 text-white py-3 px-6 rounded-lg text-center font-semibold transition-all duration-300 ease-in-out transform hover:bg-green-700 hover:shadow-md active:bg-green-800"
+                        >
+                            Ajukan Sewa
+                        </button>
 
-                        <button onClick={handleBooking} className="w-full mt-4 bg-green-500 text-white py-3 rounded-lg">Ajukan Sewa</button>
                     </div>
                 </div>
             </main>

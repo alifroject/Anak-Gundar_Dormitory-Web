@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Image from 'next/image';
-import { FaHome, FaBuilding, FaReceipt, FaCog, FaUser } from 'react-icons/fa';
+import {FaBuilding, FaReceipt, FaCog, FaUser } from 'react-icons/fa';
 import KosSaya from '@/app/profile/[uid]/KosSaya';
 import RiwayatKos from '@/app/profile/[uid]/RiwayatKos';
 import RiwayatTransaksi from '@/app/profile/[uid]/RiwayatTransaksi';
@@ -11,8 +11,9 @@ import UpdateProfile from '@/app/profile/[uid]/updateProfile';
 import AddHomes from '@/app/profile/[uid]/Add-homes';
 import Verify from '@/app/profile/[uid]/StatusVerify';
 import UserVerify from '@/app/profile/[uid]/userStatusVerify';
+import EditHomes from '@/app/profile/[uid]/EditHomes';
 import { GeoPoint } from 'firebase/firestore';
-import {FaCheckCircle} from 'react-icons/fa'; // Import the icon
+import { FaCheckCircle } from 'react-icons/fa'; // Import the icon
 
 interface ProfileType {
     uid: string;
@@ -123,6 +124,8 @@ const Profile = ({ userProfile }: { userProfile: ProfileType | null }) => {
                 return <Verify />
             case 'Status Verifikasi':
                 return <UserVerify />
+            case 'Edit Homes':
+                return <EditHomes />
             default:
                 return null;
         }
@@ -172,18 +175,19 @@ const Profile = ({ userProfile }: { userProfile: ProfileType | null }) => {
                                 <FaUser className="mr-3" />
                                 <span>Verify</span>
                             </li>
+                            <li
+                                className="flex items-center text-sm hover:text-blue-500 cursor-pointer"
+                                onClick={() => setSelectedSection('Edit Homes')}
+                            >
+                                <FaUser className="mr-3" />
+                                <span>Edit Homes</span>
+                            </li>
                         </>
 
                     ) : (
                         // Tampilkan bagian lainnya jika pengguna bukan admin
                         <>
-                            <li
-                                className="flex items-center text-sm hover:text-blue-500 cursor-pointer"
-                                onClick={() => setSelectedSection('Kos Saya')}
-                            >
-                                <FaHome className="mr-3" />
-                                <span>Kos Saya</span>
-                            </li>
+
                             <li
                                 className="flex items-center text-sm hover:text-blue-500 cursor-pointer"
                                 onClick={() => setSelectedSection('Riwayat Kos')}
@@ -198,9 +202,9 @@ const Profile = ({ userProfile }: { userProfile: ProfileType | null }) => {
                                 <FaReceipt className="mr-3" />
                                 <span>Riwayat Transaksi</span>
                             </li>
-                            
 
-                            
+
+
                             <li
                                 className="flex items-center text-sm hover:text-blue-500 cursor-pointer"
                                 onClick={() => setSelectedSection('Status Verifikasi')}
