@@ -48,6 +48,7 @@ interface TenantInfo {
     kampus: string;
     tanggalLahir: Date;
     statusNikah: string;
+    kotaAsal: string;
 }
 
 interface UserProfile {
@@ -80,6 +81,7 @@ interface Tenant {
     phoneNumber: string;
     tanggalLahir: Date;
     statusNikah: string;
+    kotaAsal: string;
 }
 
 interface RentalData {
@@ -366,7 +368,8 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                         pekerjaan: userData.pekerjaan || "Pekerjaan belum terisi",
                         kampus: userData.kampus || "Perguruan tinggi belum terisi",
                         tanggalLahir: new Date(),
-                        statusNikah: userData.statusNikah || "Status belum terisi" // Include this line
+                        statusNikah: userData.statusNikah || "Status belum terisi", // Include this line
+                        kotaAsal: userData.kotaAsal || "Kota asala belum diisi",
                     });
 
                 } else {
@@ -562,6 +565,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                 startDate: startDate,
                 documents: documentURLs,
                 uid: userProfile.uid,
+               
             };
 
             await addDoc(collection(dbFire, "draft"), draftData);

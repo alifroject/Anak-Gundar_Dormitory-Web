@@ -69,8 +69,8 @@ const KosMap: React.FC<Props> = ({ kosList, onSelectKos }) => {
         if (typeof window !== 'undefined') {
             const customIcon = new L.Icon({
                 iconUrl: '/marker-icon.png',
-                iconSize: [25, 41],
-                iconAnchor: [12, 41],
+                iconSize: [45, 61],
+                iconAnchor: [32, 61],
             });
             setIcon(customIcon);
         }
@@ -106,16 +106,17 @@ const KosMap: React.FC<Props> = ({ kosList, onSelectKos }) => {
                     }}
                 >
                     <Popup>
-                        <div>
+                        <div className='w-[140px]'>
                             <strong>{kos.name}</strong>
                             <br />
-                            {kos.address.jalan}, {kos.address.kota_kabupaten}, {kos.address.provinsi}
-                            <br />
-                            Harga per Hari: Rp{kos.price.perHari}
-                            <br />
-                            Harga per Minggu: Rp{kos.price.perMinggu}
-                            <br />
-                            Harga per Bulan: Rp{kos.price.perBulan}
+                            Jl. {kos.address.jalan}, Kota/Kabupaten. {kos.address.kota_kabupaten}, Provinsi. {kos.address.provinsi}
+                            
+                            <p>
+                                Harga per Bulan: <span className="font-semibold text-green-600">
+                                    {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(kos.price.perBulan)}
+                                </span>
+                            </p>
+
                             <br />
                             <img src={kos.images[0]} alt="Gambar Kos" width="100%" />
                         </div>

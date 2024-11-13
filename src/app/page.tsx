@@ -53,8 +53,12 @@ const ActiveSlider = () => {
   return (
     <>
       <div className="flex items-center justify-center flex-col min-h-[900px] w-full overflow-hidden 240px:overflow-hidden">
-        <h1 className="text-4xl text-black font-bold mb-4">Lagi cari kos deket Gundar?</h1>
-        <p className="text-lg text-black font-bold mb-10">Coba pilih gundar region mana dibawah ini.</p>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-gray-800 text-center mb-4">
+          Lagi cari kos deket Gundar?
+        </h1>
+        <p className="text-base sm:text-lg md:text-xl text-gray-600 font-medium text-center mb-10">
+          Coba pilih gundar region mana dibawah ini.
+        </p>
 
         <Swiper
           onSwiper={(swiper) => (swiperRef.current = swiper)}

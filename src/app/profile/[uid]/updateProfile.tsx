@@ -30,6 +30,36 @@ export default function UpdateProfile() {
     const [isSaving, setIsSaving] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState<string>('');
+    const [universities, setUniversities] = useState<string[]>([]);  // State untuk menyimpan daftar universitas
+    const [searchQuery, setSearchQuery] = useState<string>('');  // State untuk menyimpan query pencarian
+    const [filteredUniversities, setFilteredUniversities] = useState<string[]>([]);
+
+    useEffect(() => {
+        const fetchUniversities = async () => {
+            try {
+                const response = await fetch('http://universities.hipolabs.com/search?country=Indonesia');  // API untuk daftar universitas
+                const data = await response.json();
+                const universityNames = data.map((university: any) => university.name);
+                setUniversities(universityNames);  // Menyimpan nama universitas ke dalam state universities
+            } catch (error) {
+                console.error('Error fetching universities:', error);
+            }
+        };
+
+        fetchUniversities();
+    }, []);
+
+    useEffect(() => {
+        if (searchQuery === '') {
+            setFilteredUniversities([]);  // Jika searchQuery kosong, hapus hasil pencarian
+        } else {
+            const filtered = universities.filter((university) =>
+                university.toLowerCase().includes(searchQuery.toLowerCase())  // Filter universitas berdasarkan query
+            );
+            setFilteredUniversities(filtered);  // Set hasil pencarian ke filteredUniversities
+        }
+    }, [searchQuery, universities]);
+
 
     useEffect(() => {
         const auth = getAuth();
@@ -153,13 +183,41 @@ export default function UpdateProfile() {
                                 </p>
                             </div>
                             <div className="flex items-center mb-6">
-                                <img
-                                    src={previewUrl || userData?.photoURL || "https://placehold.co/100x100"}
-                                    alt="Profile picture"
-                                    className="rounded-full w-24 h-24 object-cover mr-4"
-                                />
-                                <input type="file" accept="image/*" onChange={handleFileChange} />
+                                <div className="relative">
+                                    <img
+                                        src={previewUrl || userData?.photoURL || "https://placehold.co/100x100"}
+                                        alt="Profile picture"
+                                        className="rounded-full w-24 h-24 object-cover border-4 border-indigo-500"
+                                    />
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                        id="fileInput"
+                                        className="hidden"
+                                    />
+                                    <label
+                                        htmlFor="fileInput"
+                                        className="absolute bottom-0 right-0 bg-blue-500 text-white rounded-full p-2 cursor-pointer hover:bg-blue-600 transition duration-300"
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                            className="w-6 h-6"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
+                                                d="M5 13l4 4L19 7"
+                                            />
+                                        </svg>
+                                    </label>
+                                </div>
                             </div>
+
                             {loading ? (
                                 <p>Loading...</p>
                             ) : (
@@ -250,16 +308,50 @@ export default function UpdateProfile() {
                                             </select>
                                         </div>
 
-                                        <div>
-                                            <label className="block text-indigo-700">Nama Kampus/Sekolah</label>
+                                        <div className="relative">
+                                            <label className="block text-indigo-700 font-medium mb-2">Nama Kampus/Sekolah</label>
+
                                             <input
                                                 type="text"
                                                 name="kampus"
-                                                value={userData?.kampus || ""}
-                                                onChange={handleChange}
-                                                className="border rounded w-full px-4 py-2"
+                                                value={searchQuery || userData?.kampus || ""}
+
+
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                className="border border-indigo-300 rounded-lg w-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                                placeholder="Ketik nama kampus atau sekolah"
                                             />
+
+                                            {/* Dropdown hasil pencarian */}
+                                            {filteredUniversities.length > 0 && (
+                                                <ul className="absolute z-10 mt-2 w-full bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                                    {filteredUniversities.map((university, index) => (
+                                                        <li
+                                                            key={index}
+                                                            className="p-2 cursor-pointer hover:bg-indigo-100 focus:bg-indigo-100 transition-all"
+                                                            onClick={() => {
+                                                                setSearchQuery(university);
+                                                                setUserData((prevData) => {
+                                                                    if (prevData) {
+                                                                        return {  // Perbarui hanya jika prevData bukan null
+                                                                            ...prevData,
+                                                                            kampus: university,
+                                                                        };
+                                                                    }
+                                                                    return prevData;  // Jika prevData null, biarkan tetap null
+                                                                });
+                                                                setFilteredUniversities([]);
+
+                                                            }}
+                                                        >
+                                                            {university}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            )}
                                         </div>
+
+
                                         <div>
                                             <label className="block text-orange-700">Kota Asal</label>
                                             <input

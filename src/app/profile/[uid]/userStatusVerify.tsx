@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { auth, dbFire } from "@/app/firebase/config";
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { auth, dbFire,  } from "@/app/firebase/config";
+import { collection, getDocs, query, where, getDoc, doc, updateDoc, deleteDoc, addDoc } from 'firebase/firestore';
 import { FaCheckCircle } from 'react-icons/fa';
 
 interface Tenant {
@@ -10,6 +10,7 @@ interface Tenant {
     kampus: string;
     pekerjaan: string;
     phoneNumber: string;
+    kotaAsal: string;
 }
 
 interface BookingData {
@@ -21,6 +22,7 @@ interface BookingData {
     status: string;
     tenant: Tenant;
     uid: string;
+    kostanId: string;
 }
 interface SnapPaymentOptions {
     onSuccess: (result: SnapPaymentResult) => void;
@@ -33,6 +35,7 @@ interface SnapPaymentResult {
     transaction_status: string;
     order_id: string;
     gross_amount: number;
+    status_code: number;
     payment_type: string;
     bank: string;
     // Add other properties based on Midtrans Snap API response
@@ -48,9 +51,41 @@ declare global {
         snap: Snap; // Add type declaration for Midtrans Snap
     }
 }
+interface UserProfile {
+    uid: string;
+    email: string | null;
+    displayName?: string | null;
+    nama: string;
+    jenisKelamin: string;
+    tanggalLahir: Date | null;
+    pekerjaan: string;
+    namaKampus: string;
+    kotaAsal: string;
+    statusPernikahan: string;
+    pendidikanTerakhir: string;
+    kontakDarurat: string;
+    photoURL: string;
+}
+// Define the type for payment data structure
+type PaymentData = {
+    order_id: string;
+    status_code: string;
+    transaction_status: string;
+    payment_type: string;
+    gross_amount: string;
+    first_name: string;
+    email: string;
+    phoneNumber: string;
+    kampus: string;
+    kotaAsal: string;
+    pdf_url: string;
+    va_numbers: { bank: string; va_number: string }[]; // Adjust based on actual structure if needed
+  };
+  
 const UserVerify: React.FC = () => {
     const [booking, setBooking] = useState<BookingData[]>([]);
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+    const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
     // Fetch user bookings
     useEffect(() => {
@@ -108,24 +143,115 @@ const UserVerify: React.FC = () => {
                 body: JSON.stringify({
                     orderId: bookingId,
                     grossAmount: booking.find((b) => b.id === bookingId)?.price,
+                    kostanId: booking.find((b) => b.id === bookingId)?.kostanId,
+
                     customerDetails: {
                         first_name: auth.currentUser?.displayName || "Guest",
                         email: auth.currentUser?.email || "guest@example.com",
+                        kampus: booking.find((b) => b.id === bookingId)?.tenant.kampus,
+                        phoneNumber: booking.find((b) => b.id === bookingId)?.tenant.phoneNumber,
+                        kotaAsal: booking.find((b) => b.id === bookingId)?.tenant.kotaAsal
                     },
+
                 }),
             });
 
             const data = await response.json();
             console.log('Token response:', data);
             console.log("client", process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY)
-
+            const saveTransactionToFirestore = async (paymentData: PaymentData) => {
+                try {
+                   
+                    const transactionDoc = await addDoc(collection(dbFire, 'bukti_transaksi'), {
+                        order_id: paymentData.order_id,
+                        status_code: paymentData.status_code,
+                        transaction_status: paymentData.transaction_status,
+                        payment_type: paymentData.payment_type,
+                        gross_amount: paymentData.gross_amount,
+                        first_name: paymentData.first_name,
+                        email: paymentData.email,
+                        phoneNumber: paymentData.phoneNumber,
+                        kampus: paymentData.kampus,
+                        kotaAsal: paymentData.kotaAsal,
+                        pdf_url: paymentData.pdf_url,
+                        va_number: paymentData.va_numbers?.[0]?.va_number, // Assuming you're storing only the first VA number
+                        transaction_time: new Date().toISOString(),
+                    });
+                    console.log("Transaction document written with ID: ", transactionDoc.id);
+                } catch (error) {
+                    console.error("Error saving transaction to Firestore: ", error);
+                }
+            };
             if (data.token) {
+                // Temporarily prevent redirects in the Snap SDK by capturing the result and not triggering the default redirect
                 window.snap.pay(data.token, {
-                    onSuccess: function (result: SnapPaymentResult) {
+                    onSuccess: async function (result: SnapPaymentResult) {
                         console.log("Payment success:", result);
+
+                        const paymentData = {
+                            ...result,
+                            first_name: auth.currentUser?.displayName,
+                            email: auth.currentUser?.email,
+                            kampus: booking.find((b) => b.id === bookingId)?.tenant.kampus,
+                            phoneNumber: booking.find((b) => b.id === bookingId)?.tenant.phoneNumber,
+                            kotaAsal: booking.find((b) => b.id === bookingId)?.tenant.kotaAsal
+                        };
+
+                        const kostanId = booking.find((b) => b.id === bookingId)?.kostanId;
+
+                        if (kostanId) {
+                            // Reference to the kostan document
+                            const kostanRef = doc(dbFire, "home", kostanId);
+
+                            // Fetch the current sisaKamar value
+                            const kostanDoc = await getDoc(kostanRef);
+                            if (kostanDoc.exists()) {
+                                const currentSisaKamar = kostanDoc.data().sisaKamar;
+
+                                if (currentSisaKamar > 0) {
+                                    // Decrement the sisaKamar by 1
+                                    await updateDoc(kostanRef, {
+                                        sisaKamar: currentSisaKamar - 1
+                                    });
+
+                                    console.log("Room availability updated, remaining rooms:", currentSisaKamar - 1);
+                                } else {
+                                    console.log("No rooms available.");
+                                }
+                            } else {
+                                console.log("Kostan document not found.");
+                            }
+                        }
+                        const bookingRef = doc(dbFire, "booking", bookingId); // Reference to the booking document
+                        try {
+                            await deleteDoc(bookingRef);
+                            console.log("Booking deleted successfully");
+                        } catch (e) {
+                            console.error("Error deleting booking: ", e);
+                        }
+
+                        // Store the result in local storage for further use
+                        localStorage.setItem('paymentResult', JSON.stringify(paymentData));
+                        
+                        console.log(localStorage.getItem('paymentResult'));
+
+                        const redirectUrl = `http://localhost:3000/dataTransaksi?order_id=${result.order_id}&status_code=${result.status_code}&transaction_status=${result.transaction_status}`;
+                        window.location.href = redirectUrl;
+
+                        // Display a custom success message (you can replace this with a modal or update the UI as you like)
+                        alert('Payment was successful! You will not be redirected.');
+
+                        // Show success message on the page
+                        document.getElementById("payment-success-message")!.style.display = 'block';
+
+                        // Delete the booking after successful payment
+                       
+
                     },
                     onPending: function (result: SnapPaymentResult) {
                         console.log("Payment pending:", result);
+                        localStorage.setItem('paymentResultPending', JSON.stringify(result));
+                        console.log(localStorage.getItem('paymentResultPending'));
                     },
                     onError: function (result: SnapPaymentResult) {
                         console.log("Payment error:", result);
@@ -133,12 +259,51 @@ const UserVerify: React.FC = () => {
                     onClose: function () {
                         console.log("Payment popup closed");
                     },
-                });
+                } as SnapPaymentOptions);
             }
+
         } catch (error) {
             console.error("Error fetching payment token:", error);
         }
     };
+
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                setIsLoggedIn(true);
+                // Fetch user profile data from Firestore
+                const userDoc = doc(dbFire, 'user', user.uid);
+                const userSnapshot = await getDoc(userDoc);
+                if (userSnapshot.exists()) {
+                    const userData = userSnapshot.data() as UserProfile; // Cast to UserProfile
+                    const userProfileData: UserProfile = {
+                        uid: user.uid,
+                        email: user.email,
+                        displayName: user.displayName || "Anonymous",
+                        nama: userData.nama || "",
+                        jenisKelamin: userData.jenisKelamin || "",
+                        tanggalLahir: userData.tanggalLahir || null,
+                        pekerjaan: userData.pekerjaan || "",
+                        namaKampus: userData.namaKampus || "",
+                        kotaAsal: userData.kotaAsal || "",
+                        statusPernikahan: userData.statusPernikahan || "",
+                        pendidikanTerakhir: userData.pendidikanTerakhir || "",
+                        kontakDarurat: userData.kontakDarurat || "",
+                        photoURL: userData.photoURL || user.photoURL || "", // Get from Firestore or Auth
+                    };
+                    setUserProfile(userProfileData);
+                } else {
+                    console.error("No such user document!");
+                    // Handle the case when user data doesn't exist
+                }
+            } else {
+                setIsLoggedIn(false);
+                setUserProfile(null);
+            }
+        });
+
+        return () => unsubscribe();
+    }, []);
 
     return (
         <div className="min-h-screen p-4 bg-gray-100">

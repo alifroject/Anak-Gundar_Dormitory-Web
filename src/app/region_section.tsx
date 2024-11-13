@@ -5,6 +5,7 @@ import { dbFire } from '@/app/firebase/config';
 import Link from 'next/link'; // Import Link dari Next.js
 
 
+
 // Define the interfaces (same as before)
 interface Fal {
     contoh: boolean;
@@ -68,7 +69,7 @@ interface KostanData {
 
 export default function PromoComponent() {
     const [kostanData, setKostanData] = useState<KostanData[]>([]);
-
+   
     // Fetch data from Firestore
     useEffect(() => {
         const fetchKostanData = async () => {
@@ -106,7 +107,7 @@ export default function PromoComponent() {
     const regions = Array.from(new Set(kostanData.map(kostan => kostan.region)));
 
     return (
-        <div className="bg-gray-100">
+        <div className="bg-gradient-to-r from-blue-500 via-indigo-400 to-purple-600">
             <div className="max-w-7xl mx-auto flex flex-col gap-8">
                 {regions.map((region) => (
                     <div key={region} className="w-full flex-shrink-0">

@@ -7,11 +7,12 @@ import { onAuthStateChanged } from 'firebase/auth';
 import Login from '@/app/Login'; // Import komponen login
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-
+import { FacebookShareButton, TwitterShareButton, WhatsappShareButton, EmailShareButton, FacebookIcon, TwitterIcon, WhatsappIcon, EmailIcon } from "react-share";
+import { FaShareAlt, FaWhatsapp, FaEnvelope, FaFacebook, FaTwitter, FaCopy } from 'react-icons/fa';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
-
+import './ShareButtons.css'; // Pastikan untuk mengimpor file CSS
 
 const MapComponent = dynamic(() => import('@/app/MapComponent'), { ssr: false });
 import Link from 'next/link';
@@ -112,10 +113,69 @@ const KostanDetailClient = ({ initialData }: { initialData: KostanData | null })
     const [loading] = useState(false);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false); // Assume you have a way to determine if the user is logged in
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+    const [copySuccess, setCopySuccess] = useState('');
 
+    const [isFadingOut, setIsFadingOut] = useState(false);
     const router = useRouter(); // Initialize router
 
 
+
+
+    useEffect(() => {
+        // Membuat elemen script
+        const script = document.createElement('script');
+        script.src = 'https://platform-api.sharethis.com/js/sharethis.js#property=YOUR_PROPERTY_ID&product=inline-share-buttons';
+        script.async = true;
+
+        // Menambahkan script ke dalam body
+        document.body.appendChild(script);
+
+        // Clean up saat komponen dibuang
+        return () => {
+            document.body.removeChild(script);
+        };
+    }, []);
+
+    const toggleShareModal = () => {
+        setIsOpen(!isOpen);
+    };
+
+    const handleShare = (platform: 'whatsapp' | 'email' | 'facebook' | 'twitter' | 'copy'): void => {
+        const url: string = window.location.href; // Get current page URL
+        const text: string = "Check this out!"; // Customize your message here
+
+        switch (platform) {
+            case 'whatsapp':
+                window.open(`https://wa.me/?text=${text} ${url}`, '_blank');
+                break;
+            case 'email':
+                window.location.href = `mailto:?subject=Check this out&body=${text} ${url}`;
+                break;
+            case 'facebook':
+                window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+                break;
+            case 'twitter':
+                window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank');
+                break;
+            case 'copy':
+                navigator.clipboard.writeText(url).then(() => {
+                    setCopySuccess('Berhasil copy Link');
+                    setTimeout(() => setCopySuccess(''), 3000); // Clear message after 3 seconds
+                    setTimeout(() => {
+                        setCopySuccess('');
+                        setIsFadingOut(false);
+                    }, 3000); // Clear message after 3s
+
+                }).catch(() => {
+                    setCopySuccess('Berhasil copy Link');
+                });
+                break;
+            default:
+                break;
+        }
+        setIsOpen(false); // Close the modal after sharing
+    };
 
     useEffect(() => {
         console.log("Kostan data:", kostan);
@@ -334,7 +394,7 @@ const KostanDetailClient = ({ initialData }: { initialData: KostanData | null })
                         </div>
 
                         <button
-                            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg"
+                            className="mt-4 bg-blue-500 text-white mb-4 px-4 py-2 rounded-lg"
                             onClick={handleAjukanSewaClick}
                         >
                             Ajukan Sewa
@@ -388,8 +448,66 @@ const KostanDetailClient = ({ initialData }: { initialData: KostanData | null })
                                 <FontAwesomeIcon icon={faWhatsapp} style={{ color: 'green' }} className="h-12 w-12" />
                                 <p className='text-black'>Chat Owner</p>
                             </Link>
+                            <button
+                                className="text-gray-800 flex items-center space-x-2 mt-10"
+                                onClick={toggleShareModal}
+                            >
+                                <FaShareAlt className="text-xl" />
+                                <span>Bagikan</span>
+                            </button>
                         </div>
 
+                        {isOpen && (
+                            <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-60 z-50 backdrop-blur-sm">
+                                <div className="bg-white p-8 rounded-2xl shadow-2xl w-80">
+                                    <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Share This</h2>
+                                    <div className="flex justify-around mb-6">
+                                        <button
+                                            className="text-green-600 hover:text-green-700 transition-colors duration-200 p-2"
+                                            onClick={() => handleShare('whatsapp')}
+                                        >
+                                            <FaWhatsapp className="text-3xl" />
+                                        </button>
+                                        <button
+                                            className="text-blue-700 hover:text-blue-800 transition-colors duration-200 p-2"
+                                            onClick={() => handleShare('facebook')}
+                                        >
+                                            <FaFacebook className="text-3xl" />
+                                        </button>
+                                        <button
+                                            className="text-blue-500 hover:text-blue-600 transition-colors duration-200 p-2"
+                                            onClick={() => handleShare('twitter')}
+                                        >
+                                            <FaTwitter className="text-3xl" />
+                                        </button>
+                                        <button
+                                            className="text-red-500 hover:text-red-600 transition-colors duration-200 p-2"
+                                            onClick={() => handleShare('email')}
+                                        >
+                                            <FaEnvelope className="text-3xl" />
+                                        </button>
+                                        <button
+                                            className="text-gray-600 hover:text-gray-700 transition-colors duration-200 p-2"
+                                            onClick={() => handleShare('copy')}
+                                        >
+                                            <FaCopy className="text-2xl" /> Copy Link
+                                        </button>
+                                    </div>
+                                    <div className="flex justify-center">
+                                        <button
+                                            className="bg-green-500 text-white px-8 py-3 rounded-full text-lg font-semibold shadow-lg hover:bg-green-600 transition-all duration-200"
+                                            onClick={toggleShareModal}
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {copySuccess && (
+                            <p className={`fade-in-out ${isFadingOut ? 'fade-out' : ''} text-black`}>{copySuccess}</p>
+                        )}
 
 
 
