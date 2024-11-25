@@ -64,14 +64,14 @@ export default function Career() {
                         <motion.img
                             src={member.image}
                             alt={member.name}
-                            className="w-24 h-24 rounded-full mb-4 border-4 border-indigo-500"
+                            className="w-40 h-40 rounded-full mb-4 border-4 border-indigo-500"
                             whileHover={{ scale: 1.1 }}
                             transition={{ duration: 0.3 }}
                         />
-                        <h2 className="text-xl font-semibold text-gray-800">
+                        <h2 className="text-xl md:text-[25px] font-semibold text-gray-800">
                             {member.name}
                         </h2>
-                        <p className="text-sm text-gray-600 text-center">
+                        <p className="text-sm md:text-[15px] text-gray-600 text-center">
                             {member.role}
                         </p>
                     </motion.div>
