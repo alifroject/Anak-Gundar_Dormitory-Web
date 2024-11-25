@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faFileAlt } from '@fortawesome/free-solid-svg-icons';
 import { auth, dbFire } from "@/app/firebase/config";
 import { collection, getDocs, deleteDoc, doc, getDoc } from 'firebase/firestore';
 import { GeoPoint } from 'firebase/firestore';
@@ -280,8 +280,26 @@ const RiwayatKos: React.FC<RiwayatKosProps> = ({ initialData }) => {
         <div className='h-screen'>
             <>
                 {isLoggedIn ? (
-                    <div className="min-h-screen flex flex-col items-start w-full flex-grow">
-                        <h1 className="text-2xl font-semibold mb-4 text-black">Pengajuan Sewa</h1>
+                    <div className="p-6 md:p-10   w-full flex flex-col 
+             bg-gradient-to-b from-blue-300 to-purple-100 
+             shadow-md border-t-10 border-blue-600 rounded-lg z-10">
+                        <div className="bg-white shadow-xl mb-10 border-t-4 border-blue-500 rounded-lg p-8 w-full max-w-3xl mx-auto mt-10">
+                            <div className="flex flex-col items-center text-center">
+                                {/* Ikon */}
+                                <div className="mb-4">
+                                    <FontAwesomeIcon icon={faFileAlt} className="text-blue-500 text-5xl" />
+                                </div>
+                                {/* Judul */}
+                                <h1 className="text-3xl font-extrabold text-gray-800 mb-2">
+                                    Pengajuan Sewa
+                                </h1>
+                                {/* Deskripsi */}
+                                <p className="text-gray-600 text-lg">
+                                    Ajukan permohonan sewa dengan mudah dan cepat.
+                                </p>
+                            </div>
+                        </div>
+
 
                         <div className="bg-white p-4 rounded-lg mb-4 flex-1 w-full">
                             <div className="h-full flex flex-col">
@@ -318,7 +336,7 @@ const RiwayatKos: React.FC<RiwayatKosProps> = ({ initialData }) => {
                                         </div>
                                     ))
                                 ) : (
-                                    <div className="h-full flex justify-center items-center">
+                                    <div className="h-full  flex justify-center items-center">
                                         <div className="text-gray-500">No rental data available.</div>
                                     </div>
                                 )}

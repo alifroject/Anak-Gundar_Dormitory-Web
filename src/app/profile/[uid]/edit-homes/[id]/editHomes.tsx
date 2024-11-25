@@ -1,9 +1,10 @@
 "use client";
 import React, { useEffect, useState, ChangeEvent, DragEvent } from 'react';
 import { dbFire, storage } from "@/app/firebase/config";
-import { doc, updateDoc  } from 'firebase/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { GeoPoint } from 'firebase/firestore';
+
 
 interface Price {
     perBulan: number;
@@ -56,7 +57,7 @@ interface Peraturan {
     [key: string]: string;
 }
 
-export interface KostanData{
+export interface KostanData {
     id: string;
     Price: Price;
     fal: Fal;
@@ -133,9 +134,10 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
     const [longitude, setLongitude] = useState<number>(0);
     const [images, setImages] = useState<(File | null)[]>([null, null, null, null]);
     const [imageUrls, setImageUrls] = useState<(string | null)[]>([null, null, null, null]);
+    const [isModalOpen, setIsModalOpen] = useState(false); // State untuk modalfform
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const { name, value, type, checked, files } = e.target;
+    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>,) => {
+        const { name, value, type, checked, files } = e.target as HTMLInputElement;
         const nameParts = name.split('.');
 
         setFormData((prevFormData) => {
@@ -178,15 +180,31 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
         });
     };
 
+    useEffect(() => {
+        setLatitude(formData.geolokasi.latitude || 0);
+        setLongitude(formData.geolokasi.longitude || 0);
+    }, [formData]);
 
     const handleLatitudeChange = (e: ChangeEvent<HTMLInputElement>) => {
         setLatitude(parseFloat(e.target.value));
+        const value = parseFloat(e.target.value);
+        setLatitude(value);
+        setFormData((prev) => ({
+            ...prev,
+            geolokasi: new GeoPoint(isNaN(value) ? prev.geolokasi.latitude : value, prev.geolokasi.longitude),
+        }));
     };
 
     const handleLongitudeChange = (e: ChangeEvent<HTMLInputElement>) => {
-        setLongitude(parseFloat(e.target.value)); 
-
+        setLongitude(parseFloat(e.target.value));
+        const value = parseFloat(e.target.value);
+        setLongitude(value);
+        setFormData((prev) => ({
+            ...prev,
+            geolokasi: new GeoPoint(prev.geolokasi.latitude, isNaN(value) ? prev.geolokasi.longitude : value),
+        }));
     };
+
     const handleDragOver = (event: DragEvent<HTMLDivElement>): void => {
         event.preventDefault();
     };
@@ -212,6 +230,7 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setIsModalOpen(true);
 
         try {
             // 1. Upload new images if they are provided
@@ -243,13 +262,16 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
             const kostanRef = doc(dbFire, 'home', formData.id);
             await updateDoc(kostanRef, updatedKostanData);
 
-            alert("Data updated successfully");
+
             console.log("Updated data:", updatedKostanData);
 
         } catch (error) {
             console.error("Error updating data:", error);
             alert("Failed to update data");
         }
+    };
+    const closeModal = () => {
+        setIsModalOpen(false); // Sembunyikan modal
     };
 
 
@@ -285,13 +307,16 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
 
 
     return (
-        <div className="bg-gray-50 p-8 rounded-lg shadow-md">
-            <h1 className="text-3xl font-bold mb-6 text-gray-800">Input Kostan Data</h1>
-            <form onSubmit={handleSubmit} className="text-gray-800">
+        <div className="bg-blue-800 p-8 rounded-lg shadow-md text-white">
+            <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-500 to-indigo-400 mb-6 mt-20 text-center">
+                Input Kostan Data
+            </h1>
+
+            <form onSubmit={handleSubmit} className="bg-gradient-to-br md:p-20 from-blue-100 to-blue-50 p-10 rounded-lg shadow-xl text-gray-800  mx-auto">
                 <div>
                     <label>Nama Kostan: </label>
                     <input
-                        className="border border-black p-2 mb-4 w-full"
+                        className="border text-black border-gray-300 p-3 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 md:m-4"
                         type="text"
                         name="nama"
                         value={formData.nama || ""}
@@ -302,7 +327,7 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
                 <div>
                     <label>Tipe: </label>
                     <input
-                        className="border border-black p-2 mb-4 w-full"
+                        className="border text-black border-gray-300 p-3 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 md:m-4"
                         type="text"
                         name="type"
                         value={formData.type}
@@ -313,7 +338,7 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
                 <div>
                     <label>Jenis: </label>
                     <input
-                        className="border border-black p-2 mb-4 w-full"
+                        className="border text-black border-gray-300 p-3 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 md:m-4"
                         type="text"
                         name="jenis"
                         value={formData.jenis}
@@ -321,21 +346,55 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
                         required
                     />
                 </div>
-                <div>
-                    <label>Region: </label>
-                    <input
-                        className="border border-black p-2 mb-4 w-full"
-                        type="text"
-                        name="region"
-                        value={formData.region}
-                        onChange={handleChange}
-                        required
-                    />
+                <div className="mb-6">
+                    <label className="font-semibold text-lg block mb-3 text-white-700">
+                        Region
+                    </label>
+                    <div className="relative">
+                        <select
+                            className="border text-gray-700 border-gray-300 p-4 rounded-lg w-full shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 appearance-none"
+                            name="region"
+                            value={formData.region}
+                            onChange={handleChange}
+                            required
+                        >
+                            <option value="" disabled>
+                                Pilih Region
+                            </option>
+                            {[
+                                "Kampus A,B,C",
+                                "Depok Kampus D",
+                                "Depok Kampus G&E",
+                                "Kampus J",
+                                "Kampus K",
+                            ].map((region) => (
+                                <option key={region} value={region}>
+                                    {region}
+                                </option>
+                            ))}
+                        </select>
+                        <div className="absolute top-0 right-4 h-full flex items-center pointer-events-none">
+                            <svg
+                                className="w-5 h-5 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M19 9l-7 7-7-7"
+                                ></path>
+                            </svg>
+                        </div>
+                    </div>
                 </div>
                 <div>
                     <label>Ukuran Kamar: </label>
                     <input
-                        className="border border-black p-2 mb-4 w-full"
+                        className="border text-black border-gray-300 p-3 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 md:m-4"
                         type="text"
                         name="ukuranKamar"
                         value={formData.ukuranKamar}
@@ -346,7 +405,7 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
                 <div>
                     <label>Sisa Kamar: </label>
                     <input
-                        className="border border-black p-2 mb-4 w-full"
+                        className="border text-black border-gray-300 p-3 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 md:m-4"
                         type="number"
                         name="sisaKamar"
                         value={formData.sisaKamar}
@@ -357,7 +416,7 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
                 <div>
                     <label>Harga Per Hari: </label>
                     <input
-                        className="border border-black p-2 mb-4 w-full"
+                        className="border text-black border-gray-300 p-3 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 md:m-4"
                         type="number"
                         name="Price.perHari"
                         value={formData.Price.perHari}
@@ -368,7 +427,7 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
                 <div>
                     <label>Owner Name: </label>
                     <input
-                        className="border border-black p-2 mb-4 w-full"
+                        className="border text-black border-gray-300 p-3 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 md:m-4"
                         type="text"
                         name="ownerName"
                         value={formData.ownerName}
@@ -379,7 +438,7 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
                 <div>
                     <label>Owner Phone Number: </label>
                     <input
-                        className="border border-black p-2 mb-4 w-full"
+                        className="border text-black border-gray-300 p-3 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 md:m-4"
                         type="text"
                         name="ownerPhoneNumber"
                         value={formData.ownerPhoneNumber}
@@ -390,7 +449,7 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
                 <div>
                     <label>Harga Per Minggu: </label>
                     <input
-                        className="border border-black p-2 mb-4 w-full"
+                        className="border text-black border-gray-300 p-3 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 md:m-4"
                         type="number"
                         name="Price.perMinggu"
                         value={formData.Price.perMinggu}
@@ -401,7 +460,7 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
                 <div>
                     <label>Harga Per Bulan: </label>
                     <input
-                        className="border border-black p-2 mb-4 w-full"
+                        className="border text-black border-gray-300 p-3 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 md:m-4"
                         type="number"
                         name="Price.perBulan"
                         value={formData.Price.perBulan}
@@ -430,7 +489,7 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
                 <div>
                     <h2 className="font-bold text-black">Alamat:</h2>
                     <input
-                        className="border border-black p-2 mb-2 w-full"
+                        className="border text-black border-gray-300 p-3 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 md:m-4"
                         type="text"
                         name="alamat.provinsi"
                         placeholder="Provinsi"
@@ -439,7 +498,7 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
                         required
                     />
                     <input
-                        className="border border-black p-2 mb-2 w-full"
+                        className="border text-black border-gray-300 p-3 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 md:m-4"
                         type="text"
                         name="alamat.kota_kabupaten"
                         placeholder="Kota/Kabupaten"
@@ -448,7 +507,7 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
                         required
                     />
                     <input
-                        className="border border-black p-2 mb-2 w-full"
+                        className="border text-black border-gray-300 p-3 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 md:m-4"
                         type="text"
                         name="alamat.kecamatan"
                         placeholder="Kecamatan"
@@ -457,7 +516,7 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
                         required
                     />
                     <input
-                        className="border border-black p-2 mb-2 w-full"
+                        className="border text-black border-gray-300 p-3 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 md:m-4"
                         type="text"
                         name="alamat.Desa_Kelurahan"
                         placeholder="Desa/Kelurahan"
@@ -466,7 +525,7 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
                         required
                     />
                     <input
-                        className="border border-black p-2 mb-2 w-full"
+                        className="border text-black border-gray-300 p-3 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 md:m-4"
                         type="text"
                         name="alamat.Jalan"
                         placeholder="Jalan"
@@ -475,7 +534,7 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
                         required
                     />
                     <input
-                        className="border border-black p-2 mb-2 w-full"
+                        className="border text-black border-gray-300 p-3 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 md:m-4"
                         type="text"
                         name="alamat.Nomor_Rumah"
                         placeholder="Nomor Rumah"
@@ -484,7 +543,7 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
                         required
                     />
                     <input
-                        className="border border-black p-2 mb-2 w-full"
+                        className="border text-black border-gray-300 p-3 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 md:m-4"
                         type="text"
                         name="alamat.Kode_Pos"
                         placeholder="Kode Pos"
@@ -501,6 +560,7 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
                     onChange={handleLatitudeChange}
                     placeholder="Enter latitude"
                     required
+                    className="border text-black border-gray-300 p-3 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 md:m-4"
                 />
 
                 <label>Longitude:</label>
@@ -509,6 +569,7 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
                     value={longitude}
                     onChange={handleLongitudeChange}
                     placeholder="Enter longitude"
+                    className="border text-black border-gray-300 p-3 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 md:m-4"
                     required
                 />
 
@@ -518,7 +579,7 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
                         <div key={key}>
                             <label>{key}:</label>
                             <input
-                                className="border border-black p-2 mb-2 w-full"
+                                className="border text-black border-gray-300 p-3 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 md:m-4"
                                 type="text"
                                 name={`peraturan.${key}`}
                                 value={formData.peraturan[key]}
@@ -563,10 +624,64 @@ const HomeDetails = ({ useHome }: { useHome: KostanData }) => {
 
                 <button
                     type="submit"
-                    className="bg-blue-500 text-white px-4 py-2 mt-4"
+                    className="bg-blue-500 text-white px-6 py-3 mt-4 rounded-lg shadow-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all duration-300 ease-in-out transform hover:scale-105"
                 >
                     Submit
                 </button>
+
+                {isModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300">
+                        <div className="bg-white rounded-xl p-8 shadow-2xl transform transition-all scale-95 opacity-0 duration-500 ease-out max-w-lg w-full"
+                            style={{
+                                animation: 'popUpAnimation 0.5s forwards',
+                            }}
+                        >
+                            {/* Header */}
+                            <div className="flex justify-between items-center pb-4 border-b">
+                                <h3 className="text-xl font-bold text-gray-800">Berhasil!</h3>
+                                <button
+                                    onClick={closeModal}
+                                    className="text-gray-400 hover:text-gray-600 transition duration-200"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+
+                            {/* Body */}
+                            <div className="py-6 text-center">
+                                <div className="flex items-center justify-center w-16 h-16 mx-auto bg-green-100 rounded-full mb-4">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="h-8 w-8 text-green-500"
+                                        viewBox="0 0 20 20"
+                                        fill="currentColor"
+                                    >
+                                        <path
+                                            fillRule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm4.28-10.72a.75.75 0 10-1.06-1.06L9 11.44l-2.22-2.22a.75.75 0 00-1.06 1.06l3 3a.75.75 0 001.06 0l5-5z"
+                                            clipRule="evenodd"
+                                        />
+                                    </svg>
+                                </div>
+                                <p className="text-lg text-gray-600">
+                                    Dormitory berhasil di edit.
+                                </p>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="flex justify-center mt-6">
+                                <button
+                                    onClick={closeModal}
+                                    className="bg-blue-500 text-white px-6 py-2 rounded-lg shadow hover:bg-blue-600 focus:outline-none transition duration-300"
+                                >
+                                    Tutup
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+
             </form>
         </div>
 

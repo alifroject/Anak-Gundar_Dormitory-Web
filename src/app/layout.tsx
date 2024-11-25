@@ -9,6 +9,7 @@ import Navbar from '@/app/navbar-app';
 import Login from '@/app/Login';
 import Spinner from '@/components/spinner/Spinner'; // Import the Spinner component
 
+
 interface RootLayoutProps {
   children: ReactNode;
 }
@@ -44,12 +45,25 @@ export default function RootLayout({ children }: RootLayoutProps) {
           href="https://fonts.googleapis.com/css2?family=Roboto&family=Open+Sans&family=Lato&family=Montserrat&display=swap"
           rel="stylesheet"
         />
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+        />
+        <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+
+
+
+
+
+
         <meta httpEquiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups" />
       </head>
       <body className="overflow-hidden min-h-screen">
         {!isRegisterPage && <Header />}
         <Navbar onLoginClick={handleLoginClick} />
-        
+
         {isLoginOpen && (
           <Login
             onClose={handleCloseLogin}
@@ -63,7 +77,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         {isLoading && <Spinner />}
 
         <div className={`h-screen overflow-y-auto transition-all duration-300 ease-in-out`}>
-          <main className={`pt-${!isRegisterPage ? '16' : '0'} bg-white w-full`}>
+          <main className={`pt-${!isRegisterPage ? '16' : '0'} bg-white w-full mt-0`}>
             {children}
           </main>
         </div>

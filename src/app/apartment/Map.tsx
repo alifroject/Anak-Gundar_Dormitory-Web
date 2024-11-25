@@ -11,14 +11,18 @@ interface GeoJSONFeatureProperties {
 interface KosList {
     id: string;
     name: string;
+    type: string;
     geolokasi: {
         lat: number;
         lng: number;
     };
-    address: {
+    alamat: {
         jalan: string;
         kota_kabupaten: string;
         provinsi: string;
+        kecamatan?: string;
+        Desa_Kelurahan: string;
+        Nomor_Rumah: string;
     };
     price: {
         perHari: number;
@@ -69,8 +73,8 @@ const KosMap: React.FC<Props> = ({ kosList, onSelectKos }) => {
         if (typeof window !== 'undefined') {
             const customIcon = new L.Icon({
                 iconUrl: '/marker-icon.png',
-                iconSize: [25, 41],
-                iconAnchor: [12, 41],
+                iconSize: [45, 61],
+                iconAnchor: [32, 61],
             });
             setIcon(customIcon);
         }
@@ -107,9 +111,9 @@ const KosMap: React.FC<Props> = ({ kosList, onSelectKos }) => {
                 >
                     <Popup>
                         <div className='w-[140px]'>
-                        <strong>{kos.name}</strong>
+                            <strong>{kos.name}</strong>
                             <br />
-                            Jl. {kos.address.jalan}, Kota/Kabupaten. {kos.address.kota_kabupaten}, Provinsi. {kos.address.provinsi}
+                            Jl. {kos.alamat.jalan}, Kota/Kabupaten. {kos.alamat.kota_kabupaten}, Provinsi. {kos.alamat.provinsi}
                             
                             <p>
                                 Harga per Bulan: <span className="font-semibold text-green-600">

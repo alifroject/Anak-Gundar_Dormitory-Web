@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Image from 'next/image';
-import {FaBuilding, FaReceipt, FaCog, FaUser } from 'react-icons/fa';
+import { FaBuilding, FaReceipt, FaHeart, FaUser } from 'react-icons/fa';
 import KosSaya from '@/app/profile/[uid]/KosSaya';
 import RiwayatKos from '@/app/profile/[uid]/RiwayatKos';
 import RiwayatTransaksi from '@/app/profile/[uid]/RiwayatTransaksi';
@@ -13,7 +13,7 @@ import Verify from '@/app/profile/[uid]/StatusVerify';
 import UserVerify from '@/app/profile/[uid]/userStatusVerify';
 import EditHomes from '@/app/profile/[uid]/EditHomes';
 import { GeoPoint } from 'firebase/firestore';
-import { FaCheckCircle } from 'react-icons/fa'; // Import the icon
+import { FaCheckCircle, FaHome } from 'react-icons/fa'; // Import the icon
 
 interface ProfileType {
     uid: string;
@@ -100,7 +100,7 @@ const Profile = ({ userProfile }: { userProfile: ProfileType | null }) => {
         const auth = getAuth();
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
-                setIsAdmin(user.email === 'admin@gmail.com'); // Ganti dengan email admin sebenarnya
+                setIsAdmin(user.email === 'admin12@gmail.com'); // Ganti dengan email admin sebenarnya
             }
         });
         return () => unsubscribe();
@@ -132,11 +132,11 @@ const Profile = ({ userProfile }: { userProfile: ProfileType | null }) => {
     };
 
     return (
-        <div className="flex flex-col md:flex-row h-full bg-gray-100">
-            <div className="w-full md:w-1/4 mt-20 bg-white p-6 shadow-lg">
-                <ul className="space-y-5 text-gray-700">
+        <div className="flex flex-col md:flex-row h-full bg-gradient-to-r from-blue-100 to-purple-200">
+            <div className="w-full md:w-1/4 mt-20 bg-gradient-to-r from-blue-300 via-indigo-300 to-purple-300 p-6 shadow-xl rounded-lg border border-gray-200">
+                <ul className="space-y-1 text-gray-700">
                     <li
-                        className="flex items-center cursor-pointer"
+                        className="flex items-center cursor-pointer hover:bg-blue-50 p-3 rounded-lg transition-colors"
                         onClick={() => setSelectedSection('Update Profile')}
                     >
                         <Image
@@ -162,63 +162,59 @@ const Profile = ({ userProfile }: { userProfile: ProfileType | null }) => {
                     {isAdmin ? (
                         <>
                             <li
-                                className="flex items-center text-sm hover:text-blue-500 cursor-pointer"
+                                className="flex items-center text-sm hover:text-blue-500 cursor-pointer hover:bg-blue-50 p-3 rounded-lg transition-colors"
                                 onClick={() => setSelectedSection('Admin Panel')}
                             >
-                                <FaUser className="mr-3" />
-                                <span>Admin Panel</span>
+                                <FaHome className="mr-3 text-red-500 w-6 h-6" /> {/* Ikon Edit Homes */}
+                                <span>Add Homes</span>
                             </li>
                             <li
-                                className="flex items-center text-sm hover:text-blue-500 cursor-pointer"
+                                className="flex items-center text-sm hover:text-blue-500 cursor-pointer hover:bg-blue-50 p-3 rounded-lg transition-colors"
                                 onClick={() => setSelectedSection('Verify')}
                             >
-                                <FaUser className="mr-3" />
+                                <FaUser className="mr-3 text-blue-500 w-6 h-6" />
                                 <span>Verify</span>
                             </li>
                             <li
-                                className="flex items-center text-sm hover:text-blue-500 cursor-pointer"
+                                className="flex items-center text-sm hover:text-blue-500 cursor-pointer hover:bg-blue-50 p-3 rounded-lg transition-colors"
                                 onClick={() => setSelectedSection('Edit Homes')}
                             >
-                                <FaUser className="mr-3" />
+                                <FaHome className="mr-3 text-purple-500 w-6 h-6" /> {/* Ikon Edit Homes */}
                                 <span>Edit Homes</span>
                             </li>
                         </>
-
                     ) : (
                         // Tampilkan bagian lainnya jika pengguna bukan admin
                         <>
-
                             <li
-                                className="flex items-center text-sm hover:text-blue-500 cursor-pointer"
+                                className="flex items-center text-sm hover:text-blue-500 cursor-pointer hover:bg-blue-50 p-3 rounded-lg transition-colors"
                                 onClick={() => setSelectedSection('Riwayat Kos')}
                             >
-                                <FaBuilding className="mr-3" />
+                                <FaBuilding className="mr-3 w-6 h-6 text-black-500" />
                                 <span>Riwayat Kos</span>
                             </li>
                             <li
-                                className="flex items-center text-sm hover:text-blue-500 cursor-pointer"
-                                onClick={() => setSelectedSection('Riwayat Transaksi')}
+                                className="flex items-center text-sm font-medium hover:text-purple-600 cursor-pointer hover:bg-purple-50 p-3 rounded-lg transition-colors"
+                                onClick={() => setSelectedSection('Pengaturan')}
                             >
-                                <FaReceipt className="mr-3" />
-                                <span>Riwayat Transaksi</span>
+                                <FaHeart className="mr-3 text-red-500 w-6 h-6" /> {/* Ganti ikon menjadi hati dengan warna merah */}
+                                <span>Home yang Di Sukai</span> {/* Ubah teks sesuai permintaan */}
                             </li>
 
-
-
                             <li
-                                className="flex items-center text-sm hover:text-blue-500 cursor-pointer"
+                                className="flex items-center text-sm hover:text-blue-500 cursor-pointer hover:bg-blue-50 p-3 rounded-lg transition-colors"
                                 onClick={() => setSelectedSection('Status Verifikasi')}
                             >
-                                <FaCheckCircle className="mr-3" /> {/* Use FaCheckCircle for a verification icon */}
+                                <FaCheckCircle className="mr-3 w-6 h-6 text-blue-500" />
                                 <span>Status Verifikasi</span>
                             </li>
 
                             <li
-                                className="flex items-center text-sm hover:text-blue-500 cursor-pointer"
-                                onClick={() => setSelectedSection('Pengaturan')}
+                                className="flex items-center text-sm hover:text-blue-500 cursor-pointer hover:bg-blue-50 p-3 rounded-lg transition-colors"
+                                onClick={() => setSelectedSection('Riwayat Transaksi')}
                             >
-                                <FaCog className="mr-3" />
-                                <span>Pengaturan</span>
+                                <FaReceipt className="mr-3 text-green-500 w-6 h-6" />
+                                <span>Riwayat Transaksi</span>
                             </li>
                         </>
                     )}
@@ -230,6 +226,7 @@ const Profile = ({ userProfile }: { userProfile: ProfileType | null }) => {
                 <div>{renderMainContent()}</div>
             </div>
         </div>
+
     );
 };
 

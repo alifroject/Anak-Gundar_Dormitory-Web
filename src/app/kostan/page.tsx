@@ -9,14 +9,18 @@ import Link from 'next/link';
 interface KosData {
     id: string;
     name: string;
+    type: string;
     geolokasi: {
         lat: number;
         lng: number;
     };
-    address: {
+    alamat: {
         jalan: string;
         kota_kabupaten: string;
         provinsi: string;
+        kecamatan?: string;
+        Desa_Kelurahan: string;
+        Nomor_Rumah: string;
     };
     price: {
         perHari: number;
@@ -99,14 +103,13 @@ export default function Career() {
     const [kosList, setKosList] = useState<KosData[]>([]);
     const [selectedKos, setSelectedKos] = useState<KosData | null>(null);
     const [, setDefaultKos] = useState<KosData[]>([]);
-    const [searchKeyword, setSearchKeyword] = useState<string>(''); // State for search keyword
     const [filteredKos, setFilteredKos] = useState<KosData[]>([]); // State for filtered kos list
     const [regions, setRegions] = useState<string[]>([]);
     const router = useRouter();
-    const [kostanData, setKostanData] = useState<KostanData[]>([]);
+    const [, setKostanData] = useState<KostanData[]>([]);
     const [selectedRegion, setSelectedRegion] = useState<string>('');
-    const [homes, setHomes] = useState<KostanData[]>([]);
-    const [isRegionSelected, setIsRegionSelected] = useState(false); // Tambahkan state baru
+    const [, setHomes] = useState<KostanData[]>([]);
+
 
     useEffect(() => {
         const fetchKostanDataLink = async () => {
@@ -143,28 +146,27 @@ export default function Career() {
 
     const handleNavigateToBooking = (e: React.MouseEvent) => {
         e.preventDefault(); // Prevent default anchor behavior
-        if (kostanData && kostanData.length > 0) { // Ensure kostanData is an array and has items
-            // Select the first item (or any specific item you want to pass to the booking URL)
-            const selectedKostan = kostanData[0]; // Or use logic to choose which one to pick
 
-
-            const bookingUrl = `/home/${selectedKostan.id}?details=${encodeURIComponent(
-                selectedKostan.nama.replace(/\s+/g, '-')
-            )}&alamat=Kota/Kabupeten=${encodeURIComponent(
-                selectedKostan.alamat.kota_kabupaten
-            )}&kecamatan=${encodeURIComponent(
-                selectedKostan.alamat.kecamatan
-            )}&desa=${encodeURIComponent(
-                selectedKostan.alamat.Desa_Kelurahan
-            )}&NO_Rumah=${encodeURIComponent(selectedKostan.alamat.Nomor_Rumah)}`;
-
-            console.log("Redirecting to:", bookingUrl);
-            router.push(bookingUrl); // Redirect to the booking page
-        } else {
-            console.error("Kostan data is not available or empty.");
+        if (!selectedKos) {
+            console.error("Kos belum dipilih.");
+            return;
         }
-    };
 
+        const bookingUrl = `/home/${selectedKos.id}?details=${encodeURIComponent(
+            selectedKos.name.replace(/\s+/g, '-')
+        )}&alamat=Kota/Kabupeten=${encodeURIComponent(
+            selectedKos.alamat.kota_kabupaten
+        )}&kecamatan=${encodeURIComponent(
+            selectedKos.alamat?.kecamatan || 'N/A'
+        )}&desa=${encodeURIComponent(
+            selectedKos.alamat?.Desa_Kelurahan || 'N/A'
+        )}&NO_Rumah=${encodeURIComponent(
+            selectedKos.alamat?.Nomor_Rumah || 'N/A'
+        )}`;
+
+        console.log("Redirecting to:", bookingUrl);
+        router.push(bookingUrl); // Redirect to the booking page
+    };
 
 
 
@@ -184,14 +186,19 @@ export default function Career() {
                     kosData.push({
                         id: doc.id,
                         name: data.nama || 'Kos',
+                        type: data.type || 'Kos',
                         geolokasi: {
                             lat: data.geolokasi?.latitude || 0,
                             lng: data.geolokasi?.longitude || 0,
                         },
-                        address: {
+                        alamat: {
                             jalan: data.alamat?.Jalan || 'Alamat tidak tersedia',
                             kota_kabupaten: data.alamat?.kota_kabupaten || '',
                             provinsi: data.alamat?.provinsi || '',
+                            kecamatan: data.kecamatan || '',
+                            Desa_Kelurahan: data.Desa_Kelurahan || '',
+                            Nomor_Rumah: data.Nomor_Rumah || ''
+
                         },
                         price: {
                             perHari: data.Price?.perHari || 0,
@@ -264,9 +271,31 @@ export default function Career() {
 
     return (
         <div className="min-h-screen bg-gradient-to-r from-purple-700 via-pink-600 to-orange-500 py-10 px-4">
-            <h1 className="text-5xl mt-[70px] font-extrabold text-blue-600 text-center">
-                Kostan
-            </h1>
+            <div className="flex flex-col mt-20 items-center justify-center mt-[70px] bg-gradient-to-r from-blue-50 via-white to-blue-50 p-10 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+                {/* Ikon */}
+                <div className="text-blue-500 mb-6 animate-bounce">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-16 w-16"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                    >
+                        <path d="M10.707 1.293a1 1 0 00-1.414 0L4.293 6.293A1 1 0 004 7v6a1 1 0 001 1h2a1 1 0 011 1v2a1 1 0 001 1h4a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 001-1V7a1 1 0 00-.293-.707l-5-5z" />
+                    </svg>
+                </div>
+
+                {/* Judul */}
+                <h1 className="text-5xl font-extrabold text-blue-600 text-center leading-tight tracking-wide">
+                    Kostan
+                </h1>
+
+                {/* Subjudul */}
+                <p className="mt-4 text-gray-600 text-lg text-center">
+                    Temukan kenyamanan di setiap sudutnya.
+                </p>
+            </div>
+
+
             <div className="mt-20 flex justify-center mb-8">
                 <select
                     id="region"
@@ -287,13 +316,13 @@ export default function Career() {
 
 
             {/* Flex container for map and kos details */}
-            <div className="flex flex-col md:flex-row gap-8 justify-center">
+            <div className="flex flex-col h-full  md:flex-row gap-8 justify-center">
                 {/* Map Section */}
                 <div className="rounded-lg  md:w-1/2 w-full">
                     <KosMap kosList={filteredKos} onSelectKos={setSelectedKos} />
                 </div>
 
-                <div className="md:w-1/2 w-full p-0 rounded-lg shadow-lg">
+                <div className="md:w-1/2 w-full md:h-full h-full p-6  shadow-lg">
                     {selectedKos ? (
                         <>
                             <button
@@ -305,65 +334,105 @@ export default function Career() {
                                 </svg>
                                 <span className='text-white'>Pilih Ulang Kos</span>
                             </button>
-                            <Link href="#" onClick={handleNavigateToBooking}>
-                                <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-2xl transition-shadow duration-300 border border-gray-200">
-                                    <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-3 hover:text-blue-600 transition-colors duration-300 tracking-tight">
-                                        {selectedKos.name}
-                                    </h2>
-                                    <p className="text-gray-500 text-base md:text-lg mb-5 italic">
-                                        {selectedKos.address.jalan}, {selectedKos.address.kota_kabupaten}, {selectedKos.address.provinsi}
-                                    </p>
-
-                                    <div className="text-gray-700 text-base md:text-lg space-y-3 mb-6">
-                                        <p>Harga per Hari: <span className="font-semibold text-green-700">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(selectedKos.price.perHari)}</span></p>
-                                        <p>Harga per Hari: <span className="font-semibold text-green-700">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(selectedKos.price.perMinggu)}</span></p>
-                                        <p>Harga per Hari: <span className="font-semibold text-green-700">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(selectedKos.price.perBulan)}</span></p>
-                                    </div>
-
+                            <Link
+                                href={`/home/${selectedKos.id}?House_Or_Apertment=${encodeURIComponent(selectedKos.name.replace(/\s+/g, '-'))}`}
+                                onClick={handleNavigateToBooking}
+                            >
+                                <div className="bg-gray-50 rounded-lg shadow-lg p-6 hover:shadow-2xl transition duration-300 border border-gray-200 flex flex-col md:flex-row items-center">
+                                    {/* Gambar */}
                                     {selectedKos.images[0] && (
-                                        <div className="mt-5 overflow-hidden rounded-lg shadow-md transition-transform transform hover:scale-105 duration-300">
+                                        <div className="w-full md:w-32 md:h-32 md:mr-6 flex-shrink-0 rounded-lg overflow-hidden shadow-md">
                                             <img
                                                 src={selectedKos.images[0]}
                                                 alt="Gambar Kos"
-                                                className="w-full h-60 md:h-72 object-cover rounded-lg"
+                                                className="w-full h-[200px] object-cover"
                                             />
                                         </div>
                                     )}
+
+                                    {/* Konten Teks */}
+                                    <div className="flex-1 mt-4 md:mt-0 text-center md:text-left">
+                                        <h2 className="text-xl md:text-3xl font-semibold text-blue-900 mb-2 tracking-wide">
+                                            {selectedKos.name}  <span className='text-red-500'>{selectedKos.type}</span>
+                                        </h2>
+                                        <p className="text-sm md:text-base text-gray-600 mb-3">
+                                            📍 {selectedKos.alamat.jalan}, {selectedKos.alamat.kota_kabupaten}, {selectedKos.alamat.provinsi}
+                                        </p>
+                                        <p className="text-sm text-gray-500 font-medium">{selectedKos.region}</p>
+
+                                        <div className="mt-4">
+                                            <p className="text-lg text-gray-700">
+                                                Harga per Bulan:{' '}
+                                                <span className="font-bold text-green-600">
+                                                    {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(selectedKos.price.perBulan)}
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             </Link>
+
+
 
 
                         </>
 
                     ) : (
-                        <Link href="#" onClick={handleNavigateToBooking}>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 px-4 mt-8">
-                                {filteredKos.map((kos) => (
-                                    <div key={kos.id} className="flex flex-col h-full p-6 bg-gray-200 border border-gray-400 rounded-lg shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-                                        <h2 className="text-sm md:text-4xl font-bold text-gray-800 mb-4 hover:text-blue-500 transition-colors duration-300">{kos.name}</h2>
-                                        <p className="text-gray-600 text-sm md:text-lg mb-4">
-                                            {kos.address.jalan}, {kos.address.kota_kabupaten}, {kos.address.provinsi}
-                                        </p>
-                                        <div className="space-y-3 text-sm md:text-lg text-gray-800">
-                                        <p>Harga per Hari: <span className="font-semibold text-green-700">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(kos.price.perHari)}</span></p>
-                                        <p>Harga per Hari: <span className="font-semibold text-green-700">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(kos.price.perMinggu)}</span></p>
-                                        <p>Harga per Hari: <span className="font-semibold text-green-700">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(kos.price.perBulan)}</span></p>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 px-6 mt-12">
+                            {filteredKos.map((kos) => (
+                                <Link
+
+                                    key={kos.id}
+                                    href={`/home/${kos.id}?House_Or_Apertment=${encodeURIComponent(kos.name.replace(/\s+/g, '-'))}`}
+                                >
+                                    {kos.images[0] && (
+                                        <div className="mt-auto overflow-hidden rounded-t-lg shadow-sm transition-transform transform hover:scale-105 duration-300">
+                                            <img
+                                                src={kos.images[0]}
+                                                alt={`Gambar ${kos.name}`}
+                                                className="w-full  h-[150px] object-cover"
+                                            />
                                         </div>
-                                        {kos.images[0] && (
-                                            <div className="mt-6 overflow-hidden rounded-lg shadow-md transition-transform transform hover:scale-105 duration-300">
-                                                <img
-                                                    src={kos.images[0]}
-                                                    alt="Gambar Kos"
-                                                    className="w-full h-48 object-cover rounded-lg"
-                                                />
-                                            </div>
-                                        )}
+                                    )}
+                                    <div className="flex flex-col md:w-full rounded-b-lg md:h-[52%]  p-5 bg-white border border-gray-300 mb-5  shadow-md hover:shadow-lg transition-transform transform hover:scale-105 cursor-pointer">
+                                        {/* Judul Kos */}
+
+
+                                        <h2 className="text-base md:text-[14px] font-bold text-gray-800 hover:text-blue-600 transition-colors duration-300">
+                                            {kos.name} <span className='text-red-500'>{kos.type}</span>
+                                        </h2>
+
+                                        {/* Alamat Kos */}
+                                        <p className="text-gray-600 md:text-[8.4px] text-[9px] text-sm md:text-sm leading-relaxed ">
+                                            {kos.alamat.jalan}, {kos.alamat.kota_kabupaten}, {kos.alamat.provinsi}
+                                        </p>
+
+                                        {/* Region */}
+                                        <p className="text-xs md:text-sm  md:text-[8.6px] text-[10px] font-medium text-gray-700 ">
+                                            Wilayah: <span className="text-blue-600 font-semibold">{kos.region}</span>
+                                        </p>
+
+                                        {/* Harga */}
+                                        <div className="text-sm mt-2 md:text-sm md:text-[10px] text-gray-800 ">
+                                            <p>
+                                                Harga per Bulan:{" "}
+                                                <span className="font-semibold text-green-700">
+                                                    {new Intl.NumberFormat("id-ID", {
+                                                        style: "currency",
+                                                        currency: "IDR",
+                                                    }).format(kos.price.perBulan)}
+                                                </span>
+                                            </p>
+                                        </div>
+
+                                        {/* Gambar Kos */}
+
                                     </div>
-                                ))}
-                            </div>
+                                </Link>
+                            ))}
+                        </div>
 
-
-                        </Link>
                     )}
                 </div>
 

@@ -11,7 +11,12 @@ import { app } from '@/app/firebase/config';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
 import { dbFire } from '@/app/firebase/config';
-import { doc, getDoc} from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
+import { FaHome, FaBuilding } from 'react-icons/fa';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUserCircle, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
+import { MagnifyingGlassIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
+
 
 interface NavbarProps {
     onLoginClick: () => void;
@@ -137,7 +142,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                 <div className="flex items-center">
                     <Link href="/">
                         <Image
-                            src="https://firebasestorage.googleapis.com/v0/b/anak-gundar.appspot.com/o/anakGundar.png?alt=media"
+                            src="/anakGundar.png"
                             alt="Description of the image"
                             width={120}
                             height={100}
@@ -146,53 +151,67 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                     </Link>
                 </div>
 
-                {/* Hamburger Menu for smaller screens */}
                 <div className="md:hidden">
                     <button onClick={toggleSidebar} className="text-black hover:text-gray-400 focus:outline-none">
                         {isSidebarOpen ? (
-                            <XMarkIcon className="h-8 w-8" />
+                            <div
+                                className="flex items-center justify-center p-2 rounded-full bg-red-500 text-white shadow-md hover:bg-red-600 hover:shadow-lg transition-all duration-300"
+                                aria-label="Close"
+                            >
+                                <XMarkIcon className="h-8 w-8" />
+                            </div>
                         ) : (
-                            <Bars3Icon className="h-8 w-8" />
+                            <div
+                                className="flex items-center justify-center p-3 rounded-full bg-blue-500 text-white shadow-md hover:bg-blue-600 hover:shadow-lg transition-all duration-300"
+                                aria-label="Open Menu"
+                            >
+                                <Bars3Icon className="h-8 w-8" />
+                            </div>
                         )}
                     </button>
                 </div>
+
 
                 {/* Centered List Items for larger screens */}
                 <ul className="hidden md:flex items-center justify-center space-x-8 flex-grow" style={{ fontFamily: 'Lato, sans-serif' }}>
                     <div className="relative">
                         <button
                             onClick={toggleCariDropdown}
-                            className="flex items-center text-black hover:text-gray-400"
+                            className="flex items-center text-gray-800 hover:text-blue-500 px-4 py-2 rounded-lg transition-all duration-200"
                             aria-expanded={isCariDropdownOpen}
                         >
                             Masih Cari?
                             <ChevronDownIcon className="w-5 h-5 ml-1" />
                         </button>
                         {isCariDropdownOpen && (
-                            <ul className="w-30 absolute bg-white text-black shadow-lg mt-2 rounded">
+                            <ul className="w-48 absolute bg-white text-gray-800 shadow-lg mt-2 rounded-lg border border-gray-300">
                                 <li>
-                                    <Link href="/kostan" className="flex items-center px-4 py-2 hover:bg-gray-200">
+                                    <Link href="/kostan" className="flex items-center px-4 py-3 hover:bg-blue-50 rounded-lg">
+                                        <FaHome className="w-5 h-5 mr-2 text-blue-500" /> {/* Ikon rumah untuk Kostan */}
                                         Kostan
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/apartment" className="flex items-center px-4 py-2 hover:bg-gray-200">
+                                    <Link href="/apartment" className="flex items-center px-4 py-3 hover:bg-blue-50 rounded-lg">
+                                        <FaBuilding className="w-5 h-5 mr-2 text-blue-500" /> {/* Ikon gedung untuk Apartment */}
                                         Apartment
                                     </Link>
                                 </li>
                             </ul>
                         )}
                     </div>
+
                     <li>
-                        <Link href="/rules" className="text-black hover:text-gray-400 block" passHref>
+                        <Link href="/rules" className="text-gray-800 hover:text-blue-500 block px-4 py-3 rounded-lg transition-all duration-200">
                             Syarat yang berlaku dan aturan
                         </Link>
                     </li>
+
                     {isLoggedIn ? (
                         <div className="relative">
                             <button
                                 onClick={toggleProfileDropdown}
-                                className="flex items-center text-black hover:text-gray-400"
+                                className="flex items-center text-gray-800 hover:text-blue-500 px-4 py-2 rounded-lg transition-all duration-200"
                                 aria-expanded={isProfileDropdownOpen}
                             >
                                 <Image
@@ -200,37 +219,44 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                                     alt="Profile"
                                     width={40}
                                     height={40}
-                                    className="rounded-full" // Makes the image circular
+                                    className="rounded-full border-2 border-gray-300"
                                 />
-
                                 <ChevronDownIcon className="w-5 h-5 ml-1" />
                             </button>
                             {isProfileDropdownOpen && (
-                                <ul className="absolute bg-white text-black shadow-lg mt-2 rounded w-40">
+                                <ul className="absolute bg-white text-black shadow-md mt-2 rounded-lg w-48 border border-gray-200">
                                     <li>
-                                        <Link href={`/profile/${userProfile?.uid}`} className="block px-4 py-2 hover:bg-gray-200" passHref>
-                                            Lihat Profil
+                                        <Link
+                                            href={`/profile/${userProfile?.uid}`}
+                                            onClick={closeSidebar}
+                                            className="flex items-center px-4 py-3 hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 rounded-lg transition-all duration-300"
+                                        >
+                                            <FontAwesomeIcon icon={faUserCircle} className="w-5 h-5 mr-3 text-blue-500" />
+                                            <span className="font-medium">Lihat Profil</span>
                                         </Link>
                                     </li>
                                     <li>
                                         <button
                                             onClick={handleLogout}
-                                            className="block px-4 py-2 hover:bg-gray-200 w-full text-left"
+                                            className="flex items-center px-4 py-3 hover:bg-gradient-to-r hover:from-red-100 hover:to-red-200 rounded-lg transition-all duration-300 w-full text-left"
                                         >
-                                            Logout
+                                            <FontAwesomeIcon icon={faSignOutAlt} className="w-5 h-5 mr-3 text-red-500" />
+                                            <span className="font-medium">Logout</span>
                                         </button>
                                     </li>
                                 </ul>
+
                             )}
                         </div>
                     ) : (
                         <li>
-                            <button onClick={onLoginClick} className="text-blue-700 hover:bg-gray-100 hover:text-blue-400 border-2 border-blue-500 px-4 py-1 rounded w-full">
+                            <button onClick={onLoginClick} className="text-white bg-blue-500 hover:bg-blue-600 border-2 border-blue-500 px-6 py-2 rounded-lg transition-all duration-200 w-full">
                                 Masuk
                             </button>
                         </li>
                     )}
                 </ul>
+
             </nav>
 
             {/* Sidebar */}
@@ -241,7 +267,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                 <div className={`p-4 ${isSidebarOpen ? 'block' : 'hidden'}`}>
                     <Link href="/" onClick={closeSidebar}>
                         <img
-                            src="https://firebasestorage.googleapis.com/v0/b/anak-gundar.appspot.com/o/anakGundar.png?alt=media"
+                            src="https://firebasestorage.googleapis.com/v0/b/anak-gundar.appspot.com/o/anakGundar.png?alt=media&token=c2ebe51d-1eae-45de-ac86-4ff65a2b6661"
                             alt="Description of the image"
                             width={100}
                             height={90}
@@ -249,12 +275,8 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                         />
                     </Link>
                 </div>
-                <div className="flex justify-end p-4">
-                    <button onClick={closeSidebar}>
-                        <XMarkIcon className="h-8 w-8 text-black" />
-                    </button>
-                </div>
-                <ul className="space-y-4 mt-4">
+
+                <ul className="space-y-4 mt-4 h-full bg-blue-50 p-4">
                     {isLoggedIn ? (
                         <div className="relative">
                             <button
@@ -273,21 +295,28 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                                 <ChevronDownIcon className="w-5 h-5 ml-1" />
                             </button>
                             {isProfileDropdownOpen && (
-                                <ul className="absolute bg-white text-black shadow-lg mt-2 rounded w-40">
+                                <ul className="absolute bg-white text-black shadow-md mt-2 rounded-lg w-48 border border-gray-200">
                                     <li>
-                                        <Link href={`/profile/${userProfile?.uid}`} onClick={closeSidebar} className="block px-4 py-2 hover:bg-gray-200">
-                                            Lihat Profil
+                                        <Link
+                                            href={`/profile/${userProfile?.uid}`}
+                                            onClick={closeSidebar}
+                                            className="flex items-center px-4 py-3 hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 rounded-lg transition-all duration-300"
+                                        >
+                                            <FontAwesomeIcon icon={faUserCircle} className="w-5 h-5 mr-3 text-blue-500" />
+                                            <span className="font-medium">Lihat Profil</span>
                                         </Link>
                                     </li>
                                     <li>
                                         <button
                                             onClick={handleLogout}
-                                            className="block px-4 py-2 hover:bg-gray-200 w-full text-left"
+                                            className="flex items-center px-4 py-3 hover:bg-gradient-to-r hover:from-red-100 hover:to-red-200 rounded-lg transition-all duration-300 w-full text-left"
                                         >
-                                            Logout
+                                            <FontAwesomeIcon icon={faSignOutAlt} className="w-5 h-5 mr-3 text-red-500" />
+                                            <span className="font-medium">Logout</span>
                                         </button>
                                     </li>
                                 </ul>
+
                             )}
                         </div>
                     ) : (
@@ -300,21 +329,24 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                     <li>
                         <button
                             onClick={toggleCariDropdown}
-                            className="flex items-center text-black hover:text-gray-400 mt-20"
+                            className="flex items-center text-gray-900 hover:text-blue-600 mt-6 px-4 py-2 rounded-md font-medium transition-all duration-200 border-b-2 border-transparent hover:border-blue-500"
                             aria-expanded={isCariDropdownOpen}
                         >
+                            <MagnifyingGlassIcon className="w-5 h-5 mr-2" /> {/* Ikon cari sebelum teks */}
                             Masih Cari?
-                            <ChevronDownIcon className="w-5 h-5 ml-1" />
+                            <ChevronDownIcon className="w-5 h-5 ml-2" />
                         </button>
                         {isCariDropdownOpen && (
-                            <ul className="bg-white text-black shadow-lg mt-2 rounded w-full space-y-2">
+                            <ul className="bg-white text-gray-900 shadow-lg mt-2 rounded-md w-full space-y-2">
                                 <li>
-                                    <Link href="/kostan" onClick={closeSidebar} className="flex items-center px-4 py-2 hover:bg-gray-200">
+                                    <Link href="/kostan" onClick={closeSidebar} className="flex items-center px-6 py-3 hover:bg-blue-50 rounded-md transition-all duration-200 border-b-2 border-transparent hover:border-blue-500">
+                                        <FaHome className="w-5 h-5 mr-3 text-blue-500" />
                                         Kostan
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/apartment" onClick={closeSidebar} className="flex items-center px-4 py-2 hover:bg-gray-200">
+                                    <Link href="/apartment" onClick={closeSidebar} className="flex items-center px-6 py-3 hover:bg-blue-50 rounded-md transition-all duration-200 border-b-2 border-transparent hover:border-blue-500">
+                                        <FaBuilding className="w-5 h-5 mr-3 text-blue-500" />
                                         Apartment
                                     </Link>
                                 </li>
@@ -322,10 +354,12 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                         )}
                     </li>
                     <li>
-                        <Link href="/rules" onClick={closeSidebar} className="text-black hover:text-gray-400 block">
-                            Syarat yang berlaku dan aturan
+                        <Link href="/rules" onClick={closeSidebar} className="flex items-center text-gray-900 hover:text-blue-600 block px-4 py-3 font-medium transition-all duration-200 border-b-2 border-transparent hover:border-blue-500">
+                            <DocumentTextIcon className="w-5 h-5 mr-2" />
+                            Syarat  dan aturan
                         </Link>
                     </li>
+
                     {/* Conditional rendering for login/logout in the sidebar */}
 
                 </ul>

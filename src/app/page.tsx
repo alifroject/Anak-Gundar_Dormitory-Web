@@ -2,7 +2,6 @@
 
 import React, { useRef } from 'react';
 import { Swiper, SwiperSlide } from "swiper/react";
-import { RxArrowTopRight } from "react-icons/rx";
 import "swiper/css";
 import "swiper/css/pagination";
 import { Pagination } from "swiper/modules";
@@ -16,20 +15,20 @@ import { Swiper as SwiperCore } from 'swiper';
 
 const images = [
   {
-    src: 'https://storage.googleapis.com/a1aa/image/7atiFWwQCtqEI94eVx0zwaIch8im5QZ7tjHiU24VrQOWcjyJA.jpg',
-    alt: 'Sewa kos terpercaya & populer di sini',
+    src: '/gundar11.png',
+    
   },
   {
-    src: 'https://storage.googleapis.com/a1aa/image/eQInGqmWvqzQHarty5upmwT7aYiSfEUKUqXLFuJ26NPt4GlTA.jpg',
-    alt: 'Gak dapet jaminan kehilangan barang di kosan?',
+    src: '/gundar22.jpg',
+   
   },
   {
-    src: 'https://storage.googleapis.com/a1aa/image/lOpqDynvBP5iA9LIWcJn8WRAZDMB5DVFqyVvap8HffKq4GlTA.jpg',
-    alt: 'Surat terbuka untuk kampus se-Indonesia',
+    src: '/gundar33.jpg',
+   
   },
   {
-    src: 'https://storage.googleapis.com/a1aa/image/lOpqDynvBP5iA9LIWcJn8WRAZDMB5DVFqyVvap8HffKq4GlTA.jpg',
-    alt: 'Surat terbuka untuk kampus se-Indonesia',
+    src: '/gundar44.jpg',
+   
   },
 ];
 
@@ -52,8 +51,8 @@ const ActiveSlider = () => {
 
   return (
     <>
-      <div className="flex items-center justify-center flex-col min-h-[900px] w-full overflow-hidden 240px:overflow-hidden">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-gray-800 text-center mb-4">
+      <div className="flex items-center justify-center min-h-full  flex-col md:min-h-[900px] w-full overflow-hidden 240px:overflow-hidden">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl mt-1 font-semibold text-gray-800 mt-40 text-center mb-4">
           Lagi cari kos deket Gundar?
         </h1>
         <p className="text-base sm:text-lg md:text-xl text-gray-600 font-medium text-center mb-10">
@@ -85,35 +84,36 @@ const ActiveSlider = () => {
         >
           {images.map((image, index) => (
             <SwiperSlide key={index}>
-              <div className="flex flex-col gap-6 mb-20 group relative shadow-lg text-white rounded-xl px-6 py-8 h-auto w-full lg:h-[400px] lg:w-[350px] overflow-hidden cursor-pointer">
+              <div className="flex flex-col gap-6 mb-10 group relative shadow-lg text-white rounded-xl px-6 py-8  h-[500px] w-full md:w-[350px] lg:w-[350px] overflow-hidden cursor-pointer" >
                 <div
                   className="absolute inset-0 bg-cover bg-center"
                   style={{ backgroundImage: `url(${image.src})` }}
                 />
                 <div className="absolute inset-0 bg-black opacity-10 group-hover:opacity-50" />
-                <div className="relative flex flex-col gap-3">
-                  <h1 className="text-xl lg:text-2xl">{image.alt}</h1>
-                  <p className="lg:text-[18px]">Deskripsi untuk {image.alt}</p>
-                </div>
-                <RxArrowTopRight className="absolute bottom-5 left-5 w-[35px] h-[35px] text-white group-hover:text-blue-500 group-hover:rotate-45 duration-100" />
+                
+    
               </div>
             </SwiperSlide>
+            
           ))}
         </Swiper>
-        <div className="mt-6 flex justify-center items-center space-x-2">
+        <div className="mt-6 flex justify-center items-center space-x-4">
           <button
-            className="p-2 bg-gray-200 rounded-full shadow-sm hover:bg-gray-300"
-            onClick={handlePrevSlide} // Trigger previous slide
+            className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full shadow-lg hover:from-blue-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-300"
+            onClick={handlePrevSlide}
+            aria-label="Previous Slide"
           >
-            <FontAwesomeIcon icon={faChevronLeft} />
+            <FontAwesomeIcon icon={faChevronLeft} className="text-lg" />
           </button>
           <button
-            className="p-2 bg-gray-200 rounded-full shadow-sm hover:bg-gray-300"
-            onClick={handleNextSlide} // Trigger next slide
+            className="p-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full shadow-lg hover:from-green-600 hover:to-green-700 transform hover:scale-105 transition-all duration-300"
+            onClick={handleNextSlide}
+            aria-label="Next Slide"
           >
-            <FontAwesomeIcon icon={faChevronRight} />
+            <FontAwesomeIcon icon={faChevronRight} className="text-lg" />
           </button>
         </div>
+
       </div>
       <PromoComponent></PromoComponent>
 

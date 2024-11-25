@@ -4,6 +4,8 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
+
+
 // ProfileType for user data structure
 interface ProfileType {
     uid: string;
@@ -16,8 +18,7 @@ interface ProfileType {
     kampus?: string;
     pekerjaan?: string;
     jenisKelamin?: string;
-    statusPernikahan?: string;
-
+    statusNikah?: string;
     pendidikanTerakhir: string;
 }
 
@@ -39,7 +40,8 @@ export default function UpdateProfile() {
             try {
                 const response = await fetch('http://universities.hipolabs.com/search?country=Indonesia');  // API untuk daftar universitas
                 const data = await response.json();
-                const universityNames = data.map((university: any) => university.name);
+                const universityNames = data.map((university: { name: string }) => university.name);
+                
                 setUniversities(universityNames);  // Menyimpan nama universitas ke dalam state universities
             } catch (error) {
                 console.error('Error fetching universities:', error);
@@ -142,7 +144,7 @@ export default function UpdateProfile() {
     };
     return (
         <>
-            isLoggedIn ? (
+           
             <div className="form-container relative">
                 {isSaving && (
                     <div className="spinner-overlay absolute inset-0 flex justify-center items-center bg-opacity-50 bg-gray-800 z-50">
@@ -172,9 +174,9 @@ export default function UpdateProfile() {
 
                 )}
 
-                <div className="bg-gray-100 min-h-screen flex flex-col items-center overflow-x-hidden">
+                <div className="min-h-screen flex flex-col items-center overflow-x-hidden">
                     <main className="w-full flex-grow py-6">
-                        <div className="bg-white shadow w-full  rounded-lg p-6">
+                        <div className="bg-white shadow w-full h-full  rounded-lg p-6">
                             <h2 className="text-xl font-bold mb-4 text-blue-700">Informasi Pribadi</h2>
                             <div className="bg-green-100 p-4 rounded mb-4">
                                 <p className="text-sm text-gray-700 flex items-center">
@@ -250,12 +252,12 @@ export default function UpdateProfile() {
                                             <label className="block text-green-700">Status Nikah</label>
                                             <select
                                                 name="statusNikah"
-                                                value={userData?.statusPernikahan || ""}
+                                                value={userData?.statusNikah || ""}
                                                 onChange={handleChange}
                                                 className="border rounded w-full px-4 py-2"
                                             >
-                                                <option>Menikah</option>
-                                                <option>Belum Menikah</option>
+                                                <option value="Menikah">Menikah</option>
+                                                <option value="Belum Menikah">Belum Menikah</option>
                                             </select>
                                         </div>
 
@@ -384,7 +386,7 @@ export default function UpdateProfile() {
                 </div>
 
             </div>
-            ) : (null)
+          
         </>
     );
 }

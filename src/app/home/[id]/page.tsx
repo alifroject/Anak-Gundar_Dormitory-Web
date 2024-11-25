@@ -25,6 +25,8 @@ interface Fal {
     dapur: boolean;
     parkirMotor: boolean;
     parkirMobil: boolean;
+    parkir_Motor: boolean;
+    parkir_Mobil: boolean;
 }
 
 interface Images {
@@ -108,4 +110,3 @@ export async function generateStaticParams() {
 }
 
 export default KostanDetail;
-

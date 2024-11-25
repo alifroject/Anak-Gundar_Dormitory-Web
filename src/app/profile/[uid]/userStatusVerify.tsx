@@ -1,8 +1,10 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { auth, dbFire,  } from "@/app/firebase/config";
-import { collection, getDocs, query, where, getDoc, doc, updateDoc, deleteDoc, addDoc } from 'firebase/firestore';
+import { auth, dbFire, } from "@/app/firebase/config";
+import { collection, getDocs, query, where, getDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { FaCheckCircle } from 'react-icons/fa';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faClipboardCheck } from '@fortawesome/free-solid-svg-icons';
 
 interface Tenant {
     displayName: string;
@@ -66,26 +68,12 @@ interface UserProfile {
     kontakDarurat: string;
     photoURL: string;
 }
-// Define the type for payment data structure
-type PaymentData = {
-    order_id: string;
-    status_code: string;
-    transaction_status: string;
-    payment_type: string;
-    gross_amount: string;
-    first_name: string;
-    email: string;
-    phoneNumber: string;
-    kampus: string;
-    kotaAsal: string;
-    pdf_url: string;
-    va_numbers: { bank: string; va_number: string }[]; // Adjust based on actual structure if needed
-  };
-  
+
+
 const UserVerify: React.FC = () => {
     const [booking, setBooking] = useState<BookingData[]>([]);
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-    const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+    const [, setUserProfile] = useState<UserProfile | null>(null);
 
     // Fetch user bookings
     useEffect(() => {
@@ -144,6 +132,7 @@ const UserVerify: React.FC = () => {
                     orderId: bookingId,
                     grossAmount: booking.find((b) => b.id === bookingId)?.price,
                     kostanId: booking.find((b) => b.id === bookingId)?.kostanId,
+                    nama: booking.find((b) => b.id === bookingId)?.nama,
 
                     customerDetails: {
                         first_name: auth.currentUser?.displayName || "Guest",
@@ -159,29 +148,7 @@ const UserVerify: React.FC = () => {
             const data = await response.json();
             console.log('Token response:', data);
             console.log("client", process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY)
-            const saveTransactionToFirestore = async (paymentData: PaymentData) => {
-                try {
-                   
-                    const transactionDoc = await addDoc(collection(dbFire, 'bukti_transaksi'), {
-                        order_id: paymentData.order_id,
-                        status_code: paymentData.status_code,
-                        transaction_status: paymentData.transaction_status,
-                        payment_type: paymentData.payment_type,
-                        gross_amount: paymentData.gross_amount,
-                        first_name: paymentData.first_name,
-                        email: paymentData.email,
-                        phoneNumber: paymentData.phoneNumber,
-                        kampus: paymentData.kampus,
-                        kotaAsal: paymentData.kotaAsal,
-                        pdf_url: paymentData.pdf_url,
-                        va_number: paymentData.va_numbers?.[0]?.va_number, // Assuming you're storing only the first VA number
-                        transaction_time: new Date().toISOString(),
-                    });
-                    console.log("Transaction document written with ID: ", transactionDoc.id);
-                } catch (error) {
-                    console.error("Error saving transaction to Firestore: ", error);
-                }
-            };
+
             if (data.token) {
                 // Temporarily prevent redirects in the Snap SDK by capturing the result and not triggering the default redirect
                 window.snap.pay(data.token, {
@@ -194,7 +161,8 @@ const UserVerify: React.FC = () => {
                             email: auth.currentUser?.email,
                             kampus: booking.find((b) => b.id === bookingId)?.tenant.kampus,
                             phoneNumber: booking.find((b) => b.id === bookingId)?.tenant.phoneNumber,
-                            kotaAsal: booking.find((b) => b.id === bookingId)?.tenant.kotaAsal
+                            kotaAsal: booking.find((b) => b.id === bookingId)?.tenant.kotaAsal,
+                            nama: booking.find((b) => b.id === bookingId)?.nama
                         };
 
                         const kostanId = booking.find((b) => b.id === bookingId)?.kostanId;
@@ -232,7 +200,7 @@ const UserVerify: React.FC = () => {
 
                         // Store the result in local storage for further use
                         localStorage.setItem('paymentResult', JSON.stringify(paymentData));
-                        
+
                         console.log(localStorage.getItem('paymentResult'));
 
                         const redirectUrl = `http://localhost:3000/dataTransaksi?order_id=${result.order_id}&status_code=${result.status_code}&transaction_status=${result.transaction_status}`;
@@ -245,7 +213,7 @@ const UserVerify: React.FC = () => {
                         document.getElementById("payment-success-message")!.style.display = 'block';
 
                         // Delete the booking after successful payment
-                       
+
 
                     },
                     onPending: function (result: SnapPaymentResult) {
@@ -309,8 +277,22 @@ const UserVerify: React.FC = () => {
         <div className="min-h-screen p-4 bg-gray-100">
             {isLoggedIn ? (
                 <>
-                    <h1 className="text-2xl font-semibold text-black mb-6">Status Verifikasi Booking</h1>
-                    <div className="bg-white p-6 rounded-lg shadow-lg w-full">
+                    <div className="bg-gradient-to-r from-blue-500 via-indigo-600 to-purple-700 shadow-lg border border-indigo-800 rounded-xl p-6 md:p-10 w-full max-w-3xl mx-auto mt-10">
+                        <div className="flex flex-col items-center text-center">
+                            {/* Judul */}
+                            <h1 className="text-2xl md:text-3xl font-bold text-white-800 mb-6 drop-shadow-sm">
+                                Status Verifikasi Booking
+                            </h1>
+                            {/* Ikon */}
+                            <div className="mb-1 bg-gradient-to-r from-green-400 to-blue-500 p-4 rounded-full shadow-lg">
+                                <FontAwesomeIcon icon={faClipboardCheck} className="text-white text-4xl" />
+                            </div>
+                            {/* Status */}
+    
+                        </div>
+                    </div>
+
+                    <div className="bg-white h-screen p-6 mt-10 rounded-lg shadow-lg w-full">
                         {booking.length > 0 ? (
                             booking.map((booking) => (
                                 <div key={booking.id} className="border-b pb-4 mb-4 text-black">

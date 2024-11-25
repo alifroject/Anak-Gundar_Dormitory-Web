@@ -11,14 +11,18 @@ interface GeoJSONFeatureProperties {
 interface KosList {
     id: string;
     name: string;
+    type: string;
     geolokasi: {
         lat: number;
         lng: number;
     };
-    address: {
+    alamat: {
         jalan: string;
         kota_kabupaten: string;
         provinsi: string;
+        kecamatan?: string;
+        Desa_Kelurahan: string;
+        Nomor_Rumah: string;
     };
     price: {
         perHari: number;
@@ -109,7 +113,7 @@ const KosMap: React.FC<Props> = ({ kosList, onSelectKos }) => {
                         <div className='w-[140px]'>
                             <strong>{kos.name}</strong>
                             <br />
-                            Jl. {kos.address.jalan}, Kota/Kabupaten. {kos.address.kota_kabupaten}, Provinsi. {kos.address.provinsi}
+                            Jl. {kos.alamat.jalan}, Kota/Kabupaten. {kos.alamat.kota_kabupaten}, Provinsi. {kos.alamat.provinsi}
                             
                             <p>
                                 Harga per Bulan: <span className="font-semibold text-green-600">
@@ -118,7 +122,7 @@ const KosMap: React.FC<Props> = ({ kosList, onSelectKos }) => {
                             </p>
 
                             <br />
-                            <img src={kos.images[0]} alt="Gambar Kos" width="100%" />
+                            <img src={kos.images[0]} alt="Gambar Kos" width="100%" height="50%" />
                         </div>
                     </Popup>
                 </Marker>

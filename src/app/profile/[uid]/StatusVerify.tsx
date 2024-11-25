@@ -36,6 +36,7 @@ interface bookingData {
     status: string;
     tenant: Tenant;
     uid: string;
+    kostanId: string; // ID kosan yang dipesan
 }
 
 interface UserProfile {
@@ -53,11 +54,25 @@ interface UserProfile {
     kontakDarurat: string;
     photoURL: string;
 }
+interface KostanData {
+    id: string;
+
+    jenis: string;
+    nama: string;
+    region: string;
+    sisaKamar: number;
+    ukuranKamar: string;
+    type: string;
+
+
+}
+
 
 const Verify = () => {
     const [booking, setBooking] = useState<bookingData[]>([]);
     const [adminProfile, setAdminProfile] = useState<adminProfile | null>(null);
-    const [admin, setIsAdmin] = useState(false);
+    const [, setIsAdmin] = useState(false);
+    const [kostanData, setKostanData] = useState<KostanData[]>([]);
 
 
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -141,6 +156,32 @@ const Verify = () => {
     }, [adminProfile]); // Trigger when adminProfile is updated
 
 
+    useEffect(() => {
+        const fetchKostanData = async () => {
+            try {
+                const querySnapshot = await getDocs(collection(dbFire, 'home'));
+                const data = querySnapshot.docs.map((doc) => {
+                    const kostan = doc.data();
+                    console.log("Data Kosan:", kostan); // Menampilkan data kosan di konsol
+                    return {
+                        id: doc.id,
+                        nama: kostan.nama ?? '',
+                        region: kostan.region ?? '',
+                        sisaKamar: kostan.sisaKamar ?? 0,
+                        ukuranKamar: kostan.ukuranKamar ?? '',
+                        type: kostan.type ?? '',
+                        jenis: kostan.jenis ?? '' // Menambahkan properti jenis dengan nilai default
+                    };
+                });
+                setKostanData(data); // Set data yang sudah ditambahkan properti 'jenis'
+            } catch (error) {
+                console.error("Error fetching kostan data:", error);
+            }
+        };
+
+        fetchKostanData();
+    }, []);
+
 
 
 
@@ -149,44 +190,58 @@ const Verify = () => {
             {isLoggedIn ? (
 
                 <>
-                    <div>Welcome, {admin ? "Admin" : "User"}!</div>
-                    <div className="bg-gray-100 min-h-screen flex flex-col items-center">
-                        <h1 className="text-2xl font-semibold mb-4 text-black">Verifikasi</h1>
 
-                        <div className="bg-white p-4 rounded-lg mb-4 flex-1 w-full">
-                            <div className="h-full flex flex-col">
-                                {booking.length > 0 ? (
-                                    booking.map((booking) => (
-                                        <div key={booking.id} className="border p-4 rounded-lg mb-4 flex flex-col text-black">
-                                            <h2 className="text-lg font-semibold">{booking.nama}</h2>
-                                            <div className="flex items-center text-sm text-gray-500 mb-2">
-                                                <span className="text-green-500">Tersedia 2 Kamar</span>
-                                            </div>
-                                            <div className="text-sm text-gray-500 mb-2">Hitungan Sewa</div>
-                                            <div className="text-lg font-semibold text-red-500 mb-2">
-                                                Rp {booking.price.toLocaleString('id-ID')} <span className="text-sm text-gray-500">(Pembayaran pertama)</span>
-                                            </div>
-                                            <div className="flex justify-between items-center">
-                                                <div>
-                                                    <div className="text-sm text-gray-500">Tanggal Masuk</div>
-                                                    <div className="text-sm font-semibold">{new Date(booking.startDate).toLocaleDateString()}</div>
+                    <div className="min-h-screen flex flex-col items-center">
+                        <h1 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-indigo-600 to-purple-700 mb-6 text-center drop-shadow-lg">
+                            Verifikasi
+                        </h1>
+
+
+                        <div className="h-full w-full flex flex-col">
+                            {booking.length > 0 ? (
+                                booking.map((bookingItem) => (
+                                    <div key={bookingItem.id} className="border border-gray-300 p-6 rounded-lg mb-6 flex flex-col bg-gradient-to-r from-blue-50 via-blue-100 to-blue-200">
+                                        <h2 className="text-2xl font-extrabold text-indigo-700 mb-2">{bookingItem.nama}</h2>
+                                        <h2 className="text-sm font-semibold text-gray-800">Nama penyewa: {bookingItem.tenant.displayName}</h2>
+
+                                        {kostanData
+                                            .filter(kostan => kostan.id === bookingItem.kostanId)
+                                            .map(matchedKostan => (
+                                                <div key={matchedKostan.id} className="mt-4 p-4 bg-white rounded-lg shadow-md md:w-[400px]">
+                                                    <p className="text-sm text-gray-700 font-medium">Nama Kosan: <span className="font-semibold text-indigo-600">{matchedKostan.nama}</span></p>
+                                                    <p className="text-sm text-gray-700 font-medium">Sisa Kamar: <span className="font-semibold text-green-600">{matchedKostan.sisaKamar}</span></p>
+                                                    <p className="text-sm text-gray-700 font-medium">Ukuran Kamar: <span className="font-semibold text-orange-600">{matchedKostan.ukuranKamar}</span></p>
                                                 </div>
-                                                <div>
-                                                    <div className="text-sm text-gray-500">Durasi Sewa</div>
-                                                    <div className="text-sm font-semibold">{booking.priceOption}</div>
-                                                </div>
+                                            ))}
+                                        <div className="text-sm text-gray-500 mt-4">Hitungan Sewa</div>
+                                        <div className="text-xl font-semibold text-red-600 mt-2">
+                                            Rp {bookingItem.price.toLocaleString('id-ID')} <span className="text-sm text-gray-500">(Pembayaran pertama)</span>
+                                        </div>
+                                        <div className="flex justify-between items-center mt-4">
+                                            <div>
+                                                <div className="text-sm text-gray-500">Tanggal Masuk</div>
+                                                <div className="text-sm font-semibold text-gray-700">{new Date(bookingItem.startDate).toLocaleDateString()}</div>
                                             </div>
-                                            <div className="flex justify-between items-center mt-4">
-                                                <Link href={`/profile/${userProfile?.uid}/bookingVerify/${booking.id}`}>Lanjut izinkan pengguna</Link>
+                                            <div>
+                                                <div className="text-sm text-gray-500">Durasi Sewa</div>
+                                                <div className="text-sm font-semibold text-gray-700">{bookingItem.priceOption}</div>
                                             </div>
                                         </div>
-                                    ))
-                                ) : (
-                                    <div className="h-full flex justify-center items-center">
-                                        <div className="text-gray-500">No booking data available.</div>
+                                        <div className="flex justify-between items-center mt-6">
+                                            <Link className="bg-indigo-600 text-white py-2 px-6 rounded-lg shadow-md hover:bg-indigo-700 transition-all duration-200" href={`/profile/${userProfile?.uid}/bookingVerify/${bookingItem.id}`}>
+
+                                                <span className="text-lg font-semibold">Lanjut izinkan pengguna</span>
+
+                                            </Link>
+                                        </div>
                                     </div>
-                                )}
-                            </div>
+                                ))
+                            ) : (
+                                <div className="h-full flex flex-col justify-center items-center">
+                                    <div className="text-gray-500 mb-4 text-lg">Tidak ada data booking tersedia.</div>
+                                    <hr className="border-t-4 mb-6 border-gray-900 w-full" />
+                                </div>
+                            )}
                         </div>
                     </div>
                 </>

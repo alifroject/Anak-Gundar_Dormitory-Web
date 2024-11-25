@@ -16,7 +16,7 @@ export const generateStaticParams = async () => {
         }
 
         const params = homeSnapshot.docs.map((doc) => ({
-            uid: "MFqxgnvEr0dqIKpxa7RVmSO4GyQ2",
+            uid: "hlQWcXT1ITSjqHvVXhgr5iljMBI3",
             id: doc.id
         }));
 

@@ -748,24 +748,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
             )}
 
             <main className="bg-white p-6 rounded-lg shadow-md">
-                {/* Right Sidebar - moved to the top */}
-                {/* Right Sidebar - moved to the top
-                  <div className="w-[600px] bg-gray-50 p-6 rounded-lg shadow-md mb-6">
-                    <div className="flex items-center mb-4">
-                        <img src="https://placehold.co/80x80" alt="Room Image" className="w-20 h-20 rounded-lg" />
-                        <div className="ml-4">
-                            <h3 className="text-lg font-bold">Kos Bebas Cinta</h3>
-                            <p className="text-gray-500">Pondok Kelapa</p>
-                        </div>
-                    </div>
-                    <div className="flex justify-between items-center mb-4">
-                        <span className="text-xl font-bold">Rp680.000</span>
-                        <button className="text-green-500">Lihat Kos</button>
-                    </div>
-                    <p className="text-gray-600 mb-2">Tempat nyaman dan aman untuk tinggal</p>
-                    <p className="text-gray-500 mb-2">Berada dekat kampus dan pusat perbelanjaan</p>
-                </div>
-                 */}
+           
 
                 <div className="flex justify-between items-start">
                     <div className="w-full mt-10">
@@ -775,7 +758,6 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                         <section className="mb-6">
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-xl font-bold text-black">Informasi penyewa</h2>
-                                <button className="text-green-500">Ubah</button>
                             </div>
                             <div className="space-y-2">
                                 <div>
@@ -852,7 +834,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                                 ))}
                             </div>
 
-                            <div className="mt-4">
+                            <div className="mt-4 overflow-x-auto">
                                 <h3 className="text-lg font-bold text-black">File yang diupload:</h3>
                                 {files.length > 0 ? (
                                     <ul>
@@ -941,25 +923,6 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
 
 
 
-                        {/* <section className="mb-6">
-                            <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-xl font-bold">Metode pembayaran pertama</h2>
-                                <button className="text-green-500">Ubah</button>
-                            </div>
-                            <div className="space-y-2">
-                                <div className="flex justify-between"><span>Pembayaran penuh</span><span>Rp802.000</span></div>
-                            </div>
-                        </section> */}
-
-                        {/*  <section className="mb-6">
-                            <h2 className="text-xl font-bold mb-4">Catatan tambahan</h2>
-                            <p className="mb-4">Penjelasan terkait pengajuan sewa dan transaksimu</p>
-                            <div className="flex items-center space-x-2 mb-4">
-                                <i className="fas fa-box-open text-gray-500 text-2xl"></i>
-                                <button className="text-green-500">Pilih tambahan barang/fasilitas</button>
-                            </div>
-                            <p className="text-gray-500">Pilih di sini, dan pemilik akan memastikan biayanya setelah kamu ajukan sewa</p>
-                        </section>*/}
 
                         {/* Start Date */}
                         <section className="mb-6">
@@ -978,18 +941,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                         </section>
 
 
-                        {/*  <section className="mb-6">
-                            <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-xl font-bold">Voucher</h2>
-                                <button className="text-green-500">Masukkan</button>
-                            </div>
-                            <p>Pilih atau masukkan voucher</p>
-                        </section> */}
-
-                        {/*  <section className="mb-6">
-                            <h2 className="text-xl font-bold mb-4">FAQ tentang pengajuan sewa</h2>
-                            <button className="text-green-500">&gt;</button>
-                        </section> */}
+                
                         <Link
                             href={`/profile/${userProfile?.uid}`}
                             onClick={(e) => chooseSave(e)}
@@ -1004,6 +956,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                         >
                             Ajukan Sewa
                         </button>
+                        
 
                     </div>
                 </div>

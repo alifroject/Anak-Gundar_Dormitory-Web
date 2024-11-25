@@ -33,7 +33,7 @@ interface BookingData {
 
 export const generateStaticParams = async () => {
     try {
-        const adminUID = "MFqxgnvEr0dqIKpxa7RVmSO4GyQ2";
+        const adminUID = "hlQWcXT1ITSjqHvVXhgr5iljMBI3";
         const bookingCollectionRef = collection(dbFire, 'booking');
         const bookingSnapshot = await getDocs(bookingCollectionRef);
 

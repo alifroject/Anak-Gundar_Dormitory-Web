@@ -21,6 +21,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ['Roboto', 'Open Sans', 'Lato', 'Montserrat', 'Arial', 'sans-serif'], // Using a generic name for all fonts
+        inter: ['Inter', 'sans-serif'],
       },
     },
   },
