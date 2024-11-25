@@ -114,7 +114,7 @@ export default function PromoComponent() {
         <div className="bg-gray-200">
             <div className="max-w-7xl mx-auto p-1 pr-5 mx-auto grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-4">
                 {kostanData
-                    .filter((kostan) => ["Depok Kampus D", "Depok Kampus G&E", "Kampus A,B,C"].includes(kostan.region)) // Filter untuk beberapa region
+                    .filter((kostan) => ["Depok Kampus D", "Depok Kampus G&E", "Kampus A,B,C", "Kampus K"].includes(kostan.region)) // Filter untuk beberapa region
                     .map((kostan) => (
                         <Link
                             key={kostan.id}

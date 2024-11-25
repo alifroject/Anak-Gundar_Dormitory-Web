@@ -15,7 +15,11 @@ import { doc, getDoc } from 'firebase/firestore';
 import { FaHome, FaBuilding } from 'react-icons/fa';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserCircle, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
-import { MagnifyingGlassIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, DocumentTextIcon, PhoneIcon } from "@heroicons/react/24/outline";
+import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
+import { MdHelp } from "react-icons/md"; // Import ikon baru
+
+
 
 
 interface NavbarProps {
@@ -48,6 +52,16 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
 
     const router = useRouter();
     const pathname = usePathname();
+
+    const ownerPhone = process.env.NEXT_PUBLIC_OWNER_PHONE;
+
+    // Format nomor untuk WhatsApp (menghapus simbol dan spasi jika perlu)
+    const formatPhoneNumber = (phone: string | undefined) => {
+        if (!phone) return '';
+        return phone.replace(/[^0-9]/g, ''); // Menghapus karakter non-digit
+    };
+    const formattedPhone = formatPhoneNumber(ownerPhone);
+
 
     useEffect(() => {
         setIsCariDropdownOpen(false);
@@ -329,34 +343,70 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                     <li>
                         <button
                             onClick={toggleCariDropdown}
-                            className="flex items-center text-gray-900 hover:text-blue-600 mt-6 px-4 py-2 rounded-md font-medium transition-all duration-200 border-b-2 border-transparent hover:border-blue-500"
+                            className="flex items-center text-gray-900 hover:text-blue-600 px-4 py-3 rounded-lg font-medium transition-all duration-200 shadow-md bg-gray-50 hover:bg-blue-50"
                             aria-expanded={isCariDropdownOpen}
                         >
-                            <MagnifyingGlassIcon className="w-5 h-5 mr-2" /> {/* Ikon cari sebelum teks */}
+                            <MagnifyingGlassIcon className="w-6 h-6 mr-2 text-blue-500" />
                             Masih Cari?
-                            <ChevronDownIcon className="w-5 h-5 ml-2" />
+                            <ChevronDownIcon className="w-6 h-6 ml-auto text-gray-600" />
                         </button>
                         {isCariDropdownOpen && (
-                            <ul className="bg-white text-gray-900 shadow-lg mt-2 rounded-md w-full space-y-2">
+                            <ul className="bg-white text-gray-900 shadow-lg mt-2 rounded-lg p-4 space-y-3">
                                 <li>
-                                    <Link href="/kostan" onClick={closeSidebar} className="flex items-center px-6 py-3 hover:bg-blue-50 rounded-md transition-all duration-200 border-b-2 border-transparent hover:border-blue-500">
-                                        <FaHome className="w-5 h-5 mr-3 text-blue-500" />
-                                        Kostan
+                                    <Link
+                                        href="/kostan"
+                                        onClick={closeSidebar}
+                                        className="flex items-center px-4 py-3 rounded-lg hover:bg-blue-50 transition-all duration-200 shadow-sm border-b border-transparent hover:border-blue-500"
+                                    >
+                                        <FaHome className="w-6 h-6 mr-3 text-blue-500" />
+                                        <span className="font-medium text-[15px]">Kostan</span>
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/apartment" onClick={closeSidebar} className="flex items-center px-6 py-3 hover:bg-blue-50 rounded-md transition-all duration-200 border-b-2 border-transparent hover:border-blue-500">
-                                        <FaBuilding className="w-5 h-5 mr-3 text-blue-500" />
-                                        Apartment
+                                    <Link
+                                        href="/apartment"
+                                        onClick={closeSidebar}
+                                        className="flex items-center px-4 py-3 rounded-lg hover:bg-blue-50 transition-all duration-200 shadow-sm border-b border-transparent hover:border-blue-500"
+                                    >
+                                        <FaBuilding className="w-6 h-6 mr-3 text-blue-500" />
+                                        <span className="font-medium text-[15px]">Apartment</span>
                                     </Link>
                                 </li>
                             </ul>
                         )}
                     </li>
                     <li>
-                        <Link href="/rules" onClick={closeSidebar} className="flex items-center text-gray-900 hover:text-blue-600 block px-4 py-3 font-medium transition-all duration-200 border-b-2 border-transparent hover:border-blue-500">
-                            <DocumentTextIcon className="w-5 h-5 mr-2" />
-                            Syarat  dan aturan
+                        <Link
+                            href="/rules"
+                            onClick={closeSidebar}
+                            className="flex items-center text-gray-900 hover:text-blue-600 px-4 py-3 rounded-lg font-medium transition-all duration-200 shadow-md bg-gray-50 hover:bg-blue-50"
+                        >
+                            <DocumentTextIcon className="w-6 h-6 mr-3 text-blue-500" />
+                            Syarat dan Aturan
+                        </Link>
+                    </li>
+
+                    <li>
+                        <Link
+                            href={`https://wa.me/${formattedPhone}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
+                        >
+                            <FontAwesomeIcon icon={faWhatsapp} style={{ color: 'green' }} className="h-8 w-8" />
+                            <p className="text-[14px] font-medium text-green-800">
+                                Contact Admin
+                            </p>
+                        </Link>
+                    </li>
+                    <li>
+                        <Link
+                            href="https://www.instagram.com/reel/DAi2aZKo3df/?igsh=OXd3NWFlODY5OTdv"
+                            onClick={closeSidebar}
+                            className="flex items-center text-gray-900 hover:text-blue-600 px-4 py-3 rounded-lg font-medium transition-all duration-200 shadow-md bg-gray-50 hover:bg-blue-50"
+                        >
+                            <MdHelp className="w-6 h-6 mr-3 text-blue-500" />
+                            FAQ
                         </Link>
                     </li>
 

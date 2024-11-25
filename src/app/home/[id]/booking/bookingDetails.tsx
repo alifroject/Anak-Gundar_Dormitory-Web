@@ -520,7 +520,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
         try {
             await uploadBytes(fileRef, file);
             const downloadURL = await getDownloadURL(fileRef);
-            console.log("File uploaded successfully, URL:", downloadURL);
+            
             return downloadURL;
         } catch (error) {
             console.error("Error uploading file to Firebase Storage:", error);
@@ -536,7 +536,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
             return;
         }
 
-        console.log("Saving with user UID:", userProfile.uid);
+       
 
         setIsSaving(true);
         try {
@@ -572,7 +572,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
             setTimeout(() => {
                 // After 2 seconds, stop the spinner and perform the save action
                 setIsSaving(false);
-                console.log('Save completed!');
+               
                 // Add your actual save logic here
             }, 2000);  // 2000 milliseconds = 2 seconds
             setIsEditing(false);

@@ -13,22 +13,24 @@ import PromoComponent from '@/app/region_section';
 
 import { Swiper as SwiperCore } from 'swiper';
 
+
+
 const images = [
   {
     src: '/gundar11.png',
-    
+
   },
   {
     src: '/gundar22.jpg',
-   
+
   },
   {
     src: '/gundar33.jpg',
-   
+
   },
   {
     src: '/gundar44.jpg',
-   
+
   },
 ];
 
@@ -52,12 +54,61 @@ const ActiveSlider = () => {
   return (
     <>
       <div className="flex items-center justify-center min-h-full  flex-col md:min-h-[900px] w-full overflow-hidden 240px:overflow-hidden">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl mt-1 font-semibold text-gray-800 mt-40 text-center mb-4">
-          Lagi cari kos deket Gundar?
-        </h1>
-        <p className="text-base sm:text-lg md:text-xl text-gray-600 font-medium text-center mb-10">
-          Coba pilih gundar region mana dibawah ini.
-        </p>
+        <div className="relative mt-20 mb-5 bg-gradient-to-br from-blue-50 via-white to-blue-100 py-16 px-4 sm:px-6 lg:px-8 shadow-lg rounded-xl">
+          <div className="max-w-4xl mx-auto text-center">
+            {/* Tambahkan ikon di atas teks */}
+            <div className="flex justify-center mb-6">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+                className="w-16 h-16 text-blue-500"
+              >
+                <path d="M12 2a7 7 0 0 1 7 7v2.3c.6.2 1 .8 1 1.4v8c0 .8-.7 1.3-1.5 1.3H5.5c-.8 0-1.5-.5-1.5-1.3v-8c0-.6.4-1.2 1-1.4V9a7 7 0 0 1 7-7zM9 12a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H9z" />
+              </svg>
+            </div>
+            {/* Teks utama */}
+            <h1
+              className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-800 leading-tight"
+              style={{ fontFamily: "'Poppins', sans-serif" }}
+            >
+              Lagi cari kos <span className="text-blue-600">deket Gundar?</span>
+            </h1>
+            {/* Subteks */}
+            <p
+              className="mt-6 text-lg sm:text-xl text-gray-600 font-medium"
+              style={{ fontFamily: "'Roboto', sans-serif" }}
+            >
+              Temukan kos terbaik dengan fasilitas.
+            </p>
+            {/* Tombol CTA */}
+            <div className="mt-8">
+              <button
+                onClick={() => {
+                  const targetElement = document.getElementById("target-section");
+                  if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+                className="inline-block bg-blue-600 text-white py-3 px-6 rounded-full text-lg font-semibold shadow-lg hover:bg-blue-700 hover:shadow-xl transition-transform transform hover:-translate-y-1"
+                style={{ fontFamily: "'Poppins', sans-serif" }}
+              >
+                Cari Sekarang
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                  className="w-5 h-5 inline ml-2"
+                >
+                  <path d="M14.29 8.7a1 1 0 0 0 0 1.4L16.17 12H4a1 1 0 1 0 0 2h12.17l-1.88 1.88a1 1 0 1 0 1.42 1.42l3.59-3.59a1 1 0 0 0 0-1.42l-3.59-3.59a1 1 0 0 0-1.42 0z" />
+                </svg>
+              </button>
+
+            </div>
+          </div>
+        </div>
+
+
 
         <Swiper
           onSwiper={(swiper) => (swiperRef.current = swiper)}
@@ -90,11 +141,11 @@ const ActiveSlider = () => {
                   style={{ backgroundImage: `url(${image.src})` }}
                 />
                 <div className="absolute inset-0 bg-black opacity-10 group-hover:opacity-50" />
-                
-    
+
+
               </div>
             </SwiperSlide>
-            
+
           ))}
         </Swiper>
         <div className="mt-6 flex justify-center items-center space-x-4">
@@ -115,7 +166,11 @@ const ActiveSlider = () => {
         </div>
 
       </div>
-      <PromoComponent></PromoComponent>
+      <div id='target-section'>
+
+        <PromoComponent ></PromoComponent>
+
+      </div>
 
     </>
   );

@@ -269,7 +269,7 @@ const KostanDetailClient = ({ initialData }: { initialData: KostanData | null })
             };
 
             const docRef = await addDoc(collection(dbFire, "LikedHouse"), likedHouse);
-            console.log("Liked house saved with ID:", docRef.id);
+           
 
             setModalBooking(true)
 
@@ -363,7 +363,7 @@ const KostanDetailClient = ({ initialData }: { initialData: KostanData | null })
             if (user) {
                 setIsLoggedIn(true);
                 setIsLoginModalOpen(false); // Close modal if logged in
-                console.log("User is logged in:", user);
+                
             } else {
                 setIsLoggedIn(false);
                 console.log("No user is logged in.");
@@ -385,7 +385,7 @@ const KostanDetailClient = ({ initialData }: { initialData: KostanData | null })
             const bookingUrl = `/home/${kostan?.id}/booking?details=${encodeURIComponent(
                 kostan?.nama?.replace(/\s+/g, '-') ?? 'Unnamed')}`;
 
-            console.log("Redirecting to:", bookingUrl);
+            
             router.push(bookingUrl); // Redirect to the booking page
         }
     };

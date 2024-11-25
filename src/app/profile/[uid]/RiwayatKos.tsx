@@ -261,7 +261,7 @@ const RiwayatKos: React.FC<RiwayatKosProps> = ({ initialData }) => {
                     kostan.alamat?.Nomor_Rumah ?? 'Nomor Tidak Diketahui'
                 )}&draftId=${draftId}`;
 
-                console.log("Redirecting to:", bookingUrl);
+              
                 router.push(bookingUrl); // Redirect to the booking page
             } else {
                 console.error("Kostan data is not available.");
@@ -327,12 +327,35 @@ const RiwayatKos: React.FC<RiwayatKosProps> = ({ initialData }) => {
                                                     <div className="text-sm font-semibold">{rental.priceOption}</div>
                                                 </div>
                                             </div>
-                                            <div className="flex justify-between items-center mt-4">
-                                                <button className="text-gray-500" onClick={() => handleDeleteDraft(rental.id)}>
-                                                    <FontAwesomeIcon icon={faTrash} />
+                                            <div className="flex justify-between items-center mt-4 space-x-4">
+                                                {/* Tombol Hapus */}
+                                                <button
+                                                    className="p-3 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
+                                                    onClick={() => handleDeleteDraft(rental.id)}
+                                                    aria-label="Hapus Draft"
+                                                >
+                                                    <FontAwesomeIcon icon={faTrash} className="w-5 h-5" />
+                                                    <span className="hidden md:inline font-medium">Hapus</span>
                                                 </button>
-                                                <button onClick={handleNavigateToBooking}>Lanjutkan ke Booking</button>
+
+                                                {/* Tombol Lanjutkan */}
+                                                <button
+                                                    onClick={handleNavigateToBooking}
+                                                    className="py-3 px-6 rounded-full bg-blue-600 text-white font-semibold shadow-lg hover:bg-blue-700 hover:shadow-xl transform transition-transform duration-300 hover:-translate-y-1 flex items-center gap-2"
+                                                    aria-label="Lanjutkan ke Booking"
+                                                >
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        fill="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                        className="w-5 h-5"
+                                                    >
+                                                        <path d="M14.29 8.7a1 1 0 0 0 0 1.4L16.17 12H4a1 1 0 1 0 0 2h12.17l-1.88 1.88a1 1 0 1 0 1.42 1.42l3.59-3.59a1 1 0 0 0 0-1.42l-3.59-3.59a1 1 0 0 0-1.42 0z" />
+                                                    </svg>
+                                                    <span>Lanjutkan</span>
+                                                </button>
                                             </div>
+
                                         </div>
                                     ))
                                 ) : (
