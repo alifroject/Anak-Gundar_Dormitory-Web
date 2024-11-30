@@ -197,8 +197,8 @@ const Profile = ({ userProfile }: { userProfile: ProfileType | null }) => {
                                 className="flex items-center text-sm font-medium hover:text-purple-600 cursor-pointer hover:bg-purple-50 p-3 rounded-lg transition-colors"
                                 onClick={() => setSelectedSection('Pengaturan')}
                             >
-                                <FaHeart className="mr-3 text-red-500 w-6 h-6" /> {/* Ganti ikon menjadi hati dengan warna merah */}
-                                <span>Home yang Di Sukai</span> {/* Ubah teks sesuai permintaan */}
+                                <FaHeart className="mr-3 text-red-500 w-6 h-6" /> 
+                                <span>Home yang Di Sukai</span>
                             </li>
 
                             <li
@@ -221,7 +221,7 @@ const Profile = ({ userProfile }: { userProfile: ProfileType | null }) => {
                 </ul>
             </div>
 
-            {/* Main Content */}
+         
             <div className="flex-1 mt-4 md:mt-20 md:p-8 min-h-full">
                 <div>{renderMainContent()}</div>
             </div>

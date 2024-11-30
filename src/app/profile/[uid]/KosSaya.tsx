@@ -3,17 +3,17 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUsers } from '@fortawesome/free-solid-svg-icons';
 
 const teamMembers = [
-    { name: "John Doe", role: "Backend and Frontend", image: "/images/john.jpg" },
-    { name: "Jane Smith", role: "Figma Designer", image: "/images/jane.jpg" },
-    { name: "Michael Johnson", role: "Bug Hunter And Software Tester", image: "/images/michael.jpg" },
-    { name: "Emily Davis", role: "Data Collector", image: "/images/emily.jpg" },
-    { name: "Chris Lee", role: "Data Collector", image: "/images/chris.jpg" },
+    { name: "Alif Jovani Safik", role: "Backend and Frontend", image: "/Alif.jpg" },
+    { name: "Achmad Raihan", role: "Figma Designer", image: "/Raihan.png" },
+    { name: "Kaka Arsya Permana", role: "Bug Hunter And Software Tester", image: "/Kaka.jpg" },
+    { name: "Ajji Tana Arifainy", role: "Data Collector", image: "/Aji.jpg" },
+    { name: "Alvaro Cesio Nehemia Silitonga", role: "Data Collector", image: "/Alvaro.jpg" },
 ];
 
 export default function Career() {
     return (
         <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-indigo-200 flex flex-col items-center justify-center px-6 py-10">
-            {/* Title Section */}
+
             <motion.div
                 className="flex flex-col items-center mb-10"
                 initial={{ opacity: 0, y: -50 }}
@@ -39,7 +39,7 @@ export default function Career() {
                 </p>
             </motion.div>
 
-            {/* Box Section */}
+       
             <motion.div
                 className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl"
                 initial="hidden"

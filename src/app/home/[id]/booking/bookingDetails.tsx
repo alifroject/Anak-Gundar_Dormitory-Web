@@ -1,14 +1,15 @@
 "use client";
 import React, { useState, useEffect, ChangeEvent, DragEvent } from "react";
-import { auth, dbFire, storage } from "@/app/firebase/config"; // Pastikan file konfigurasi Firebase Anda benar
+import { auth, dbFire, storage } from "@/app/firebase/config";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, getDocs, QuerySnapshot, getDoc, doc, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
-import { v4 as uuidv4 } from 'uuid'; // pastikan kamu menginstal uuid
+import { v4 as uuidv4 } from 'uuid';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUser, faPhone, faVenusMars, faBriefcase, faUniversity } from '@fortawesome/free-solid-svg-icons';
 
 
 interface Price {
@@ -34,9 +35,9 @@ interface BookingDetailsProps {
 
 }
 interface UploadedFile {
-    file: File;       // The actual file
-    name: string;     // The name of the file
-    preview: string;  // The preview URL of the file
+    file: File;
+    name: string;
+    preview: string;
 }
 
 
@@ -100,10 +101,10 @@ interface RentalData {
 const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
     const [tenant, setTenant] = useState<TenantInfo | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [, setKostans] = useState<Kostan[]>([]); // Tetapkan tipe state
+    const [, setKostans] = useState<Kostan[]>([]);
     const [priceOption, setPriceOption] = useState<'perBulan' | 'perMinggu' | 'perHari'>('perBulan');
     const [startDate, setStartDate] = useState<string>(new Date().toISOString().split("T")[0]);
-    const [, setIsEditing] = useState(false); // Tambahkan state untuk mode edit
+    const [, setIsEditing] = useState(false);
     const [editedData, setEditedData] = useState<RentalData | null>(null);
 
     const [isSaving, setIsSaving] = useState(false);
@@ -124,8 +125,8 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
     const [documentFiles, setDocumentFiles] = useState<(UploadedFile | null)[]>(Array(4).fill(null));
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const [rentalData, setRentalData] = useState<RentalData[]>([]);
-    const searchParams = useSearchParams(); // To access query parameters
-    const draftId = searchParams.get('draftId'); // Retrieve 'draftId' from URL query
+    const searchParams = useSearchParams();
+    const draftId = searchParams.get('draftId');
     const router = useRouter();
 
     useEffect(() => {
@@ -180,7 +181,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
     };
 
     const uploadImageToServer = async (file: File): Promise<File> => {
-        // Convert file to base64 before sending
+
         const reader = new FileReader();
         reader.readAsDataURL(file);
 
@@ -192,7 +193,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ fileBuffer: base64File }),  // Send base64 file
+                    body: JSON.stringify({ fileBuffer: base64File }),
                 });
 
                 if (!response.ok) {
@@ -214,19 +215,19 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
 
 
     const handleFileChange = (event: ChangeEvent<HTMLInputElement>, index: number) => {
-        const selectedFile = event.target.files?.[0]; // Dapatkan file yang dipilih
+        const selectedFile = event.target.files?.[0];
         if (selectedFile) {
             const reader = new FileReader();
             reader.onloadend = () => {
-                const previewUrl = reader.result as string; // Simpan preview URL
+                const previewUrl = reader.result as string;
 
                 setDocumentFiles(prev => {
                     const newDocumentFiles = [...prev];
                     newDocumentFiles[index] = {
-                        file: selectedFile,  // Sertakan file asli
-                        name: selectedFile.name, // Gunakan nama file tanpa batasan panjang
-                        preview: previewUrl,  // Simpan preview
-                    } as UploadedFile; // Cast ke UploadedFile
+                        file: selectedFile,
+                        name: selectedFile.name,
+                        preview: previewUrl,
+                    } as UploadedFile;
                     return newDocumentFiles;
                 });
 
@@ -236,11 +237,11 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                         file: selectedFile,
                         name: selectedFile.name,
                         preview: previewUrl,
-                    } as UploadedFile; // Cast ke UploadedFile
+                    } as UploadedFile;
                     return newFiles;
                 });
             };
-            reader.readAsDataURL(selectedFile); // Baca file sebagai data URL untuk preview
+            reader.readAsDataURL(selectedFile);
         }
     };
 
@@ -270,13 +271,13 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
 
         setDocumentFiles(prev => {
             const newDocumentFiles = [...prev];
-            newDocumentFiles[index] = fileArray[0];  // Replace the file at the specified index
+            newDocumentFiles[index] = fileArray[0];
             return newDocumentFiles;
         });
 
         setFiles(prevFiles => {
             const newFiles = [...prevFiles];
-            newFiles[index] = fileArray[0];  // Replace the file at the specified index
+            newFiles[index] = fileArray[0];
             return newFiles;
         });
     };
@@ -292,11 +293,11 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
     const handleRemoveFile = (index: number) => {
         setDocumentFiles(prev => {
             const newDocumentFiles = [...prev];
-            newDocumentFiles[index] = null; // Set file ke null untuk menghapusnya
+            newDocumentFiles[index] = null;
             return newDocumentFiles;
         });
 
-        // Hapus juga file dari state `files`
+
         setFiles(prevFiles => {
             return prevFiles.filter((_, i) => i !== index);
         });
@@ -306,11 +307,11 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
             if (user) {
                 setIsLoggedIn(true);
-                // Fetch user profile data from Firestore
+
                 const userDoc = doc(dbFire, 'user', user.uid);
                 const userSnapshot = await getDoc(userDoc);
                 if (userSnapshot.exists()) {
-                    const userData = userSnapshot.data() as UserProfile; // Cast to UserProfile
+                    const userData = userSnapshot.data() as UserProfile;
                     const userProfileData: UserProfile = {
                         uid: user.uid,
                         email: user.email,
@@ -324,12 +325,12 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                         statusPernikahan: userData.statusPernikahan || "",
                         pendidikanTerakhir: userData.pendidikanTerakhir || "",
                         kontakDarurat: userData.kontakDarurat || "",
-                        photoURL: userData.photoURL || user.photoURL || "", // Get from Firestore or Auth
+                        photoURL: userData.photoURL || user.photoURL || "",
                     };
                     setUserProfile(userProfileData);
                 } else {
                     console.error("No such user document!");
-                    // Handle the case when user data doesn't exist
+
                 }
             } else {
                 setIsLoggedIn(false);
@@ -356,7 +357,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 setIsLoggedIn(true);
-                const userDocRef = doc(dbFire, "user", user.uid); // Ambil dokumen pengguna berdasarkan uid
+                const userDocRef = doc(dbFire, "user", user.uid);
                 const userDoc = await getDoc(userDocRef);
 
                 if (userDoc.exists()) {
@@ -368,7 +369,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                         pekerjaan: userData.pekerjaan || "Pekerjaan belum terisi",
                         kampus: userData.kampus || "Perguruan tinggi belum terisi",
                         tanggalLahir: new Date(),
-                        statusNikah: userData.statusNikah || "Status belum terisi", // Include this line
+                        statusNikah: userData.statusNikah || "Status belum terisi",
                         kotaAsal: userData.kotaAsal || "Kota asala belum diisi",
                     });
 
@@ -404,7 +405,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
 
     const updateDisplayedPrice = (option: 'perBulan' | 'perMinggu' | 'perHari') => {
         let price: number;
-        // Calculate price based on the selected option
+
         switch (option) {
             case 'perBulan':
                 price = kostann.Price.perBulan;
@@ -416,11 +417,11 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                 price = kostann.Price.perHari;
                 break;
             default:
-                price = 0;  // Provide a default value or handle it accordingly
+                price = 0;
                 break;
         }
 
-        setDisplayedPrice(price); // Update the displayed price state
+        setDisplayedPrice(price);
     };
 
 
@@ -439,7 +440,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
             const priceToSave = displayedPrice;
             setIsSaving(true);
             try {
-                // Fetch the existing document to get old document URLs
+
                 const docSnapshot = await getDoc(docRef);
                 const existingData = docSnapshot.data();
 
@@ -478,11 +479,11 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                 setModalUpdated(true)
                 setModalMessageodalUpdated("Berhasil update data anda")
                 setTimeout(() => {
-                    // After 2 seconds, stop the spinner and perform the save action
+
                     setIsSaving(false);
                     console.log('Save completed!');
-                    // Add your actual save logic here
-                }, 2000);  // 2000 milliseconds = 2 seconds
+
+                }, 2000);
 
                 setIsEditing(false);
 
@@ -494,11 +495,11 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
             } catch (error) {
                 console.error("Error updating draft: ", error);
                 setTimeout(() => {
-                    // After 2 seconds, stop the spinner and perform the save action
+
                     setIsSaving(false);
                     console.log('Save completed!');
-                    // Add your actual save logic here
-                }, 2000);  // 2000 milliseconds = 2 seconds
+
+                }, 2000);
             }
         } else {
             alert("User profile or draft data is missing.");
@@ -508,8 +509,8 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
 
 
     const generateUniqueFileName = (originalFileName: string): string => {
-        const fileExtension = originalFileName.split('.').pop();  // Mendapatkan ekstensi file
-        return `${uuidv4()}.${fileExtension}`;  // Menambahkan ekstensi ke nama file unik
+        const fileExtension = originalFileName.split('.').pop();
+        return `${uuidv4()}.${fileExtension}`;
     };
 
 
@@ -520,11 +521,11 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
         try {
             await uploadBytes(fileRef, file);
             const downloadURL = await getDownloadURL(fileRef);
-            
+
             return downloadURL;
         } catch (error) {
             console.error("Error uploading file to Firebase Storage:", error);
-            throw error; // Lempar ulang kesalahan untuk penanganan lebih lanjut
+            throw error;
         }
     };
 
@@ -536,14 +537,14 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
             return;
         }
 
-       
+
 
         setIsSaving(true);
         try {
             const documentURLs = await Promise.all(files.map(async fileObj => {
 
 
-                // Cek jika ada gambar lama dan hapus
+
                 const oldFileRef = ref(storage, `drafts/${userProfile.uid}/${fileObj.file.name}`);
                 await deleteObject(oldFileRef).catch((error) => {
                     console.warn("No existing file to delete:", error);
@@ -565,16 +566,16 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                 startDate: startDate,
                 documents: documentURLs,
                 uid: userProfile.uid,
-               
+
             };
 
             await addDoc(collection(dbFire, "draft"), draftData);
             setTimeout(() => {
-                // After 2 seconds, stop the spinner and perform the save action
+
                 setIsSaving(false);
-               
-                // Add your actual save logic here
-            }, 2000);  // 2000 milliseconds = 2 seconds
+
+
+            }, 2000);
             setIsEditing(false);
         } catch (error) {
             console.error("Error saving draft: ", error);
@@ -588,14 +589,14 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
         // Validate required fields
         if (!tenant || files.length === 0 || displayedPrice <= 0 || !userProfile || !userProfile.uid) {
             setModalMessage("Harap isi semua data document anda!");
-            setShowModal(true); // Show modal// Show an alert or use another notification method
+            setShowModal(true);
             return;
         }
 
         if (!startDate || !tenant || files.length === 0) {
             console.log("Missing required fields:", { startDate, tenant, files });
             setModalMessage("Harap isi semua data document anda!");
-            setShowModal(true); // Show modal// Show an alert or use another notification method
+            setShowModal(true);
             return;
         }
         setIsSaving(true);
@@ -629,11 +630,11 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
         console.log("Booking Data:", bookingData);
 
         try {
-            // Save booking data to Firestore
+
             const bookingRef = await addDoc(collection(dbFire, "booking"), bookingData);
             console.log("Booking data saved successfully with ID:", bookingRef.id);
 
-            // Delete draft if booking data was saved successfully
+
             if (draftId) {
                 const draftRef = doc(dbFire, "draft", draftId);
                 await deleteDoc(draftRef);
@@ -643,13 +644,13 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
             setModalMessageodalBooking("Booking berhasil, tunggu hingga dokument di verifikasi dalam 1 hari kerja.")
 
             setTimeout(() => {
-                // After 2 seconds, stop the spinner and perform the save action
+
                 setIsSaving(false);
                 console.log('Booking completed!');
                 const bookingUrl = `/profile/${userProfile?.uid}`;
-                router.push(bookingUrl); // Redirect to the booking page
-                // Add your actual save logic here
-            }, 3000);  // 2000 milliseconds = 2 seconds
+                router.push(bookingUrl);
+
+            }, 3000);
         } catch (error) {
             console.error("Error submitting booking: ", error);
             alert("Failed to submit booking request.");
@@ -657,30 +658,30 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
     };
 
     const closeModal = () => {
-        setShowModal(false); // Close the modal
+        setShowModal(false);
         setModalUpdated(false)
     };
 
     const chooseSave = (e: React.MouseEvent<HTMLAnchorElement>) => {
-        // Check if all necessary data is provided
+
         if (!tenant || files.length === 0 || displayedPrice <= 0 || !userProfile || !userProfile.uid) {
-            e.preventDefault(); // Prevent navigation if data is missing
+            e.preventDefault();
             setModalMessage("Harap isi semua data document anda!");
-            setShowModal(true); // Show modal// Show an alert or use another notification method
-            return; // Stop further action if data is incomplete
+            setShowModal(true);
+            return;
         }
 
         if (!startDate || !documentFiles.length || !priceOption) {
-            e.preventDefault(); // Prevent navigation if data is missing
-            alert("Semua data wajib diisi sebelum melanjutkan!"); // Show an alert or use another notification method
-            return; // Stop further action if any of these fields are missing
+            e.preventDefault();
+            alert("Semua data wajib diisi sebelum melanjutkan!");
+            return;
         }
 
-        // Proceed with saving or editing the draft if the data is valid
+
         if (draftId) {
-            handleSave(); // Call saveEditDraft if there is a draftId
+            handleSave();
         } else {
-            saveDraft(); // Call saveDraft if there is no draftId
+            saveDraft();
         }
     };
 
@@ -748,39 +749,91 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
             )}
 
             <main className="bg-white p-6 rounded-lg shadow-md">
-           
+
 
                 <div className="flex justify-between items-start">
                     <div className="w-full mt-10">
-                        <h1 className="text-3xl items-center mt-4   md:ml-[500px] md:text-green-500  text-green-500 font-bold mb-4 ">Pengajuan Sewa</h1>
+                        <div className="flex flex-col items-center justify-center mt-8 mx-auto p-6 bg-white shadow-lg rounded-lg border border-gray-200 max-w-md">
+                            <div className="flex items-center mb-4">
+                                {/* Icon: Dokumen */}
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth={2}
+                                    stroke="green"
+                                    className="w-8 h-8 mr-3">
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M9 12h6m2 4H7m12-9V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2h8a2 2 0 002-2v-5l4-4z"
+                                    />
+                                </svg>
+                                {/* Judul */}
+                                <h1 className="md:text-3xl text-[20px] text-green-500 font-bold">
+                                    Pengajuan Sewa
+                                </h1>
+                            </div>
+                        </div>
 
-                        {/* Tenant Information */}
+
+
                         <section className="mb-6">
                             <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-xl font-bold text-black">Informasi penyewa</h2>
+                                <h2 className="text-xl font-bold text-black">Informasi Penyewa</h2>
                             </div>
-                            <div className="space-y-2">
-                                <div>
-                                    <span className="font-bold  text-green-600">Nama penyewa</span>
-                                    <p className="text-gray-600">{tenant?.displayName}</p>
+                            <div className="space-y-4">
+                                {/* Nama Penyewa */}
+                                <div className="flex items-center">
+                                    <FontAwesomeIcon icon={faUser} className="text-red-600 w-6 h-6 mr-3" />
+                                    <div>
+                                        <span className="font-bold text-green-600">Nama Penyewa</span>
+                                        <p className="text-gray-600">{tenant?.displayName}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <span className="font-bold  text-green-600">Nomor HP</span>
-                                    <p className={tenant?.phoneNumber === "Nomor HP belum terisi" ? "text-red-500" : "text-red-500"}>
-                                        {tenant?.phoneNumber}
-                                    </p>
+
+                                {/* Nomor HP */}
+                                <div className="flex items-center">
+                                    <FontAwesomeIcon icon={faPhone} className="text-red-600 w-6 h-6 mr-3" />
+                                    <div>
+                                        <span className="font-bold text-green-600">Nomor HP</span>
+                                        <p
+                                            className={
+                                                tenant?.phoneNumber === "Nomor HP belum terisi"
+                                                    ? "text-red-500"
+                                                    : "text-gray-600"
+                                            }
+                                        >
+                                            {tenant?.phoneNumber}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <span className="font-bold text-green-500">Jenis kelamin</span>
-                                    <p className="text-gray-500">{tenant?.jenisKelamin}</p>
+
+                                {/* Jenis Kelamin */}
+                                <div className="flex items-center">
+                                    <FontAwesomeIcon icon={faVenusMars} className="text-red-600 w-6 h-6 mr-3" />
+                                    <div>
+                                        <span className="font-bold text-green-500">Jenis Kelamin</span>
+                                        <p className="text-gray-500">{tenant?.jenisKelamin}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <span className="font-bold text-green-500">Pekerjaan</span>
-                                    <p className="text-gray-500">{tenant?.pekerjaan}</p>
+
+                                {/* Pekerjaan */}
+                                <div className="flex items-center">
+                                    <FontAwesomeIcon icon={faBriefcase} className="text-red-600 w-6 h-6 mr-3" />
+                                    <div>
+                                        <span className="font-bold text-green-500">Pekerjaan</span>
+                                        <p className="text-gray-500">{tenant?.pekerjaan}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <span className="font-bold text-green-500">Nama perguruan tinggi</span>
-                                    <p className="text-gray-500">{tenant?.kampus}</p>
+
+                                {/* Nama Perguruan Tinggi */}
+                                <div className="flex items-center">
+                                    <FontAwesomeIcon icon={faUniversity} className="text-red-600 w-6 h-6 mr-3" />
+                                    <div>
+                                        <span className="font-bold text-green-500">Nama Perguruan Tinggi</span>
+                                        <p className="text-gray-500">{tenant?.kampus}</p>
+                                    </div>
                                 </div>
                             </div>
                         </section>
@@ -807,13 +860,13 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                                             id={`file-input-${index}`}
                                             className="hidden"
                                             accept=".jpg, .jpeg, .png, .heic"
-                                            onChange={(e) => handleFileChange(e, index)} // Handle file change
+                                            onChange={(e) => handleFileChange(e, index)}
                                         />
 
                                         <div
                                             className="border-2 border-dashed border-gray-300 p-4 rounded-lg w-full h-24 flex items-center justify-center"
-                                            onDrop={(e) => handleDrop(e, index)} // Handle drop event
-                                            onDragOver={handleDragOver} // Allow drag over
+                                            onDrop={(e) => handleDrop(e, index)}
+                                            onDragOver={handleDragOver}
                                             style={{ height: '200px', width: '100%', position: 'relative' }}
                                         >
                                             {/* Show uploaded image if available, else show placeholder text */}
@@ -941,7 +994,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                         </section>
 
 
-                
+
                         <Link
                             href={`/profile/${userProfile?.uid}`}
                             onClick={(e) => chooseSave(e)}
@@ -956,7 +1009,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                         >
                             Ajukan Sewa
                         </button>
-                        
+
 
                     </div>
                 </div>

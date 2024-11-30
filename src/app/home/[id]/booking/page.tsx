@@ -64,7 +64,7 @@ export const generateStaticParams = async () => {
     const kostanCollectionRef = collection(dbFire, 'home');
     const snapshot = await getDocs(kostanCollectionRef);
 
-    // Generate static params for each document in the 'home' collection
+
     return snapshot.docs.map((doc) => ({
         id: doc.id,
     }));

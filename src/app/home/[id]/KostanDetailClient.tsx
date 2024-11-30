@@ -8,7 +8,7 @@ import Login from '@/app/Login'; // Import komponen login
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { FaShareAlt, FaWhatsapp, FaEnvelope, FaFacebook, FaTwitter, FaCopy } from 'react-icons/fa';
-import { getDoc, doc, updateDoc, arrayUnion, addDoc, collection } from "firebase/firestore";
+import { getDoc, doc, updateDoc, arrayUnion } from "firebase/firestore";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import './ShareButtons.css'; // Pastikan untuk mengimpor file CSS
@@ -263,12 +263,9 @@ const KostanDetailClient = ({ initialData }: { initialData: KostanData | null })
                 return;
             }
 
-            const likedHouse = {
-                uid: user.uid, // UID pengguna yang login
-                homeId: kostan.id, // ID dari rumah yang disukai
-            };
+          
 
-            const docRef = await addDoc(collection(dbFire, "LikedHouse"), likedHouse);
+            
            
 
             setModalBooking(true)
@@ -404,15 +401,15 @@ const KostanDetailClient = ({ initialData }: { initialData: KostanData | null })
     };
 
     const formatPhoneNumber = (phoneNumber: string) => {
-        // Pastikan nomor telepon tidak mengandung karakter selain angka
+  
         const cleaned = ('' + phoneNumber).replace(/\D/g, '');
 
-        // Jika nomor dimulai dengan '0', hapus '0' dan tambahkan '62' di depannya
+
         if (cleaned.startsWith('0')) {
             return `62${cleaned.slice(1)}`;
         }
 
-        // Jika nomor sudah dalam format internasional, kembalikan langsung
+ 
         return cleaned;
     };
 
@@ -421,7 +418,7 @@ const KostanDetailClient = ({ initialData }: { initialData: KostanData | null })
             id: kostan.id,
             nama: kostan.nama,
             geolokasi: kostan.geolokasi ? {
-                latitude: kostan.geolokasi.latitude, // Directly accessing latitude and longitude
+                latitude: kostan.geolokasi.latitude, 
                 longitude: kostan.geolokasi.longitude,
             } : { latitude: 0, longitude: 0 },
             Price: {

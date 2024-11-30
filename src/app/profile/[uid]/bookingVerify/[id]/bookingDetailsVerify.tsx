@@ -192,8 +192,7 @@ const BookingDetails = ({ useBooking }: { useBooking: BookingData }) => {
 
             </div>
 
-            {/* Image Modal */}
-            {/* Image Modal */}
+          
             {selectedImage && (
                 <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-70 z-50">
                     <div className="bg-white rounded-2xl shadow-2xl p-6 relative max-w-3xl w-full mx-4">

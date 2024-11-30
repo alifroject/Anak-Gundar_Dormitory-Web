@@ -36,7 +36,7 @@ interface bookingData {
     status: string;
     tenant: Tenant;
     uid: string;
-    kostanId: string; // ID kosan yang dipesan
+    kostanId: string; 
 }
 
 interface UserProfile {
@@ -88,7 +88,7 @@ const Verify = () => {
                 const userDoc = doc(dbFire, 'user', user.uid);
                 const userSnapshot = await getDoc(userDoc);
                 if (userSnapshot.exists()) {
-                    const userData = userSnapshot.data() as UserProfile; // Cast to UserProfile
+                    const userData = userSnapshot.data() as UserProfile; 
                     const userProfileData: UserProfile = {
                         uid: user.uid,
                         email: user.email,
@@ -102,7 +102,7 @@ const Verify = () => {
                         statusPernikahan: userData.statusPernikahan || "",
                         pendidikanTerakhir: userData.pendidikanTerakhir || "",
                         kontakDarurat: userData.kontakDarurat || "",
-                        photoURL: userData.photoURL || user.photoURL || "", // Get from Firestore or Auth
+                        photoURL: userData.photoURL || user.photoURL || "", 
                     };
                     setUserProfile(userProfileData);
                 } else {
@@ -137,8 +137,8 @@ const Verify = () => {
                 const bookingSnapshot = await getDocs(bookingDocument);
                 const bookingDocs = bookingSnapshot.docs
                     .map(doc => ({ id: doc.id, ...doc.data() }) as bookingData)
-                    // Remove the filter by adminProfile?.uid since admin views all bookings
-                    .filter(doc => doc.status === "unverified");  // Example: Filter by status (unverified)
+                
+                    .filter(doc => doc.status === "unverified");  
 
                 if (bookingDocs.length > 0) {
                     setBooking(bookingDocs);
@@ -162,7 +162,7 @@ const Verify = () => {
                 const querySnapshot = await getDocs(collection(dbFire, 'home'));
                 const data = querySnapshot.docs.map((doc) => {
                     const kostan = doc.data();
-                    console.log("Data Kosan:", kostan); // Menampilkan data kosan di konsol
+                    console.log("Data Kosan:", kostan); 
                     return {
                         id: doc.id,
                         nama: kostan.nama ?? '',
@@ -170,10 +170,10 @@ const Verify = () => {
                         sisaKamar: kostan.sisaKamar ?? 0,
                         ukuranKamar: kostan.ukuranKamar ?? '',
                         type: kostan.type ?? '',
-                        jenis: kostan.jenis ?? '' // Menambahkan properti jenis dengan nilai default
+                        jenis: kostan.jenis ?? '' 
                     };
                 });
-                setKostanData(data); // Set data yang sudah ditambahkan properti 'jenis'
+                setKostanData(data); 
             } catch (error) {
                 console.error("Error fetching kostan data:", error);
             }

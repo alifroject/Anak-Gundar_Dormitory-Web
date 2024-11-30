@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
-import { getAuth } from "firebase/auth"; // Import autentikasi Firebase
+import { getAuth } from "firebase/auth"; 
 import { dbFire } from "@/app/firebase/config";
 import { jsPDF } from "jspdf";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -60,13 +60,13 @@ export default function Career() {
         const doc = new jsPDF();
 
         // Tambahkan Background
-        doc.setFillColor(240, 248, 255); // Light blue color
+        doc.setFillColor(240, 248, 255); 
         doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, "F");
 
         // Header
         doc.setFont("helvetica", "bold");
         doc.setFontSize(20);
-        doc.setTextColor(0, 102, 204); // Blue color
+        doc.setTextColor(0, 102, 204); 
         doc.text("Invoice Transaksi", 105, 20, { align: "center" });
 
         // Garis bawah header
@@ -77,7 +77,7 @@ export default function Career() {
         // Informasi Pengguna
         doc.setFont("helvetica", "bold");
         doc.setFontSize(14);
-        doc.setTextColor(51, 51, 51); // Dark gray color
+        doc.setTextColor(51, 51, 51);
         doc.text("Informasi Pelanggan", 20, 35);
 
         doc.setFont("helvetica", "normal");
@@ -122,7 +122,7 @@ export default function Career() {
         // Footer
         doc.setFont("helvetica", "italic");
         doc.setFontSize(11);
-        doc.setTextColor(128, 128, 128); // Gray color
+        doc.setTextColor(128, 128, 128); 
         doc.text(
             "Terima kasih telah menggunakan layanan kami!",
             105,

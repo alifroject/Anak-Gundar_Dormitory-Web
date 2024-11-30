@@ -121,7 +121,7 @@ export default function PromoComponent() {
                             href={`/home/${kostan.id}?House_Or_Apertment=${encodeURIComponent(kostan.nama.replace(/\s+/g, "-"))}`}
                             passHref
                         >
-                            <div className="rounded-lg shadow-md overflow-hidden cursor-pointer m-2 w-full">
+                            <div className="rounded-lg shadow-md overflow-hidden h-full cursor-pointer m-2 w-full">
                                 {kostan.images.image1 && (
                                     <img
                                         src={kostan.images.image1}

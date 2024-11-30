@@ -285,15 +285,15 @@ const RiwayatKos: React.FC<RiwayatKosProps> = ({ initialData }) => {
              shadow-md border-t-10 border-blue-600 rounded-lg z-10">
                         <div className="bg-white shadow-xl mb-10 border-t-4 border-blue-500 rounded-lg p-8 w-full max-w-3xl mx-auto mt-10">
                             <div className="flex flex-col items-center text-center">
-                                {/* Ikon */}
+                               
                                 <div className="mb-4">
                                     <FontAwesomeIcon icon={faFileAlt} className="text-blue-500 text-5xl" />
                                 </div>
-                                {/* Judul */}
+                             
                                 <h1 className="text-3xl font-extrabold text-gray-800 mb-2">
                                     Pengajuan Sewa
                                 </h1>
-                                {/* Deskripsi */}
+                               
                                 <p className="text-gray-600 text-lg">
                                     Ajukan permohonan sewa dengan mudah dan cepat.
                                 </p>
@@ -307,7 +307,7 @@ const RiwayatKos: React.FC<RiwayatKosProps> = ({ initialData }) => {
                                     rentalData.map((rental) => (
                                         <div key={rental.id} className="border p-4 rounded-lg mb-4 flex flex-col text-black">
                                             <div className="flex">
-                                                {/* Your other content */}
+                                                
                                             </div>
                                             <h2 className="text-lg font-semibold">{rental.nama}</h2>
                                             <div className="flex items-center text-sm text-gray-500 mb-2">
@@ -328,7 +328,7 @@ const RiwayatKos: React.FC<RiwayatKosProps> = ({ initialData }) => {
                                                 </div>
                                             </div>
                                             <div className="flex justify-between items-center mt-4 space-x-4">
-                                                {/* Tombol Hapus */}
+                                               
                                                 <button
                                                     className="p-3 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
                                                     onClick={() => handleDeleteDraft(rental.id)}
@@ -338,7 +338,7 @@ const RiwayatKos: React.FC<RiwayatKosProps> = ({ initialData }) => {
                                                     <span className="hidden md:inline font-medium">Hapus</span>
                                                 </button>
 
-                                                {/* Tombol Lanjutkan */}
+                                              
                                                 <button
                                                     onClick={handleNavigateToBooking}
                                                     className="py-3 px-6 rounded-full bg-blue-600 text-white font-semibold shadow-lg hover:bg-blue-700 hover:shadow-xl transform transition-transform duration-300 hover:-translate-y-1 flex items-center gap-2"

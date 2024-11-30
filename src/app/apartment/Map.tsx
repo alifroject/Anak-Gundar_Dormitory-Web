@@ -50,11 +50,11 @@ const geojsonData: FeatureCollection<Geometry, GeoJSONFeatureProperties> = {
                 type: "Polygon",
                 coordinates: [
                     [
-                        [106.45, -6.5], // Kiri bawah
-                        [107.15, -6.5], // Kanan bawah
-                        [107.15, -6.0], // Kanan atas
-                        [106.45, -6.0], // Kiri atas
-                        [106.45, -6.5], // Menutup kotak
+                        [106.45, -6.5], 
+                        [107.15, -6.5], 
+                        [107.15, -6.0], 
+                        [106.45, -6.0], 
+                        [106.45, -6.5], 
                     ],
                 ],
             },
@@ -67,7 +67,7 @@ const geojsonData: FeatureCollection<Geometry, GeoJSONFeatureProperties> = {
 
 const KosMap: React.FC<Props> = ({ kosList, onSelectKos }) => {
     const [icon, setIcon] = useState<L.Icon | null>(null);
-    const [, setSelectedKos] = useState<KosList | null>(null);  // State untuk marker yang dipilih
+    const [, setSelectedKos] = useState<KosList | null>(null);  
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -83,13 +83,13 @@ const KosMap: React.FC<Props> = ({ kosList, onSelectKos }) => {
     if (!icon) return <p>Loading map...</p>;
 
     const handleMarkerClick = (kos: KosList) => {
-        setSelectedKos(kos); // Set the selectedKos state when a marker is clicked
-        onSelectKos(kos); // Trigger onSelectKos callback
+        setSelectedKos(kos);
+        onSelectKos(kos); 
     };
 
     return (
         <MapContainer
-            className="w-full h-[400px] md:h-[90vh] z-0" // Ensure map takes full viewport height
+            className="w-full h-[400px] md:h-[150vh] z-0" 
             center={[-6.200000, 106.816666]}
             zoom={11}
             scrollWheelZoom={true}
@@ -99,7 +99,7 @@ const KosMap: React.FC<Props> = ({ kosList, onSelectKos }) => {
                 attribution='&copy; OpenStreetMap contributors'
             />
 
-            {/* Render Kos markers */}
+          
             {kosList.map((kos) => (
                 <Marker
                     key={kos.id}
@@ -128,7 +128,7 @@ const KosMap: React.FC<Props> = ({ kosList, onSelectKos }) => {
                 </Marker>
             ))}
 
-            {/* Render GeoJSON features */}
+          
             <GeoJSON data={geojsonData} />
         </MapContainer>
     );

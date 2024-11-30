@@ -31,7 +31,7 @@ const UserProfile = async ({ params }: { params: { uid: string } }) => {
     let user: User | null = null;
 
     try {
-        console.log('Fetching user with UID:', uid); // Debugging log
+       
         const userDocRef = doc(dbFire, 'user', uid);
         const userDoc = await getDoc(userDocRef);
 
@@ -56,7 +56,7 @@ const UserProfile = async ({ params }: { params: { uid: string } }) => {
     );
 };
 
-// Function to generate static parameters for the user profile
+
 
 
 

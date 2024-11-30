@@ -34,7 +34,7 @@ interface KosData {
     };
 }
 
-// Define the interfaces (same as before)
+
 interface Fal {
     contoh: boolean;
     AC: boolean;
@@ -103,7 +103,7 @@ export default function Career() {
     const [kosList, setKosList] = useState<KosData[]>([]);
     const [selectedKos, setSelectedKos] = useState<KosData | null>(null);
     const [, setDefaultKos] = useState<KosData[]>([]);
-    const [filteredKos, setFilteredKos] = useState<KosData[]>([]); // State for filtered kos list
+    const [filteredKos, setFilteredKos] = useState<KosData[]>([]); 
     const [regions, setRegions] = useState<string[]>([]);
     const router = useRouter();
     const [, setKostanData] = useState<KostanData[]>([]);
@@ -121,7 +121,7 @@ export default function Career() {
                         id: doc.id,
                         Price: kostan.Price ?? 0,
                         fal: kostan.fal ?? {},
-                        images: kostan.images ?? { image1: null, image2: null, image3: null, image4: null }, // Ubah 'image' menjadi 'images'
+                        images: kostan.images ?? { image1: null, image2: null, image3: null, image4: null }, 
                         jenis: kostan.jenis ?? '',
                         nama: kostan.nama ?? '',
                         region: kostan.region ?? '',
@@ -131,7 +131,7 @@ export default function Career() {
                         alamat: kostan.alamat ?? {},
                         peraturan: kostan.peraturan ?? {},
 
-                    } as KostanData; // Casting ke tipe KostanData
+                    } as KostanData;
                 });
                 setKostanData(data);
             } catch (error) {
@@ -145,7 +145,7 @@ export default function Career() {
 
 
     const handleNavigateToBooking = (e: React.MouseEvent) => {
-        e.preventDefault(); // Prevent default anchor behavior
+        e.preventDefault(); 
 
         if (!selectedKos) {
             console.error("Kos belum dipilih.");
@@ -165,7 +165,7 @@ export default function Career() {
         )}`;
 
         console.log("Redirecting to:", bookingUrl);
-        router.push(bookingUrl); // Redirect to the booking page
+        router.push(bookingUrl); 
     };
 
 
@@ -214,10 +214,9 @@ export default function Career() {
 
             setKosList(kosData);
 
-            // Set the first 5 kos as default
             if (kosData.length > 0) {
                 setDefaultKos(kosData.slice(0, 5));
-                setFilteredKos(kosData.slice(0, 5)); // Set initial filtered kos to default kos
+                setFilteredKos(kosData.slice(0, 5)); 
             }
         };
 
@@ -228,24 +227,24 @@ export default function Career() {
         const fetchRegions = async () => {
             try {
                 const querySnapshot = await getDocs(collection(dbFire, 'home'));
-                const regionsSet = new Set<string>(); // Set untuk memastikan nilai unik
+                const regionsSet = new Set<string>(); 
                 querySnapshot.forEach((doc) => {
                     const region = doc.data().region;
                     if (region) {
                         regionsSet.add(region);
                     }
                 });
-                setRegions(Array.from(regionsSet)); // Ubah Set menjadi array dan set ke state
+                setRegions(Array.from(regionsSet)); 
             } catch (error) {
                 console.error('Error fetching regions:', error);
             }
         };
 
         fetchRegions();
-    }, []); // Hanya dipanggil sekali ketika komponen pertama kali di-render
+    }, []); 
 
 
-    // Fetch unique regions from Firestore
+    
     useEffect(() => {
         const fetchHomesByRegion = async () => {
             if (selectedRegion) {
@@ -266,13 +265,13 @@ export default function Career() {
             ? kosList.filter((kos) => kos.region === selectedRegion)
             : kosList;
         setFilteredKos(filteredData);
-    }, [selectedRegion, kosList]); // Refresh ketika `selectedRegion` atau `kosList` berubah
+    }, [selectedRegion, kosList]); 
 
 
     return (
         <div className="min-h-screen bg-gradient-to-r from-purple-700 via-pink-600 to-orange-500 py-10 px-4">
             <div className="flex flex-col items-center justify-center mt-[70px] bg-gradient-to-r from-purple-50 via-white to-purple-50 p-10 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-                {/* Ikon */}
+               
                 <div className="text-purple-500 mb-6 animate-bounce">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -284,12 +283,11 @@ export default function Career() {
                     </svg>
                 </div>
 
-                {/* Judul */}
                 <h1 className="text-5xl font-extrabold text-purple-600 text-center leading-tight tracking-wide">
                     Apartemen
                 </h1>
 
-                {/* Subjudul */}
+               
                 <p className="mt-4 text-gray-600 text-lg text-center">
                     Nikmati kenyamanan hidup modern dengan fasilitas lengkap.
                 </p>
@@ -314,9 +312,9 @@ export default function Career() {
             </div>
 
 
-            {/* Flex container for map and kos details */}
+      
             <div className="flex flex-col h-full  md:flex-row gap-8 justify-center">
-                {/* Map Section */}
+            
                 <div className="rounded-lg  md:w-1/2 w-full">
                     <KosMap kosList={filteredKos} onSelectKos={setSelectedKos} />
                 </div>
@@ -338,7 +336,7 @@ export default function Career() {
                                 onClick={handleNavigateToBooking}
                             >
                                 <div className="bg-gray-50 rounded-lg shadow-lg p-6 hover:shadow-2xl transition duration-300 border border-gray-200 flex flex-col md:flex-row items-center">
-                                    {/* Gambar */}
+                                   
                                     {selectedKos.images[0] && (
                                         <div className="w-full md:w-32 md:h-32 md:mr-6 flex-shrink-0 rounded-lg overflow-hidden shadow-md">
                                             <img
@@ -349,7 +347,7 @@ export default function Career() {
                                         </div>
                                     )}
 
-                                    {/* Konten Teks */}
+                                  
                                     <div className="flex-1 mt-4 md:mt-0 text-center md:text-left">
                                         <h2 className="text-xl md:text-3xl font-semibold text-blue-900 mb-2 tracking-wide">
                                             {selectedKos.name} <span className='text-red-500'>{selectedKos.type}</span>
@@ -395,24 +393,24 @@ export default function Career() {
                                         </div>
                                     )}
                                     <div className="flex flex-col md:w-full rounded-b-lg md:h-[52%]  p-5 bg-white border border-gray-300 mb-5  shadow-md hover:shadow-lg transition-transform transform hover:scale-105 cursor-pointer">
-                                        {/* Judul Kos */}
+                               
 
 
                                         <h2 className="text-base md:text-[14px] font-bold text-gray-800 hover:text-blue-600 transition-colors duration-300">
                                             {kos.name} <span className='text-red-500'>{kos.type}</span>
                                         </h2>
 
-                                        {/* Alamat Kos */}
+                                    
                                         <p className="text-gray-600 md:text-[8.4px]  text-[9px] text-sm md:text-sm leading-relaxed ">
                                             {kos.alamat.jalan}, {kos.alamat.kota_kabupaten}, {kos.alamat.provinsi}
                                         </p>
 
-                                        {/* Region */}
+                                    
                                         <p className="text-xs md:text-sm md:text-[8.6px]  text-[10px] font-medium text-gray-700 ">
                                             Wilayah: <span className="text-blue-600 font-semibold">{kos.region}</span>
                                         </p>
 
-                                        {/* Harga */}
+                                       
                                         <div className="text-sm mt-2 md:text-sm md:text-[10px] text-gray-800 ">
                                             <p>
                                                 Harga per Bulan:{" "}
@@ -425,7 +423,7 @@ export default function Career() {
                                             </p>
                                         </div>
 
-                                        {/* Gambar Kos */}
+                                     
 
                                     </div>
                                 </Link>
@@ -441,7 +439,7 @@ export default function Career() {
 
 
             <div className="border-t border-gray-400 mt-8 pt-6 px-4 text-center">
-                <p className="text-white text-sm md:text-lg">Anank Gundar adalah platform yang membantu Anda menemukan tempat kos terbaik di berbagai region Universitas Gunadarma. Kami menyediakan informasi yang lengkap dan update mengenai harga, fasilitas, dan lokasi kos.</p>
+                <p className="text-white text-sm md:text-lg">Anak Gundar adalah platform yang membantu Anda menemukan tempat kos terbaik di berbagai region Universitas Gunadarma. Kami menyediakan informasi yang lengkap dan update mengenai harga, fasilitas, dan lokasi kos.</p>
             </div>
         </div>
 

@@ -35,5 +35,6 @@
         "destination": "/.next/server/api/:path*"
       }
     ]
+    
   }
 }

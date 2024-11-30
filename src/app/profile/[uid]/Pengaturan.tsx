@@ -51,8 +51,8 @@ interface HouseDetail {
 export default function Career() {
     const [likedHouses, setLikedHouses] = useState<LikedHouse[]>([]);
     const [houseDetails, setHouseDetails] = useState<HouseDetail[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [, setIsLoading] = useState(true);
+    const [, setIsLoggedIn] = useState(false);
     const [refresh, setRefresh] = useState(false); // State untuk memicu refetch
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedHouse, setSelectedHouse] = useState<{ likedHouseId: string; homeId: string } | null>(null);

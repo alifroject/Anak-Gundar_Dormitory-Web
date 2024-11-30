@@ -160,7 +160,7 @@ export default function EditHomes() {
                         key={home.id}
                         className="border-2 border-blue-500 hover:border-blue-700 shadow-lg rounded-lg py-4 px-4 md:px-6 flex flex-col md:flex-row items-start md:items-center mb-4 transition-colors duration-300"
                     >
-                        {/* Gambar di sebelah atas untuk layar kecil */}
+                       
                         {home.images.image1 && (
                             <img
                                 src={home.images.image1}
@@ -169,7 +169,7 @@ export default function EditHomes() {
                             />
                         )}
 
-                        {/* Teks di bawah gambar untuk layar kecil */}
+                       
                         <div className="flex flex-col w-full md:ml-10">
                             <h2 className="text-base md:text-xl font-semibold text-black">{home.nama} <span className='text-blue-800 ml-4'>{home.jenis}</span></h2>
                             <p className="text-sm md:text-base text-gray-600">
@@ -181,7 +181,7 @@ export default function EditHomes() {
                             </span>
                         </div>
 
-                        {/* Tombol ditumpuk vertikal untuk layar kecil */}
+                      
                         <div className="flex flex-col items-start md:items-center gap-2 mt-4 md:mt-0 md:mr-20">
                             <Link href={`/profile/${userProfile?.uid}/edit-homes/${home.id}`}>
                                 <button className="text-blue-500 hover:underline text-sm md:text-base">Edit Homes</button>

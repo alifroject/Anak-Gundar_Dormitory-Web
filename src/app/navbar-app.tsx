@@ -15,11 +15,11 @@ import { doc, getDoc } from 'firebase/firestore';
 import { FaHome, FaBuilding } from 'react-icons/fa';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserCircle, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
-import { MagnifyingGlassIcon, DocumentTextIcon, PhoneIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import { MdHelp } from "react-icons/md"; // Import ikon baru
 
-
+import { FaInstagram, FaTwitter, FaYoutube } from 'react-icons/fa';
 
 
 interface NavbarProps {
@@ -151,7 +151,9 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
 
     return (
         <>
-            <nav className="bg-white w-full h-22 fixed top-0 left-0 flex justify-between items-center p-4 z-30 border-b border-gray-300">
+            <nav className="bg-gradient-to-r from-purple-100 via-purple-400 to-purple-500 
+              md:bg-gradient-to-r md:from-purple-400 md:via-indigo-600 md:to-pink-700 
+              w-full h-22 fixed top-0 left-0 flex justify-between items-center p-4 z-30 shadow-lg border-b border-gray-300 hover:shadow-2xl">
                 {/* Logo */}
                 <div className="flex items-center">
                     <Link href="/">
@@ -194,8 +196,12 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                             className="flex items-center text-gray-800 hover:text-blue-500 px-4 py-2 rounded-lg transition-all duration-200"
                             aria-expanded={isCariDropdownOpen}
                         >
-                            Masih Cari?
-                            <ChevronDownIcon className="w-5 h-5 ml-1" />
+                            <span className='text-white' style={{ fontFamily: 'Poppins, sans-serif', fontSize: '16px', fontWeight: '500' }}>
+                                Masih Cari?
+                            </span>
+
+
+                            <ChevronDownIcon className="w-5 h-5 ml-1 text-white" />
                         </button>
                         {isCariDropdownOpen && (
                             <ul className="w-48 absolute bg-white text-gray-800 shadow-lg mt-2 rounded-lg border border-gray-300">
@@ -217,15 +223,47 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
 
                     <li>
                         <Link href="/rules" className="text-gray-800 hover:text-blue-500 block px-4 py-3 rounded-lg transition-all duration-200">
-                            Syarat yang berlaku dan aturan
+                            <span className='text-white' style={{ fontFamily: 'Poppins, sans-serif', fontSize: '16px', fontWeight: '500' }}>
+                                Syarat dan Aturan yang berlaku
+                            </span>
                         </Link>
+                    </li>
+                    <li>
+                        <a
+                            href="https://www.instagram.com/gunadarma/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-pink-500 hover:text-pink-800 text-2xl transition duration-300 ease-in-out"
+                        >
+                            <FaInstagram />
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="https://x.com/gunadarma_"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-500 hover:text-blue-800 text-2xl transition duration-300 ease-in-out"
+                        >
+                            <FaTwitter />
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="https://www.youtube.com/@ugtvofficial"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-red-500 hover:text-red-800 text-2xl transition duration-300 ease-in-out"
+                        >
+                            <FaYoutube />
+                        </a>
                     </li>
 
                     {isLoggedIn ? (
                         <div className="relative">
                             <button
                                 onClick={toggleProfileDropdown}
-                                className="flex items-center text-gray-800 hover:text-blue-500 px-4 py-2 rounded-lg transition-all duration-200"
+                                className="flex items-center ml-40 text-gray-800 hover:text-blue-500 px-4 py-2 rounded-lg transition-all duration-200"
                                 aria-expanded={isProfileDropdownOpen}
                             >
                                 <Image
@@ -235,10 +273,10 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                                     height={40}
                                     className="rounded-full border-2 border-gray-300"
                                 />
-                                <ChevronDownIcon className="w-5 h-5 ml-1" />
+                                <ChevronDownIcon className="w-5 h-5 ml-1 text-white" />
                             </button>
                             {isProfileDropdownOpen && (
-                                <ul className="absolute bg-white text-black shadow-md mt-2 rounded-lg w-48 border border-gray-200">
+                                <ul className="absolute bg-white text-black shadow-md ml-40 mt-2 rounded-lg w-48 border border-gray-200">
                                     <li>
                                         <Link
                                             href={`/profile/${userProfile?.uid}`}
@@ -263,8 +301,8 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                             )}
                         </div>
                     ) : (
-                        <li>
-                            <button onClick={onLoginClick} className="text-white bg-blue-500 hover:bg-blue-600 border-2 border-blue-500 px-6 py-2 rounded-lg transition-all duration-200 w-full">
+                        <li className='ml-40'>
+                            <button onClick={onLoginClick} className="text-white ml-40 md:w-[100px] bg-blue-500 hover:bg-blue-600 border-2 border-blue-500 px-6 py-2 rounded-lg transition-all duration-200 w-full">
                                 Masuk
                             </button>
                         </li>
@@ -408,6 +446,37 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                             <MdHelp className="w-6 h-6 mr-3 text-blue-500" />
                             FAQ
                         </Link>
+                    </li>
+
+                    <li>
+                        <a
+                            href="https://www.instagram.com/gunadarma/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-pink-500 hover:text-pink-800 flex items-center text-gray-900 hover:text-blue-600 px-4 py-3 rounded-lg font-medium transition-all duration-200 shadow-md bg-gray-50 hover:bg-blue-50"
+                        >
+                            <FaInstagram /> <span>Instagram</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="https://x.com/gunadarma_"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-500 hover:text-blue-800 text-2xl transition duration-300 ease-in-out"
+                        >
+                            <FaTwitter />
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="https://www.youtube.com/@ugtvofficial"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-red-500 hover:text-red-800 text-2xl transition duration-300 ease-in-out"
+                        >
+                            <FaYoutube />
+                        </a>
                     </li>
 
                     {/* Conditional rendering for login/logout in the sidebar */}

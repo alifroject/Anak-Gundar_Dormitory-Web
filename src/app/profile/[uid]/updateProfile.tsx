@@ -140,7 +140,7 @@ export default function UpdateProfile() {
     };
 
     const closeModal = () => {
-        setIsModalOpen(false); // Close modal when clicked
+        setIsModalOpen(false); 
     };
     return (
         <>

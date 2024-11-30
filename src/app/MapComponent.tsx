@@ -52,12 +52,12 @@ const MapComponent: React.FC<MapComponentProps> = ({ kostanData, hideXAxis }) =>
         <>
             {!hideXAxis && (
                 <div className="x-axis"> {/* Render x-axis here if hideXAxis is false */} 
-                    {/* Implement your x-axis rendering logic here */}
+                    
                 </div>
             )}
             {kostanData.map(({ nama, geolokasi }, index) => (
                 <Marker
-                    key={index} // Pastikan key unik
+                    key={index} 
                     position={[geolokasi.latitude, geolokasi.longitude]}
                     icon={customIcon}
                 >
@@ -69,15 +69,15 @@ const MapComponent: React.FC<MapComponentProps> = ({ kostanData, hideXAxis }) =>
 };
 
 const MapWrapper: React.FC<{ kostanData: TransformedKostanData[]; hideXAxis?: boolean }> = ({ kostanData, hideXAxis }) => {
-    const initialPosition: [number, number] = [51.505, -0.09]; // Ganti dengan koordinat yang sesuai jika perlu
+    const initialPosition: [number, number] = [51.505, -0.09]; 
 
     return (
         <MapContainer 
             center={initialPosition} 
             zoom={13} 
-            scrollWheelZoom={true} // Mengizinkan zoom dengan scroll
+            scrollWheelZoom={true} 
             style={{ height: '100%', width: '100%' }} 
-            zoomControl={true} // Menampilkan kontrol zoom
+            zoomControl={true} 
         >
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

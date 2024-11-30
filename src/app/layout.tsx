@@ -53,12 +53,13 @@ export default function RootLayout({ children }: RootLayoutProps) {
         />
         <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet" />
 
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet"/>
 
 
 
 
-
-        <meta httpEquiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups" />
+          <meta httpEquiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups" />
       </head>
       <body className="overflow-hidden min-h-screen">
         {!isRegisterPage && <Header />}
@@ -68,12 +69,12 @@ export default function RootLayout({ children }: RootLayoutProps) {
           <Login
             onClose={handleCloseLogin}
             onLoginSuccess={handleLoginSuccess}
-            onLoginSubmit={handleLoginSubmit} // Pass function to trigger loading during login
-            originPath="/" // Or use any path you want as default
+            onLoginSubmit={handleLoginSubmit}
+            originPath="/"
           />
         )}
 
-        {/* Show Spinner while loading */}
+
         {isLoading && <Spinner />}
 
         <div className={`h-screen overflow-y-auto transition-all duration-300 ease-in-out`}>

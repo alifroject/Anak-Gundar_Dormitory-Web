@@ -442,7 +442,7 @@ export default function Career() {
 
 
             <div className="border-t border-gray-400 mt-8 pt-6 px-4 text-center">
-                <p className="text-white text-sm md:text-lg">Anank Gundar adalah platform yang membantu Anda menemukan tempat kos terbaik di berbagai region Universitas Gunadarma. Kami menyediakan informasi yang lengkap dan update mengenai harga, fasilitas, dan lokasi kos.</p>
+                <p className="text-white text-sm md:text-lg">Anak Gundar adalah platform yang membantu Anda menemukan tempat kos terbaik di berbagai region Universitas Gunadarma. Kami menyediakan informasi yang lengkap dan update mengenai harga, fasilitas, dan lokasi kos.</p>
             </div>
         </div>
 

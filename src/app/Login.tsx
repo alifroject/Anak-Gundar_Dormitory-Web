@@ -5,7 +5,7 @@ import {
     FacebookAuthProvider,
     GoogleAuthProvider,
 } from "firebase/auth";
-import { auth, dbFire } from "@/app/firebase/config"; // Import db for Firestore
+import { auth, dbFire } from "@/app/firebase/config";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -19,15 +19,15 @@ interface LoginProps {
     onClose: () => void;
     onLoginSuccess: () => void;
     originPath: string;
-    onLoginSubmit: () => void; // Add this property to LoginProps
+    onLoginSubmit: () => void; 
 }
 
 const Login: React.FC<LoginProps> = ({ onClose, onLoginSuccess, originPath, onLoginSubmit }) => {
     const modalRef = useRef<HTMLDivElement>(null);
     const [isOpen, setIsOpen] = useState(false);
-    const [email, setEmail] = useState(""); // New state for email
-    const [password, setPassword] = useState(""); // New state for password
-    const [isAdminMode, setIsAdminMode] = useState(false); // State for admin mode
+    const [email, setEmail] = useState(""); 
+    const [password, setPassword] = useState(""); 
+    const [isAdminMode, setIsAdminMode] = useState(false); 
     const router = useRouter();
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -83,7 +83,7 @@ const Login: React.FC<LoginProps> = ({ onClose, onLoginSuccess, originPath, onLo
         username: string;
     }) => {
         try {
-            const adminDocRef = doc(dbFire, "user", userData.uid); // Assuming you store admin data separately
+            const adminDocRef = doc(dbFire, "user", userData.uid); 
             const adminDoc = await getDoc(adminDocRef);
             if (!adminDoc.exists()) {
                 await setDoc(adminDocRef, userData);
@@ -105,13 +105,13 @@ const Login: React.FC<LoginProps> = ({ onClose, onLoginSuccess, originPath, onLo
             const userDocument = {
                 uid: user.uid,
                 email: user.email || "",
-                image_profile: user.photoURL || "", // or default image
-                password: "", // Optional: Don't store plaintext passwords
-                role: "user", // Default role
+                image_profile: user.photoURL || "", 
+                password: "", 
+                role: "user", 
                 username: user.displayName || "Anonymous",
             };
             onLoginSubmit();
-            setIsModalOpen(true); // Tampilkan modal
+            setIsModalOpen(true); 
             await createAdminDocument(userDocument);
             handleClose();
             router.push(originPath || "/");
@@ -132,14 +132,14 @@ const Login: React.FC<LoginProps> = ({ onClose, onLoginSuccess, originPath, onLo
             const userDocument = {
                 uid: user.uid,
                 email: user.email || "",
-                image_profile: user.photoURL || "", // or default image
-                password: "", // Optional: Don't store plaintext passwords
-                role: "user", // Default role
+                image_profile: user.photoURL || "", 
+                password: "", 
+                role: "user", 
                 username: user.displayName || "Anonymous",
             };
             await createAdminDocument(userDocument);
             handleClose();
-            if (onLoginSuccess) onLoginSuccess();  // Call onLoginSuccess if provided
+            if (onLoginSuccess) onLoginSuccess();  
             router.push("/");
         } catch (error) {
             console.error("Login Error:", error);
@@ -156,26 +156,26 @@ const Login: React.FC<LoginProps> = ({ onClose, onLoginSuccess, originPath, onLo
             console.log("Sign in successful:", userCredential);
             const user = userCredential.user;
 
-            // Check if the user is an admin (this can be modified based on your authentication logic)
-            const isAdmin = (email === "admin@gmail.com"); // Example admin check
+           
+            const isAdmin = (email === "admin@gmail.com"); // admin 
 
             if (isAdmin) {
                 const adminData = {
                     uid: user.uid,
                     email: user.email,
-                    image_profile: "", // Default empty string for image_profile
-                    password: password, // The password used for login (consider hashing in production)
-                    role: "admin",      // Set role as admin
-                    username: "admin",  // Set username as admin
+                    image_profile: "", 
+                    password: password, 
+                    role: "admin",      
+                    username: "admin",  
                 };
                 await createAdminDocument(adminData); // Call the admin document creation function
             } else {
                 const userData = {
                     uid: user.uid,
                     email: user.email,
-                    displayName: user.displayName || "Anonymous", // For regular users
+                    displayName: user.displayName || "Admin_1", 
                 };
-                await createUserDocument(userData); // Call the existing user document creation function
+                await createUserDocument(userData); 
             }
 
             const token = await user.getIdToken();
@@ -183,14 +183,14 @@ const Login: React.FC<LoginProps> = ({ onClose, onLoginSuccess, originPath, onLo
 
             onClose();
             console.log("Navigating to main app...");
-            router.push('/'); // Navigate to the main app
+            router.push('/'); 
         } catch (error) {
             console.error("Email Login Error:", error);
             alert("Email or password is incorrect. Please try again.");
         }
     };
     const closeModal = () => {
-        setIsModalOpen(false); // Sembunyikan modal
+        setIsModalOpen(false); 
     };
 
 
@@ -206,7 +206,7 @@ const Login: React.FC<LoginProps> = ({ onClose, onLoginSuccess, originPath, onLo
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex mt-20  items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300">
                     <div className="bg-white rounded-xl p-8 shadow-2xl transform transition-transform scale-100 max-w-lg w-full">
-                        {/* Header */}
+                     
                         <div className="flex justify-between items-center pb-4 border-b">
                             <h3 className="text-xl font-bold text-gray-800">Berhasil!</h3>
                             <button
@@ -217,7 +217,7 @@ const Login: React.FC<LoginProps> = ({ onClose, onLoginSuccess, originPath, onLo
                             </button>
                         </div>
 
-                        {/* Body */}
+                      
                         <div className="py-6 text-center">
                             <div className="flex items-center justify-center w-16 h-16 mx-auto bg-green-100 rounded-full mb-4">
                                 <svg
@@ -238,7 +238,7 @@ const Login: React.FC<LoginProps> = ({ onClose, onLoginSuccess, originPath, onLo
                             </p>
                         </div>
 
-                        {/* Footer */}
+                      
                         <div className="flex justify-center mt-6">
                             <button
                                 onClick={closeModal}
@@ -260,7 +260,7 @@ const Login: React.FC<LoginProps> = ({ onClose, onLoginSuccess, originPath, onLo
                         ref={modalRef}
                         className="bg-white p-6 rounded-2xl shadow-2xl w-full md:max-w-lg relative transition-transform transform duration-300"
                     >
-                        {/* Tombol Tutup */}
+                      
                         <button
                             className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
                             onClick={handleClose}
@@ -269,7 +269,7 @@ const Login: React.FC<LoginProps> = ({ onClose, onLoginSuccess, originPath, onLo
                             <FontAwesomeIcon icon={faTimes} size="lg" />
                         </button>
 
-                        {/* Konten Modal */}
+                        
                         <div className="text-center">
                             <h2 className="text-2xl font-semibold text-gray-800 mb-6">
                                 {isAdminMode ? "Admin Login" : "Login"}
