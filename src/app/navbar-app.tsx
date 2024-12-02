@@ -313,9 +313,13 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
 
             {/* Sidebar */}
             {isSidebarOpen && (
-                <div className="fixed inset-0 z-20 bg-black bg-opacity-50" onClick={closeSidebar}></div>
+                <div className="fixed  inset-0 z-20 bg-black bg-opacity-50" onClick={closeSidebar}></div>
             )}
-            <div className={`fixed top-0 left-0 h-full w-64 p-5 bg-white transition-transform transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} z-30`}>
+            <div className={`fixed top-0 left-0 h-full  w-64 p-5 bg-white transition-transform transform overflow-y-auto scrollbar-hide ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} z-30`} style={{
+                scrollbarWidth: 'none', /* Firefox */
+                msOverflowStyle: 'none', /* IE and Edge */
+            }}>
+
                 <div className={`p-4 ${isSidebarOpen ? 'block' : 'hidden'}`}>
                     <Link href="/" onClick={closeSidebar}>
                         <img
@@ -328,7 +332,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                     </Link>
                 </div>
 
-                <ul className="space-y-4 mt-4 h-full bg-blue-50 p-4">
+                <ul className="space-y-4 mb-7 mt-4 h-full  p-4">
                     {isLoggedIn ? (
                         <div className="relative">
                             <button
@@ -417,9 +421,9 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                         <Link
                             href="/rules"
                             onClick={closeSidebar}
-                            className="flex items-center text-gray-900 hover:text-blue-600 px-4 py-3 rounded-lg font-medium transition-all duration-200 shadow-md bg-gray-50 hover:bg-blue-50"
+                            className="flex items-center text-gray-900 hover:text-blue-600 px-4 py-3 rounded-lg font-medium transition-all duration-200 shadow-md bg-gray-50 hover:bg-blue-100"
                         >
-                            <DocumentTextIcon className="w-6 h-6 mr-3 text-blue-500" />
+                            <DocumentTextIcon className="w-7 h-7 mr-3 text-blue-500" />
                             Syarat dan Aturan
                         </Link>
                     </li>
@@ -431,7 +435,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                             rel="noopener noreferrer"
                             className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
                         >
-                            <FontAwesomeIcon icon={faWhatsapp} style={{ color: 'green' }} className="h-8 w-8" />
+                            <FontAwesomeIcon icon={faWhatsapp} style={{ color: 'green' }} className="w-7 h-7" />
                             <p className="text-[14px] font-medium text-green-800">
                                 Contact Admin
                             </p>
@@ -441,9 +445,9 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                         <Link
                             href="https://www.instagram.com/reel/DAi2aZKo3df/?igsh=OXd3NWFlODY5OTdv"
                             onClick={closeSidebar}
-                            className="flex items-center text-gray-900 hover:text-blue-600 px-4 py-3 rounded-lg font-medium transition-all duration-200 shadow-md bg-gray-50 hover:bg-blue-50"
+                            className="flex items-center text-gray-900 hover:text-blue-600 px-4 py-3 rounded-lg font-medium transition-all duration-200 shadow-md bg-gray-50 hover:bg-blue-100"
                         >
-                            <MdHelp className="w-6 h-6 mr-3 text-blue-500" />
+                            <MdHelp className="w-7 h-7 mr-3 text-blue-500" />
                             FAQ
                         </Link>
                     </li>
@@ -453,9 +457,9 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                             href="https://www.instagram.com/gunadarma/"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-pink-500 hover:text-pink-800 flex items-center text-gray-900 hover:text-blue-600 px-4 py-3 rounded-lg font-medium transition-all duration-200 shadow-md bg-gray-50 hover:bg-blue-50"
+                            className="text-pink-500 hover:text-pink-800 flex items-center text-gray-900 hover:text-blue-600 px-4 py-3 rounded-lg font-medium transition-all duration-200 shadow-md bg-gray-50 hover:bg-pink-100"
                         >
-                            <FaInstagram /> <span>Instagram</span>
+                            <FaInstagram className='w-7 h-7'/> <span className='ml-4'>Instagram</span>
                         </a>
                     </li>
                     <li>
@@ -463,9 +467,9 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                             href="https://x.com/gunadarma_"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-500 hover:text-blue-800 text-2xl transition duration-300 ease-in-out"
+                            className="text-blue-300 hover:text-blue-800 flex items-center text-blue-500 hover:text-blue-600 px-4 py-3 rounded-lg font-medium transition-all duration-200 shadow-md bg-gray-50 hover:bg-blue-100"
                         >
-                            <FaTwitter />
+                            <FaTwitter className='w-7 h-7' /> <span className='ml-4'>Twitter</span>
                         </a>
                     </li>
                     <li>
@@ -473,9 +477,9 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                             href="https://www.youtube.com/@ugtvofficial"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-red-500 hover:text-red-800 text-2xl transition duration-300 ease-in-out"
+                             className="text-red-500  hover:text-red-800 flex items-center text-gray-900 hover:text-blue-600 px-4 py-3 my-5 rounded-lg font-medium transition-all duration-200 shadow-md bg-gray-50 hover:bg-red-100"
                         >
-                            <FaYoutube />
+                            <FaYoutube  className='w-7 h-7' /> <span className='ml-4'>YouTube</span>
                         </a>
                     </li>
 

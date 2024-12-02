@@ -8,7 +8,7 @@ import Login from '@/app/Login'; // Import komponen login
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { FaShareAlt, FaWhatsapp, FaEnvelope, FaFacebook, FaTwitter, FaCopy } from 'react-icons/fa';
-import { getDoc, doc, updateDoc, arrayUnion } from "firebase/firestore";
+import { getDoc, doc, updateDoc, arrayUnion, addDoc, collection } from "firebase/firestore";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import './ShareButtons.css'; // Pastikan untuk mengimpor file CSS
@@ -263,10 +263,13 @@ const KostanDetailClient = ({ initialData }: { initialData: KostanData | null })
                 return;
             }
 
-          
+            const likedHouse = {
+                uid: user.uid, // UID pengguna yang login
+                homeId: kostan.id, // ID dari rumah yang disukai
+            };
 
-            
-           
+           const likeData =  await addDoc(collection(dbFire, "LikedHouse"), likedHouse);
+           console.log(likeData)
 
             setModalBooking(true)
 

@@ -274,11 +274,11 @@ const UserVerify: React.FC = () => {
     }, []);
 
     return (
-        <div className="min-h-screen p-4 bg-gray-100">
+        <div className="h-screen p-4 bg-gray-100  overflow-auto">
             {isLoggedIn ? (
                 <>
-                    <div className="bg-gradient-to-r from-blue-500 via-indigo-600 to-purple-700 shadow-lg border border-indigo-800 rounded-xl p-6 md:p-10 w-full max-w-3xl mx-auto mt-10">
-                        <div className="flex flex-col items-center text-center">
+                    <div className="bg-gradient-to-r   from-blue-500 via-indigo-600 to-purple-700 shadow-lg border border-indigo-800 rounded-xl p-6 md:p-10 w-full max-w-3xl mx-auto mt-10">
+                        <div className="flex h-full flex-col items-center text-center">
                             {/* Judul */}
                             <h1 className="text-2xl md:text-3xl font-bold text-white-800 mb-6 drop-shadow-sm">
                                 Status Verifikasi Booking
@@ -288,36 +288,48 @@ const UserVerify: React.FC = () => {
                                 <FontAwesomeIcon icon={faClipboardCheck} className="text-white text-4xl" />
                             </div>
                             {/* Status */}
-    
+
                         </div>
                     </div>
 
-                    <div className="bg-white h-screen p-6 mt-10 rounded-lg shadow-lg w-full">
+                    <div className="bg-white p-8 mt-10 rounded-xl shadow-xl w-full max-w-4xl mx-auto">
                         {booking.length > 0 ? (
                             booking.map((booking) => (
-                                <div key={booking.id} className="border-b pb-4 mb-4 text-black">
-                                    <h2 className="text-lg font-semibold mb-2">{booking.nama}</h2>
-                                    <div className="flex items-center text-sm text-gray-600 mb-2">
-                                        <span>Status: </span>
-                                        {booking.status === 'verified' ? (
-                                            <div className="flex items-center ml-2 text-green-600">
-                                                <FaCheckCircle className="mr-2" />
+                                <div
+                                    key={booking.id}
+                                    className="border-b-2 border-blue-500 pb-6 mb-6 text-gray-800"
+                                >
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h2 className="text-lg font-bold">{booking.nama}</h2>
+                                        <div
+                                            className={`px-3 py-1 rounded-full text-sm ${booking.status === "verified"
+                                                    ? "bg-green-100 text-green-600"
+                                                    : "bg-red-100 text-red-600"
+                                                }`}
+                                        >
+                                            {booking.status === "verified" ? (
+                                                <div className="flex items-center gap-1">
+                                                    <FaCheckCircle className="text-green-600" />
+                                                    <span>{booking.status}</span>
+                                                </div>
+                                            ) : (
                                                 <span>{booking.status}</span>
-                                            </div>
-                                        ) : (
-                                            <span className="ml-2 text-red-600">{booking.status}</span>
-                                        )}
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="text-sm text-gray-500 mb-2">
-                                        Harga: Rp {booking.price.toLocaleString('id-ID')}
+                                    <div className="text-sm mb-2">
+                                        <p>
+                                            <span className="font-semibold">Harga:</span> Rp{" "}
+                                            {booking.price.toLocaleString("id-ID")}
+                                        </p>
+                                        <p>
+                                            <span className="font-semibold">Durasi:</span> {booking.priceOption}
+                                        </p>
                                     </div>
-                                    <div className="text-sm text-gray-500 mb-4">Durasi: {booking.priceOption}</div>
-
-                                    {/* Tampilkan tombol "Lanjutkan Bayar" hanya jika status adalah "verified" */}
-                                    {booking.status === 'verified' && (
+                                    {booking.status === "verified" && (
                                         <button
                                             onClick={() => handleLanjutkanBayar(booking.id)}
-                                            className="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 transition"
+                                            className="bg-gradient-to-r from-blue-600 to-blue-500 text-white py-2 px-6 rounded-lg shadow hover:from-blue-700 hover:to-blue-600 transition-all"
                                         >
                                             Lanjutkan Bayar
                                         </button>
@@ -325,10 +337,12 @@ const UserVerify: React.FC = () => {
                                 </div>
                             ))
                         ) : (
-                            <div className="text-gray-500">Belum ada data booking yang tersedia.</div>
+                            <div className="text-gray-500 text-center">
+                                Belum ada data booking yang tersedia.
+                            </div>
                         )}
-
                     </div>
+
                 </>
             ) : (
                 <div>Silakan login terlebih dahulu.</div>

@@ -586,10 +586,24 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
 
 
     const handleBooking = async () => {
+
+        const playAlertSounds = (isSuccess: boolean) => {
+            const soundPath = isSuccess ? '/ajukan_sewa.mp3' : '/alertWrong.mp3'; // Pilih suara sesuai status
+        console.log("Memutar suara..."); // Debugging log
+        const alertSound = new Audio(soundPath);
+        
+        alertSound.play().then(() => {
+            console.log("Suara berhasil diputar!"); // Log jika suara berhasil diputar
+        }).catch((err) => {
+            console.error("Error saat memutar suara: ", err); // Menangani error jika ada
+        });
+        };
+
         // Validate required fields
         if (!tenant || files.length === 0 || displayedPrice <= 0 || !userProfile || !userProfile.uid) {
             setModalMessage("Harap isi semua data document anda!");
             setShowModal(true);
+            playAlertSounds(false); // Putar suara peringatan
             return;
         }
 
@@ -597,6 +611,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
             console.log("Missing required fields:", { startDate, tenant, files });
             setModalMessage("Harap isi semua data document anda!");
             setShowModal(true);
+            playAlertSounds(false); // Putar suara peringatan
             return;
         }
         setIsSaving(true);
@@ -640,6 +655,7 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                 await deleteDoc(draftRef);
                 console.log("Draft data deleted successfully.");
             }
+            playAlertSounds(true);
             setModalBooking(true)
             setModalMessageodalBooking("Booking berhasil, tunggu hingga dokument di verifikasi dalam 1 hari kerja.")
 
@@ -663,20 +679,39 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
     };
 
     const chooseSave = (e: React.MouseEvent<HTMLAnchorElement>) => {
+        const playAlertSound = (isSuccess: boolean) => {
+            const soundPath = isSuccess ? '/draft.mp3' : '/alertWrong.mp3'; // Pilih suara sesuai status
+            console.log("Memutar suara..."); // Debugging log
+            const alertSound = new Audio(soundPath);
+
+            alertSound.play().then(() => {
+                console.log("Suara berhasil diputar!"); // Log jika suara berhasil diputar
+            }).catch((err) => {
+                console.error("Error saat memutar suara: ", err); // Menangani error jika ada
+            });
+        };
+
+
 
         if (!tenant || files.length === 0 || displayedPrice <= 0 || !userProfile || !userProfile.uid) {
             e.preventDefault();
-            setModalMessage("Harap isi semua data document anda!");
-            setShowModal(true);
+            setTimeout(() => {
+                playAlertSound(false); // Putar suara peringatan
+                setModalMessage("Harap isi semua data document anda!");
+                setShowModal(true);
+            }, 100); // Tunggu beberapa milidetik setelah alert dipanggil
             return;
         }
 
         if (!startDate || !documentFiles.length || !priceOption) {
             e.preventDefault();
+            playAlertSound(false); // Putar suara peringatan
             alert("Semua data wajib diisi sebelum melanjutkan!");
             return;
         }
 
+
+        playAlertSound(true);
 
         if (draftId) {
             handleSave();
@@ -684,6 +719,8 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
             saveDraft();
         }
     };
+
+
 
 
 
@@ -1009,6 +1046,8 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
                         >
                             Ajukan Sewa
                         </button>
+
+
 
 
                     </div>

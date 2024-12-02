@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
-import { getAuth } from "firebase/auth"; 
+import { getAuth } from "firebase/auth";
 import { dbFire } from "@/app/firebase/config";
 import { jsPDF } from "jspdf";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -56,88 +56,108 @@ export default function Career() {
         fetchRiwayatTransaksi();
     }, []);
 
+
+
     const generatePDF = (transaksi: Transaksi) => {
         const doc = new jsPDF();
-
+    
         // Tambahkan Background
-        doc.setFillColor(240, 248, 255); 
+        doc.setFillColor(240, 248, 255);
         doc.rect(0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height, "F");
-
+    
         // Header
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(20);
-        doc.setTextColor(0, 102, 204); 
-        doc.text("Invoice Transaksi", 105, 20, { align: "center" });
-
-        // Garis bawah header
-        doc.setDrawColor(0, 102, 204);
+        doc.setFont("times", "bold");
+        doc.setFontSize(24);
+        doc.setTextColor(0, 102, 204);
+        doc.text("Bukti Transaksi", 105, 20, { align: "center" });
+    
+        // Menambahkan logo gambar di atas garis pemisah
+        const logoImageUrl = "/anakGundar.png";  // Ganti dengan path logo Anda
+        doc.addImage(logoImageUrl, 'PNG', 80, 30, 50, 30);  // Posisi logo, sesuaikan ukuran jika perlu
+    
+        // Garis bawah header (setelah logo)
+        doc.setDrawColor(0, 102, 190);
+        doc.setLineWidth(2);
+        doc.line(20, 70, 190, 70); // Garis dibawah judul dan logo
+    
+        // Informasi Pelanggan
+        doc.setFont("times", "bold");
+        doc.setFontSize(16);
+        doc.setTextColor(51, 51, 51);
+        doc.text("Informasi Pelanggan", 80, 80);
+    
+        doc.setFont("times", "normal");
+        doc.setFontSize(14);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Nama: ${transaksi.first_name}`, 20, 90);
+        doc.text(`Email: ${transaksi.email}`, 20, 98);
+        doc.text(`Kampus: ${transaksi.kampus}`, 20, 106);
+        doc.text(`Kota Asal: ${transaksi.kotaAsal}`, 20, 114);
+    
+        // Garis bawah informasi pelanggan
+        doc.setDrawColor(51, 51, 51);
         doc.setLineWidth(1);
-        doc.line(20, 25, 190, 25);
-
-        // Informasi Pengguna
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(14);
-        doc.setTextColor(51, 51, 51);
-        doc.text("Informasi Pelanggan", 20, 35);
-
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(12);
-        doc.setTextColor(0, 0, 0);
-        doc.text(`Nama: ${transaksi.first_name}`, 20, 45);
-        doc.text(`Email: ${transaksi.email}`, 20, 53);
-        doc.text(`Kampus: ${transaksi.kampus}`, 20, 61);
-        doc.text(`Kota Asal: ${transaksi.kotaAsal}`, 20, 69);
-
+        doc.line(20, 118, 190, 118);
+    
         // Informasi Transaksi
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(14);
+        doc.setFont("times", "bold");
+        doc.setFontSize(16);
         doc.setTextColor(51, 51, 51);
-        doc.text("Detail Transaksi", 20, 85);
-
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(12);
+        doc.text("Detail Transaksi", 80, 130);
+    
+        doc.setFont("times", "normal");
+        doc.setFontSize(14);
         doc.setTextColor(0, 0, 0);
-
+    
+        const formatRupiah = (amount: string) => {
+            const numericAmount = Number(amount);
+            if (isNaN(numericAmount)) {
+                return "Rp 0";
+            }
+            return `Rp ${numericAmount.toLocaleString('id-ID')}`;
+        };
+    
         const detailData = [
             ["Order ID", transaksi.order_id],
             ["Nama Kos/Apartment", transaksi.nama],
-            ["Jumlah", `Rp ${transaksi.gross_amount}`],
+            ["Jumlah", formatRupiah(transaksi.gross_amount)],
             ["Tanggal Mulai", new Date(transaksi.transaction_time).toLocaleDateString()],
             ["BCA VA Number", transaksi.bca_va_number || "N/A"],
             ["Metode Pembayaran", transaksi.payment_type],
         ];
-
+    
         const startX = 20;
-        const startY = 95;
+        const startY = 140;
         const lineSpacing = 10;
-
+    
         detailData.forEach(([label, value], index) => {
             const yPosition = startY + index * lineSpacing;
-            doc.setFont("helvetica", "bold");
+            doc.setFont("times", "bold");
             doc.text(`${label}:`, startX, yPosition);
-            doc.setFont("helvetica", "normal");
+            doc.setFont("times", "normal");
             doc.text(value, startX + 60, yPosition);
         });
-
+    
+        // Garis bawah informasi transaksi
+        doc.setDrawColor(51, 51, 51);
+        doc.setLineWidth(1);
+        doc.line(20, startY + detailData.length * lineSpacing + 5, 190, startY + detailData.length * lineSpacing + 5);
+    
         // Footer
-        doc.setFont("helvetica", "italic");
-        doc.setFontSize(11);
-        doc.setTextColor(128, 128, 128); 
-        doc.text(
-            "Terima kasih telah menggunakan layanan kami!",
-            105,
-            270,
-            { align: "center" }
-        );
-
+        doc.setFont("times", "italic");
+        doc.setFontSize(12);
+        doc.setTextColor(128, 128, 128);
+        doc.text("Terima kasih telah menggunakan layanan kami!", 105, 270, { align: "center" });
+    
         // Garis bawah footer
         doc.setDrawColor(128, 128, 128);
         doc.setLineWidth(0.5);
         doc.line(20, 275, 190, 275);
-
+    
         // Simpan file PDF
         doc.save(`invoice_${transaksi.order_id}.pdf`);
     };
+    
 
 
 
@@ -145,11 +165,11 @@ export default function Career() {
         <div className="p-4 md:p-6 min-h-screen bg-gray-50">
             <div className="bg-gradient-to-r from-gray-100 via-gray-200 to-gray-300 shadow-md rounded-lg p-6 md:p-8 w-full max-w-4xl mx-auto mt-8">
                 <div className="flex flex-col md:flex-row items-center md:items-start">
-                  
+
                     <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-4 rounded-full shadow-lg flex items-center justify-center mr-4 md:mr-6">
                         <FontAwesomeIcon icon={faReceipt} className="text-white text-3xl md:text-4xl" />
                     </div>
-                    
+
                     <h1 className="text-xl md:text-2xl font-bold text-gray-800 text-center md:text-left drop-shadow-sm">
                         Riwayat Transaksi
                     </h1>
