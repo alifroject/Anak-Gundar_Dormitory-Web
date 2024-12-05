@@ -92,11 +92,8 @@ const BookingDetail = async ({ params }: { params: { uid: string; id: string } }
     return (
         <div>
             {booking ? (
-                <div>
+                <div className='h-[100%]'>
                     <VerifyBook useBooking={booking} />
-                    <div>
-                        <strong>User UID:</strong> {booking.uid} {/* User's UID from the booking */}
-                    </div>
                 </div>
             ) : (
                 <div>Booking not found</div>

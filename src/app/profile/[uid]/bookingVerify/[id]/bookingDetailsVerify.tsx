@@ -75,7 +75,7 @@ const BookingDetails = ({ useBooking }: { useBooking: BookingData }) => {
     };
 
     return (
-        <div className="m-6 mt-16 h-full text-gray-900">
+        <div className="m-6 mt-18 pb-5 screen text-gray-900">
             {isSaving && (
                 <div className="spinner-overlay absolute inset-0 flex justify-center items-center bg-opacity-50 bg-gray-800 z-50">
                     <div className="spinner-border animate-spin border-t-4 border-blue-500 border-solid rounded-full w-16 h-16"></div>

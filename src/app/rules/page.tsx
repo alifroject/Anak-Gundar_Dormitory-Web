@@ -1,4 +1,5 @@
 "use client"
+import { FaClipboardList } from "react-icons/fa";
 
 import { useState } from "react";
 
@@ -13,8 +14,10 @@ export default function Rules() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 p-6">
-            <h1 className="text-3xl font-bold mb-6 text-center text-blue-700">Aturan Kos</h1>
+        <div className="min-h-screen mt-20 bg-gray-100 p-6">
+            <h1 className="text-3xl font-bold mb-6 text-center text-blue-700 flex items-center justify-center gap-2">
+                <FaClipboardList className="text-4xl" /> Aturan Kos
+            </h1>
             <div className="bg-white shadow-md rounded-lg p-6">
                 <div>
                     <div

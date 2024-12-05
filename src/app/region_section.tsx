@@ -144,8 +144,7 @@ export default function PromoComponent() {
                     <div className="flex flex-wrap justify-between">
                         <div className="w-full md:w-1/4 mb-6 md:mb-0">
                             <div className="flex items-center mb-4">
-                                <img src="/anakGundar.png" alt="Anak Gundar logo" className="mr-2 w-[100px] bg-white" />
-                                <span className="text-blue-600 text-xl font-bold">Anak Gundar</span>
+                                <img src="/anakGundar.png" alt="Anak Gundar logo" className="mr-2 w-[140px]" />
                             </div>
                             <p className="text-white mb-4">Dapatkan info kost murah hanya di Anak Gundar App. Mau Sewa Kost Murah ?</p>
 

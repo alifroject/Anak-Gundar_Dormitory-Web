@@ -72,8 +72,8 @@ export default function Career() {
         doc.text("Bukti Transaksi", 105, 20, { align: "center" });
     
         // Menambahkan logo gambar di atas garis pemisah
-        const logoImageUrl = "/anakGundar.png";  // Ganti dengan path logo Anda
-        doc.addImage(logoImageUrl, 'PNG', 80, 30, 50, 30);  // Posisi logo, sesuaikan ukuran jika perlu
+        const logoImageUrl = "/AnakGundarSide.png";  // Ganti dengan path logo Anda
+        doc.addImage(logoImageUrl, 'PNG', 80, 30, 50, 40);  // Posisi logo, sesuaikan ukuran jika perlu
     
         // Garis bawah header (setelah logo)
         doc.setDrawColor(0, 102, 190);

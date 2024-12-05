@@ -62,43 +62,43 @@ const Career: React.FC = () => {
             </motion.div>
 
             <motion.div
-                className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl"
-                initial="hidden"
-                animate="visible"
-                variants={{
-                    hidden: { opacity: 0 },
-                    visible: {
-                        opacity: 1,
-                        transition: { staggerChildren: 0.3 },
-                    },
-                }}
-            >
-                {teamMembers.map((member, index) => (
-                    <motion.div
-                        key={index}
-                        className="bg-white shadow-lg rounded-lg p-6 flex flex-col items-center transition-transform transform hover:scale-105 hover:shadow-2xl"
-                        variants={{
-                            hidden: { opacity: 0, y: 50 },
-                            visible: { opacity: 1, y: 0 },
-                        }}
-                    >
-                        <motion.img
-                            src={member.image}
-                            alt={member.name}
-                            className="w-40 h-40 rounded-full mb-4 border-4 border-indigo-500 cursor-pointer"
-                            whileHover={{ scale: 1.1 }}
-                            transition={{ duration: 0.3 }}
-                            onClick={() => openModal(member.image)}  // Menangani klik pada gambar
-                        />
-                        <h2 className="text-xl md:text-[25px] font-semibold text-gray-800">
-                            {member.name}
-                        </h2>
-                        <p className="text-sm md:text-[15px] text-gray-600 text-center">
-                            {member.role}
-                        </p>
-                    </motion.div>
-                ))}
-            </motion.div>
+    className="grid justify-center items-center grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl"
+    initial="hidden"
+    animate="visible"
+    variants={{
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: { staggerChildren: 0.3 },
+        },
+    }}
+>
+    {teamMembers.map((member, index) => (
+        <motion.div
+            key={index}
+            className="bg-white shadow-lg rounded-lg p-6 flex flex-col items-center text-center transition-transform transform hover:scale-105 hover:shadow-2xl"
+            variants={{
+                hidden: { opacity: 0, y: 50 },
+                visible: { opacity: 1, y: 0 },
+            }}
+        >
+            <motion.img
+                src={member.image}
+                alt={member.name}
+                className="w-40 h-40 rounded-full mb-4 border-4 border-indigo-500 cursor-pointer"
+                whileHover={{ scale: 1.1 }}
+                transition={{ duration: 0.3 }}
+                onClick={() => openModal(member.image)}
+            />
+            <h2 className="text-xl md:text-[25px] font-semibold text-gray-800 text-center">
+                {member.name}
+            </h2>
+            <p className="text-sm md:text-[15px] text-gray-600 text-center">
+                {member.role}
+            </p>
+        </motion.div>
+    ))}
+</motion.div>
 
             {/* Modal untuk gambar besar */}
             {isModalOpen && (

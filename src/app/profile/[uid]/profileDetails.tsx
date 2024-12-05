@@ -132,7 +132,7 @@ const Profile = ({ userProfile }: { userProfile: ProfileType | null }) => {
     };
 
     return (
-        <div className="flex flex-col md:flex-row h-full bg-gradient-to-r from-blue-100 to-purple-200">
+        <div className="flex  flex-col md:flex-row h-full bg-gradient-to-r from-blue-100 to-purple-200">
             <div className="w-full md:w-1/4 mt-20 bg-gradient-to-r from-blue-300 via-indigo-300 to-purple-300 p-6 shadow-xl rounded-lg border border-gray-200">
                 <ul className="space-y-1 text-gray-700">
                     <li

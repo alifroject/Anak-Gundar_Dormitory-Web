@@ -151,23 +151,22 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
 
     return (
         <>
-            <nav className="bg-gradient-to-r from-purple-100 via-purple-400 to-purple-500 
-              md:bg-gradient-to-r md:from-purple-400 md:via-indigo-600 md:to-pink-700 
-              w-full h-22 fixed top-0 left-0 flex justify-between items-center p-4 z-30 shadow-lg border-b border-gray-300 hover:shadow-2xl">
+            <nav className="bg-gradient-to-r from-purple-600 via-purple-700 to-purple-700 
+              md:bg-gradient-to-r md:from-purple-700 md:via-indigo-700 md:to-pink-700 
+              w-full h-[120px] fixed top-0 left-0 flex justify-between items-center z-30 shadow-lg border-b border-gray-300 hover:shadow-2xl">
                 {/* Logo */}
                 <div className="flex items-center">
                     <Link href="/">
-                        <Image
+                        <img
                             src="/anakGundar.png"
                             alt="Description of the image"
-                            width={120}
-                            height={100}
-                            className="ml-10"
+
+                            className="ml-10 w-[150px] md:w-[200px] md:h-[180px]"
                         />
                     </Link>
                 </div>
 
-                <div className="md:hidden">
+                <div className="md:hidden mr-2">
                     <button onClick={toggleSidebar} className="text-black hover:text-gray-400 focus:outline-none">
                         {isSidebarOpen ? (
                             <div
@@ -320,17 +319,19 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                 msOverflowStyle: 'none', /* IE and Edge */
             }}>
 
-                <div className={`p-4 ${isSidebarOpen ? 'block' : 'hidden'}`}>
+                <div className={`p-0 ${isSidebarOpen ? 'block' : 'hidden'}`}>
                     <Link href="/" onClick={closeSidebar}>
-                        <img
-                            src="https://firebasestorage.googleapis.com/v0/b/anak-gundar.appspot.com/o/anakGundar.png?alt=media&token=c2ebe51d-1eae-45de-ac86-4ff65a2b6661"
+                        <Image
+                            src="https://firebasestorage.googleapis.com/v0/b/anak-gundar.appspot.com/o/AnakGundarSideaa.png?alt=media&token=3a7584ad-0d4a-4340-84c6-995ef6e79c37"
                             alt="Description of the image"
-                            width={100}
-                            height={90}
-                            className='ml-6'
+                            width={180}
+                            height={170}
+                            className="ml-6"
                         />
+
                     </Link>
                 </div>
+                <hr className='text-black w-full border-t-4 border-black' />
 
                 <ul className="space-y-4 mb-7 mt-4 h-full  p-4">
                     {isLoggedIn ? (
@@ -459,7 +460,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                             rel="noopener noreferrer"
                             className="text-pink-500 hover:text-pink-800 flex items-center text-gray-900 hover:text-blue-600 px-4 py-3 rounded-lg font-medium transition-all duration-200 shadow-md bg-gray-50 hover:bg-pink-100"
                         >
-                            <FaInstagram className='w-7 h-7'/> <span className='ml-4'>Instagram</span>
+                            <FaInstagram className='w-7 h-7' /> <span className='ml-4'>Instagram</span>
                         </a>
                     </li>
                     <li>
@@ -477,9 +478,9 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
                             href="https://www.youtube.com/@ugtvofficial"
                             target="_blank"
                             rel="noopener noreferrer"
-                             className="text-red-500  hover:text-red-800 flex items-center text-gray-900 hover:text-blue-600 px-4 py-3 my-5 rounded-lg font-medium transition-all duration-200 shadow-md bg-gray-50 hover:bg-red-100"
+                            className="text-red-500  hover:text-red-800 flex items-center text-gray-900 hover:text-blue-600 px-4 py-3 my-5 rounded-lg font-medium transition-all duration-200 shadow-md bg-gray-50 hover:bg-red-100"
                         >
-                            <FaYoutube  className='w-7 h-7' /> <span className='ml-4'>YouTube</span>
+                            <FaYoutube className='w-7 h-7' /> <span className='ml-4'>YouTube</span>
                         </a>
                     </li>
 
