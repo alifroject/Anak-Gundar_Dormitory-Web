@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { BsCheckCircle } from "react-icons/bs";
-import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, where, runTransaction, increment, doc } from "firebase/firestore";
 import { dbFire } from "@/app/firebase/config";
 
 interface PaymentData {
@@ -28,10 +28,10 @@ interface PaymentData {
 
 export default function Career() {
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
-  const [isSaved, setIsSaved] = useState(false); // Flag lokal untuk kontrol penyimpanan
+  const [isSaved, setIsSaved] = useState(false);
   const [saveError, ] = useState<string | null>(null);
 
-  // Mengambil data transaksi dari localStorage
+ 
   const retrievePaymentData = () => {
     const storedPaymentData = localStorage.getItem("paymentResult");
     if (storedPaymentData) {
@@ -53,6 +53,42 @@ export default function Career() {
         console.log(`Transaction with Order ID ${data.order_id} already exists.`);
         return; 
       }
+
+      const now: Date = new Date();
+      const day: string = `${now.getDate()}`; 
+      const month: string = `${now.getMonth() + 1}-${now.getFullYear()}`; 
+      const statsRef = doc(dbFire, "stats_booking", month);
+      
+      await runTransaction(dbFire, async (transaction) => {
+          const statsDoc = await transaction.get(statsRef);
+      
+          if (!statsDoc.exists()) {
+             
+              transaction.set(statsRef, {
+                  month: month,
+                  apartemen_bookings: 0,
+                  kosan_bookings: 0,
+                  total_bookings: 0,
+                  total_gross_income: parseFloat(data.gross_amount), 
+                  day: {
+                      [day]: {
+                          total_transaksi: 1,
+                          amount: parseFloat(data.gross_amount),
+                      }
+                  }
+              });
+          } else {
+              
+              const currentDayData = statsDoc.data().day?.[day] || { total_transaksi: 0, amount: 0 };
+              
+              transaction.update(statsRef, {
+                  total_gross_income: increment(parseFloat(data.gross_amount)), 
+                  [`day.${day}.total_transaksi`]: currentDayData.total_transaksi + 1, 
+                  [`day.${day}.amount`]: currentDayData.amount + parseFloat(data.gross_amount), 
+              });
+          }
+      });
+      
 
       
       await addDoc(transaksiRef, data);
@@ -95,7 +131,7 @@ export default function Career() {
               </div>
 
               <div className="space-y-4 text-gray-700">
-                {/* Order Details */}
+               
                 <p>
                   <span className="font-semibold text-gray-800">Order ID:</span>{" "}
                   {paymentData.order_id}
@@ -115,7 +151,7 @@ export default function Career() {
                   {paymentData.payment_type}
                 </p>
 
-                {/* Personal Information */}
+       
                 <p>
                   <span className="font-semibold text-gray-800">House Name:</span>{" "}
                   {paymentData.nama}
@@ -133,7 +169,7 @@ export default function Career() {
                   {paymentData.phoneNumber}
                 </p>
 
-                {/* Address Information */}
+              
                 <p>
                   <span className="font-semibold text-gray-800">Campus:</span>{" "}
                   {paymentData.kampus}
@@ -143,7 +179,7 @@ export default function Career() {
                   {paymentData.kotaAsal}
                 </p>
 
-                {/* Transaction Info */}
+        
                 <p>
                   <span className="font-semibold text-gray-800">Transaction ID:</span>{" "}
                   {paymentData.transaction_id || "N/A"}
@@ -164,7 +200,7 @@ export default function Career() {
                   <span className="font-semibold text-gray-800">Status Message:</span>{" "}
                   {paymentData.status_message || "N/A"}
                 </p>
-                {/* Virtual Account Numbers (VA Numbers) */}
+     
                 {paymentData.va_numbers.length > 0 && (
                   <div>
                     <span className="font-semibold text-gray-800">VA Numbers:</span>

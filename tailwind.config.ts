@@ -24,11 +24,21 @@ const config: Config = {
         inter: ['Inter', 'sans-serif'],
         playfair: ['Playfair Display', 'serif'],
       },
+      animation: {
+        scroll: 'scroll 15s linear infinite',
+      },
+      keyframes: {
+        scroll: {
+          '0%': { transform: 'translateY(100%)' },
+          '100%': { transform: 'translateY(-100%)' },
+        },
+      },
     },
   },
   plugins: [
     require('tailwind-scrollbar-hide')
   ],
+
 };
 
 export default config;

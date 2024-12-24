@@ -2,7 +2,7 @@
 import React, { useState, useEffect, ChangeEvent, DragEvent } from "react";
 import { auth, dbFire, storage } from "@/app/firebase/config";
 import { onAuthStateChanged } from "firebase/auth";
-import { collection, getDocs, QuerySnapshot, getDoc, doc, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, QuerySnapshot, getDoc, doc, addDoc, updateDoc, deleteDoc, increment, runTransaction } from 'firebase/firestore';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
@@ -21,6 +21,7 @@ interface Kostan {
     id: string;
     Price: Price;
     nama: string;
+    jenis: string;
     alamat: {
         kota_kabupaten: string;
         kecamatan: string;
@@ -586,92 +587,124 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({ kostann }) => {
 
 
     const handleBooking = async () => {
-
         const playAlertSounds = (isSuccess: boolean) => {
             const soundPath = isSuccess ? '/ajukan_sewa.mp3' : '/alertWrong.mp3'; // Pilih suara sesuai status
-        console.log("Memutar suara..."); // Debugging log
-        const alertSound = new Audio(soundPath);
-        
-        alertSound.play().then(() => {
-            console.log("Suara berhasil diputar!"); // Log jika suara berhasil diputar
-        }).catch((err) => {
-            console.error("Error saat memutar suara: ", err); // Menangani error jika ada
-        });
-        };
-
-        // Validate required fields
-        if (!tenant || files.length === 0 || displayedPrice <= 0 || !userProfile || !userProfile.uid) {
-            setModalMessage("Harap isi semua data document anda!");
-            setShowModal(true);
-            playAlertSounds(false); // Putar suara peringatan
-            return;
-        }
-
-        if (!startDate || !tenant || files.length === 0) {
-            console.log("Missing required fields:", { startDate, tenant, files });
-            setModalMessage("Harap isi semua data document anda!");
-            setShowModal(true);
-            playAlertSounds(false); // Putar suara peringatan
-            return;
-        }
-        setIsSaving(true);
-
-        const documentURLs = await Promise.all(files.map(async fileObj => {
-            const oldFileRef = ref(storage, `drafts/${userProfile.uid}/${fileObj.file.name}`);
-            await deleteObject(oldFileRef).catch((error) => {
-                console.warn("No existing file to delete:", error);
+            console.log("Memutar suara..."); // Debugging log
+            const alertSound = new Audio(soundPath);
+    
+            alertSound.play().then(() => {
+                console.log("Suara berhasil diputar!"); // Log jika suara berhasil diputar
+            }).catch((err) => {
+                console.error("Error saat memutar suara: ", err); // Menangani error jika ada
             });
-
-            const compressedFile = await uploadImageToServer(fileObj.file);
-            const newFileUrl = await uploadFileToStorage(compressedFile, userProfile.uid);
-            console.log(`File ${fileObj.file.name} uploaded successfully with URL: ${newFileUrl}`);
-            return { name: fileObj.file.name, url: newFileUrl };
-        }));
-
+        };
+    
+        // Validasi data input
+        if (!tenant || files.length === 0 || displayedPrice <= 0 || !userProfile || !userProfile.uid) {
+            setModalMessage("Harap isi semua data dokumen anda!");
+            setShowModal(true);
+            playAlertSounds(false);
+            return;
+        }
+    
+        if (!startDate || !tenant || files.length === 0) {
+            setModalMessage("Harap isi semua data dokumen anda!");
+            setShowModal(true);
+            playAlertSounds(false);
+            return;
+        }
+    
+        setIsSaving(true);
+    
+        const documentURLs = await Promise.all(
+            files.map(async (fileObj) => {
+                const oldFileRef = ref(storage, `drafts/${userProfile.uid}/${fileObj.file.name}`);
+                await deleteObject(oldFileRef).catch((error) => {
+                    console.warn("No existing file to delete:", error);
+                });
+    
+                const compressedFile = await uploadImageToServer(fileObj.file);
+                const newFileUrl = await uploadFileToStorage(compressedFile, userProfile.uid);
+                return { name: fileObj.file.name, url: newFileUrl };
+            })
+        );
+    
         const bookingData = {
-            tenant: tenant,
+            tenant,
             kostanId: kostann.id,
             nama: kostann.nama,
-            priceOption: priceOption,
+            jenis: kostann.jenis,
+            priceOption,
             price: displayedPrice,
-            startDate: startDate,
+            startDate,
             documents: documentURLs,
             uid: userProfile.uid,
             tanggalLahir: userProfile.tanggalLahir,
             statusPernikahan: userProfile.statusPernikahan,
-            status: "unverified",
+            status: "unverified", // Default status
         };
-
+    
         console.log("Booking Data:", bookingData);
-
+    
         try {
-
+            // Simpan data booking ke Firestore
             const bookingRef = await addDoc(collection(dbFire, "booking"), bookingData);
-            console.log("Booking data saved successfully with ID:", bookingRef.id);
-
-
+           
+    
+            // Hapus draft jika ada
             if (draftId) {
                 const draftRef = doc(dbFire, "draft", draftId);
                 await deleteDoc(draftRef);
                 console.log("Draft data deleted successfully.");
             }
+    
+            // Update statistik booking
+            const now: Date = new Date();
+            const month: string = `${now.getMonth() + 1}-${now.getFullYear()}`;
+            const statsRef = doc(dbFire, "stats_booking", month);
+    
+            await runTransaction(dbFire, async (transaction) => {
+                const statsDoc = await transaction.get(statsRef);
+    
+                if (!statsDoc.exists()) {
+                    // Jika dokumen statistik belum ada, buat dokumen baru
+                    transaction.set(statsRef, {
+                        month: month,
+                        apartemen_bookings: bookingData.jenis === "Apartment" ? 1 : 0,
+                        kosan_bookings: bookingData.jenis === "Kostan" ? 1 : 0,
+                        total_bookings: 1,
+                        
+                    });
+                } else {
+                    // Jika dokumen statistik sudah ada, update field
+                    transaction.update(statsRef, {
+                        [`${bookingData.jenis === "Apartment" ? "apartemen_bookings" : "kosan_bookings"}`]: increment(1),
+                        total_bookings: increment(1),
+                    });
+                }
+            });
+    
+          
+    
             playAlertSounds(true);
-            setModalBooking(true)
-            setModalMessageodalBooking("Booking berhasil, tunggu hingga dokument di verifikasi dalam 1 hari kerja.")
-
+            setModalBooking(true);
+            setModalMessage("Booking berhasil, tunggu hingga dokumen diverifikasi dalam 1 hari kerja.");
+    
+            // Redirect setelah booking selesai
             setTimeout(() => {
-
                 setIsSaving(false);
-                console.log('Booking completed!');
                 const bookingUrl = `/profile/${userProfile?.uid}`;
                 router.push(bookingUrl);
-
             }, 3000);
         } catch (error) {
             console.error("Error submitting booking: ", error);
             alert("Failed to submit booking request.");
+            setIsSaving(false);
         }
     };
+
+
+    
 
     const closeModal = () => {
         setShowModal(false);

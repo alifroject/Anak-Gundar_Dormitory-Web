@@ -78,7 +78,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         {isLoading && <Spinner />}
 
         <div className={`h-screen overflow-y-auto transition-all duration-300 ease-in-out mt-10`}>
-          <main className={`pt-${!isRegisterPage ? '16' : '0'} bg-white w-full mt-0`}>
+          <main className={`pt-${!isRegisterPage ? '16' : '0'} bg-white w-full mt-10`}>
             {children}
           </main>
         </div>
